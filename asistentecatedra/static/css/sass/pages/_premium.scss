@@ -1,0 +1,134 @@
+//** Premium Page
+
+//## Premium Hero Image
+.premium {
+  @include gradient(45deg, $indigo, $pink);
+  height: 500px;
+  overflow: hidden;
+
+  .main-container {
+    @include responsive(large) {
+      position: relative;
+      overflow: hidden;
+    }
+  }
+}
+
+.premium-text {
+  @include responsive(large) {
+    margin: 0;
+    max-width: 600px;
+    text-align: left;
+  }
+
+  margin: 0 auto;
+  text-align: center;
+  height: 100%;
+  padding: 1em;
+  color: $white;
+
+  .titulo-principal {
+    @include responsive(small) {
+      font-size: 3.5rem;
+    }
+
+    font-size: 2.5rem;
+    animation: {
+      name: slide-up;
+      duration: .5s;
+      timing-function: ease-in-out;
+      fill-mode: forwards;
+    };
+  }
+
+  p {
+    animation: {
+      name: slide-up;
+      duration: 1s;
+      timing-function: ease-in-out;
+      fill-mode: forwards;
+    };
+  }
+}
+
+.premium-info {
+  @include responsive(large) {
+    margin: 0 0 1em;
+  }
+  margin: 0 auto 1em;
+  font-size: 1rem;
+  max-width: 400px;
+}
+
+.premium-img {
+  @include responsive(large) {
+    display: block;
+    position: absolute;
+    bottom: 6.8em;
+    right: 0;
+  }
+  display: none;
+  width: 550px;
+}
+
+.comparison {
+  background: $white;
+
+  h4 {
+    margin: 2em 0;
+    font-weight: bold;
+  }
+
+  .subscription {
+    @include responsive(large) {
+      flex-direction: row;
+    }
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+  }
+}
+
+.subscription-card {
+  margin: 0 auto 3em;
+  border: 1px solid $gray;
+  max-width: 344px;
+
+  .sub-header {
+    border-bottom: 1px solid $gray;
+    padding: 1em 2.5em;
+
+    h5 {
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .price {
+      margin: 0 auto;
+      width: 164px;
+
+      h3,
+      small {
+        display: inline-block;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .sub-content {
+    padding: 2em;
+
+    ul {
+      margin: 0 0 1em 1em;
+
+      .inactive-feature {
+        color: $gray;
+      }
+    }
+
+    .sub-button {
+      width: 100%;
+      text-transform: uppercase;
+    }
+  }
+}

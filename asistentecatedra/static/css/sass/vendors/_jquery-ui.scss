@@ -1,0 +1,38 @@
+.ui-widget.ui-widget-content {
+  z-index: 100;
+}
+
+.ui-datepicker {
+
+  z-index: 1000 !important; //sass-lint:disable-line no-important
+
+  .ui-datepicker-header {
+    background: $secondary-color;
+    color: $white;
+
+    .ui-icon {
+      background-image: url('vendors/jquery-ui/images/ui-icons_16a085_256x240.png');
+    }
+
+    a {
+      cursor: pointer;
+
+      &:hover {
+        background: $gray-light;
+        border: 1px solid $gray;
+      }
+    }
+
+  }
+
+  .ui-datepicker-calendar {
+    a {
+      color: $primary-color;
+
+      &:hover { //sass-lint:disable-line nesting-depth
+        color: $white;
+        background: $secondary-color;
+      }
+    }
+  }
+}

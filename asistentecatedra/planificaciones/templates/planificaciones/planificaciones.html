@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <section class="planificaciones">
+        <section class="container">
+            <h2>Planificaciones</h2>
+            <p>Elige la planificación que deseas crear.</p>
+            <div class="plan-choices">
+                <div class="choice-card">
+                    <a href="{% url 'list_plan_clase' %}" class="plan-choice plan-clase">
+                        <div class="plan-img clase-img vertically-center">
+                            <img class="imagen" src="{% static 'img/plan_clase.png' %}" alt="Plan de Clase">
+                        </div>
+                    </a>
+                    <a class="choice-text" href="{% url 'list_plan_clase' %}">Plan de Clase</a>
+                </div>
+                <div class="choice-card">
+                    <a href="#" class="plan-choice plan-unidad">
+                        <div class="plan-img unidad-img vertically-center">
+                            <img class="imagen" src="{% static 'img/plan_unidad.png' %}" alt="Plan de Unidad">
+                        </div>
+                        <span class="premium-badge">PREMIUM</span>
+                    </a>
+                    <a class="choice-text" href="#">Planificación de Unidad Didáctica</a>
+                </div>
+                <div class="choice-card">
+                    <a href="#" class="plan-choice plan-destrezas">
+                        <div class="plan-img destrezas-img vertically-center">
+                            <img class="imagen" src="{% static 'img/plan_destrezas.png' %}" alt="Plan de Destrezas">
+                        </div>
+                        <span class="premium-badge">PREMIUM</span>
+                    </a>
+                    <a class="choice-text" href="#">Planificación de Destrezas</a>
+                </div>
+                <div class="choice-card">
+                    <a href="#" class="plan-choice plan-anual">
+                        <div class="plan-img anual-img vertically-center">
+                            <img class="imagen" src="{% static 'img/plan_anual.png' %}" alt="Plan Anual">
+                        </div>
+                        <span class="premium-badge">PREMIUM</span>
+                    </a>
+                    <a class="choice-text" href="#">Planificación Curricular Anual</a>
+                </div>
+            </div>
+        </section>
+    </section>
+{% endblock %}

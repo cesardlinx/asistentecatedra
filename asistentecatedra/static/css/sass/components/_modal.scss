@@ -1,0 +1,98 @@
+//** Modals
+
+.modal-overlay {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: $black-50;
+  pointer-events: none;
+  opacity: 0;
+  transition: all $std-time ease-in-out;
+
+  .modal-contenido {
+    @include responsive(small) {
+      width: 50%;
+    }
+
+    margin: 0 auto;
+    width: 80%;
+    background: $white;
+    color: $black;
+    box-shadow: 0 23px 30px -20px $black-40;
+    border-radius: 5px;
+    padding: 1em 2em;
+
+    h4 {
+      font-weight: bold;
+      margin-bottom: 1em;
+    }
+
+    p {
+      margin-bottom: 2em;
+    }
+
+    .action-buttons {
+      margin: 0;
+    }
+  }
+
+  &.modal-active {
+    pointer-events: all;
+    opacity: 1;
+
+    .modal-contenido {
+      animation: {
+        name: modalIn;
+        duration: $std-time;
+        timing-function: ease-in-out;
+        fill-mode: forwards;
+      }
+
+      ;
+    }
+  }
+
+  &.modal-inactive {
+    pointer-events: none;
+    opacity: 0;
+
+    .modal-contenido {
+      animation: {
+        name: modalOut;
+        duration: $std-time;
+        timing-function: ease-in-out;
+        fill-mode: forwards;
+      }
+
+      ;
+    }
+  }
+}
+
+
+@keyframes modalIn {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(30%);
+    opacity: 1;
+  }
+}
+
+@keyframes modalOut {
+  0% {
+    transform: translateY(30%);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}

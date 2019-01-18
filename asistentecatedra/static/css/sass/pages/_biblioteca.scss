@@ -1,0 +1,164 @@
+// Contenedor de los Libros
+.books {
+
+  @include responsive(small) {
+    width: 377px;
+  }
+
+  @include responsive(medium) {
+    width: 565px;
+  }
+
+  @include responsive(extra-large) {
+    width: 753px;
+  }
+
+  @include responsive(super-large) {
+    width: 941px;
+  }
+
+  display: flex;
+  margin: 0 auto;
+  flex-flow: row wrap;
+  width: 189px;
+}
+
+//## Libro
+.book {
+  margin: .5em 1.6em;
+  border-radius: 5px;
+  color: $white;
+  padding: 1em 1.5em;
+  font-size: 1.1rem;
+
+  .book-body {
+    text-align: center;
+    width: 79px;
+  }
+
+  a {
+    color: $white;
+
+    &:hover {
+      color: $white;
+    }
+  }
+
+  h6 {
+    margin: 1em 0;
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  &:hover {
+    color: $white;
+    text-decoration: none;
+  }
+
+  // Colores para cada Materia
+
+  &.literatura {
+    background: $literatura-color;
+
+    &:hover {
+      background: $literatura-light;
+    }
+  }
+
+  &.ingles {
+    background: $ingles-color;
+
+    &:hover {
+      background: $ingles-light;
+    }
+  }
+
+  &.matematica {
+    background: $matematica-color;
+
+    &:hover {
+      background: $matematica-light;
+    }
+  }
+
+  &.naturales {
+    background: $naturales-color;
+
+    &:hover {
+      background: $naturales-light;
+    }
+  }
+
+  &.quimica {
+    background: $naturales-color;
+
+    &:hover {
+      background: $naturales-light;
+    }
+  }
+
+  &.fisica {
+    background: $naturales-color;
+
+    &:hover {
+      background: $naturales-light;
+    }
+  }
+
+  &.biologia {
+    background: $naturales-color;
+
+    &:hover {
+      background: $naturales-light;
+    }
+  }
+
+  &.sociales {
+    background: $sociales-color;
+
+    &:hover {
+      background: $sociales-light;
+    }
+  }
+
+  &.historia {
+    background: $sociales-color;
+
+    &:hover {
+      background: $sociales-light;
+    }
+  }
+
+  &.ciudadania {
+    background: $sociales-color;
+
+    &:hover {
+      background: $sociales-light;
+    }
+  }
+
+  &.filosofia {
+    background: $sociales-color;
+
+    &:hover {
+      background: $sociales-light;
+    }
+  }
+
+  &.emprendimiento {
+    background: $emprendimiento-color;
+
+    &:hover {
+      background: $emprendimiento-light;
+    }
+  }
+
+  &.preparatoria {
+    background: $preparatoria-color;
+
+    &:hover {
+      background: $preparatoria-light;
+    }
+  }
+
+}

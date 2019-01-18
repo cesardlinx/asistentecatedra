@@ -1,0 +1,109 @@
+//** Footer
+
+footer {
+  background: $secondary-dark-13;
+  color: $white;
+  flex-shrink: 0;
+}
+
+.footer-menu {
+  @include responsive(medium) {
+    padding: 2em 0;
+  }
+
+  display: flex;
+  border-bottom: 1px solid $gray;
+  padding-top: .7em;
+  flex-flow: row wrap;
+  justify-content: space-around;
+
+  .footer-list-wrapper {
+    padding: 0 3em;
+
+    .footer-list {
+      list-style: none;
+    }
+
+    &:last-child {
+      @include responsive(medium) {
+        padding: 0 3em;
+      }
+
+      padding: 1em 3em;
+    }
+
+    &:nth-child(1) {
+      @include responsive(super-small) {
+        order: 0;
+      }
+
+      order: 2;
+    }
+
+    &:nth-child(2) {
+      @include responsive(super-small) {
+        order: 1;
+      }
+
+      order: 1;
+    }
+
+    &:nth-child(3) {
+      @include responsive(super-small) {
+        order: 2;
+      }
+
+      order: 0;
+    }
+  }
+}
+
+.footer-list-item {
+  a {
+    font-size: .8rem;
+    text-decoration: none;
+    color: $white;
+
+    &:hover {
+      color: $white;
+      text-decoration: underline;
+    }
+  }
+}
+
+.social {
+  display: inline-block;
+  width: 1.6em;
+  height: 1.6em;
+  font-size: 1.8rem;
+  border-radius: 50%;
+  border: 1px solid $white;
+  text-align: center;
+  color: $white;
+
+  &:hover {
+    color: $black;
+    background: $primary-color;
+  }
+}
+
+.copyright {
+  width: 100%;
+  margin-top: 1em;
+
+  img {
+    display: inline-block;
+  }
+
+  .pais {
+    display: inline-block;
+    margin: 0 1em 0 0;
+    font-size: .7rem;
+  }
+
+  .copy {
+    display: inline-block;
+    font-size: .7rem;
+    padding: 1em 0;
+  }
+}

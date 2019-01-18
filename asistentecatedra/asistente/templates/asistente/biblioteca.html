@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <section class="recursos-profesor">
+        <section class="container">
+            <h3 class="main-title"><img src="{% static 'img/books.png'%}" alt="Libros"> Biblioteca del Asistente</h3>
+            <section class="flat-content">
+                <div class="accordion" id="biblioteca">
+
+                    {% for asignatura_key, asignatura in asignaturas.items %}
+                        <div class="card">
+
+                            <div class="card-header" id="{{ asignatura_key }}">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link {% if not forloop.first %} collapsed {% endif %}"
+                                            type="button" data-toggle="collapse"
+                                            data-target="#collapse_{{ asignatura_key }}"
+                                            aria-expanded="{% if forloop.first %} true {% else %} false {% endif %}"
+                                            aria-controls="collapse_{{ asignatura_key }}">
+                                        {{ asignatura.nombre }}
+                                    </button>
+                                </h5>
+                            </div>
+
+                            <div id="collapse_{{ asignatura_key }}"
+                                 class="collapse {% if forloop.first %} show {% endif %}"
+                                 aria-labelledby="{{ asignatura_key }}"
+                                 data-parent="#biblioteca">
+                                <div class="card-body">
+
+                                    {% comment %} contenedor de libros {% endcomment %}
+                                    <div class="books">
+
+                                        {% for libro in asignatura.libros %}
+                                            {% comment %} libro {% endcomment %}
+                                            <a href="{{ libro.archivo.url }}" target="_blank" class="book {{ asignatura_key }}">
+                                                <div class="book-body">
+                                                    <span class="fas fa-book-open fa-3x"></span>
+                                                    <h6>{{ libro.curso }}</h6>
+                                                </div>
+                                            </a>
+                                        {% endfor %}
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </section>
+        </section>
+    </section>
+{% endblock %}
+
+
+{% block scripts %}
+    <script src="{% static 'js/vendors/bootstrap/bootstrap.min.js' %}"></script>
+{% endblock scripts %}

@@ -1,0 +1,23 @@
+//** Base Styles
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+:root {
+  font-size: 16px;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  background: $white;
+  flex-direction: column;
+  font-family: $primary-font;
+  min-height: 100vh;
+}

@@ -1,0 +1,29 @@
+// Imports
+@import 'sass/helpers/variables';
+@import 'sass/helpers/mixins';
+@import 'sass/base/base';
+@import 'sass/components/buttons';
+@import 'sass/components/forms';
+@import 'sass/components/modal';
+@import 'sass/components/switch';
+@import 'sass/components/titles';
+@import 'sass/components/tables';
+@import 'sass/layout/header';
+@import 'sass/layout/content';
+@import 'sass/layout/footer';
+@import 'sass/pages/detail';
+@import 'sass/pages/home';
+@import 'sass/pages/list';
+@import 'sass/pages/login';
+@import 'sass/pages/payment';
+@import 'sass/pages/planificaciones';
+@import 'sass/pages/premium';
+@import 'sass/pages/profile';
+@import 'sass/pages/register';
+@import 'sass/pages/biblioteca';
+@import 'sass/pages/ayuda';
+@import 'sass/vendors/bootstrap';
+@import 'sass/vendors/stripe';
+@import 'sass/vendors/jquery-ui';
+
+

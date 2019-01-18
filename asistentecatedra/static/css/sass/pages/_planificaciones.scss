@@ -1,0 +1,101 @@
+//** Página para elegir tipo de planificación
+
+.planificaciones {
+  height: 100%;
+
+  h2 {
+    margin: 1em 0 .5em;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  p {
+    text-align: center;
+    font-weight: lighter;
+  }
+
+  .plan-choices {
+    display: flex;
+    margin: 3em 0 2em;
+    flex-flow: row wrap;
+  }
+}
+
+.choice-card {
+  margin: 0 auto 1em;
+  max-width: 150px;
+  text-align: center;
+
+  .plan-clase {
+    background: $blue;
+
+    &:hover {
+      background: $blue-light;
+    }
+  }
+
+  .plan-unidad {
+    background: $yellow;
+
+    &:hover {
+      background: $yellow-light;
+    }
+  }
+
+  .plan-destrezas {
+    background: $purple;
+
+    &:hover {
+      background: $purple-light;
+    }
+  }
+
+  .plan-anual {
+    background: $secondary-color;
+
+    &:hover {
+      background: $secondary-light;
+    }
+  }
+
+  .choice-text {
+    color: $black;
+  }
+}
+
+.plan-choice {
+  display: block;
+  position: relative;
+  width: 150px;
+  height: 150px;
+  padding: 1.5em;
+  border-radius: 50%;
+  margin-bottom: 1em;
+
+  .plan-img {
+    height: 100%;
+  }
+
+  .destrezas-img {
+    margin: 0 auto;
+    width: 80%;
+  }
+
+  .anual-img {
+    margin: 0 auto;
+    width: 90%;
+  }
+}
+
+.premium-badge {
+  display: block;
+  position: absolute;
+  background: $primary-color;
+  border-radius: 50px;
+  top: 0;
+  right: 0;
+  color: $white;
+  font-size: .6rem;
+  font-weight: bold;
+  padding: .1em .7em;
+}

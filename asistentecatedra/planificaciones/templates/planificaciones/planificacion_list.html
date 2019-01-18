@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <section class="container">
+        <section class="planificaciones list">
+            <h2>Planes de Clase</h2>
+            <div class="list-buttons">
+                <a href="{% url 'create_plan_clase' %}" class="primary-button list-btn">
+                    <span class="fas fa-file"></span> Nueva Planficación
+                </a>
+                <a href="{% url 'planificaciones' %}" class="primary-button list-btn back-menu">
+                    <span class="fas fa-bars"></span> Ir al Menú
+                </a>
+            </div>
+            <table class="table list">
+                <thead class="thead-dark">
+                    <tr>
+                        <th width="2%" scope="col">No</th>
+                        <th scope="col">Nombre</th>
+                        <th class="resp-column-md" scope="col">Asignatura</th>
+                        <th class="resp-column-md" scope="col">Curso/s</th>
+                        <th class="resp-column-lg" scope="col">Paralelo/s</th>
+                        <th class="resp-column-sm" scope="col">Fecha de Creación</th>
+                        <th scope="col">Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if planes %}
+                         {% for plan in planes %}
+                            <tr>
+                                <th scope="row">{{ forloop.counter }}</th>
+                                <td><a href="#">{{ plan.name }}</a></td>
+                                <td class="resp-column-md">{{ plan.asignatura.name }}</td>
+                                <td class="resp-column-md">{{ plan.curso.name }}</td>
+                                <td class="resp-column-lg">{{ plan.paralelos }}</td>
+                                <td class="resp-column-sm">{{ plan.fecha }}</td>
+                                <td>
+                                    <a class="icon edit" href="#" title="Editar">
+                                        <span class="fas fa-edit"></span>
+                                    </a>
+                                    <a class="icon word" href="#" title="Exportar a Word">
+                                        <span class="fas fa-file-word"></span>
+                                    </a>
+                                    <a class="icon delete" href="#" title="Borrar">
+                                        <span class="fas fa-trash"></span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7">No hay ninguna planificación creada</td>
+
+                        </tr>
+                    {% endif %}
+
+                </tbody>
+            </table>
+            <div class="pagination">
+                <div class="pag-wrapper">
+                    <button type="button" class="secondary-button">
+                        <span class="fas fa-arrow-left"></span> Página Anterior
+                    </button>
+                    <p>Página 1 de 1</p>
+                    <button type="button" class="primary-button">
+                        Página Siguiente <span class="fas fa-arrow-right"></span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </section>
+{% endblock %}

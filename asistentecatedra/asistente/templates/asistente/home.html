@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <!-- hero image starts here -->
+    <section class="hero">
+        <div class="main-container">
+            <div class="hero-text">
+                <h2 class="titulo-principal slide-up-fast">Planifica fácil y rápido</h2>
+                <p class="slide-up-slow">Dedica tu tiempo a enseñar y no solo a planificar.</p>
+                <p class="slide-up-slow">
+                    Asistente de Cátedra te ayuda a crear, organizar y
+                    almacenar tus planificaciones con el mínimo esfuerzo.
+                </p>
+                <button class="comenzar-button zoom">Comenzar Ya!</button>
+            </div>
+            <div class="hero-img">
+                <img class="imagen" src="{% static 'img/robot.png' %}" alt="Asistente de Cátedra">
+            </div>
+        </div>
+    </section>
+    <!-- hero image starts here -->
+
+    <!-- curriculum starts here -->
+    <section class="curriculum" id="curriculum">
+        <div class="main-container">
+            <div class="curriculum-text">
+                <h2 class="titulo-secundario">Todo el Currículum a tu alcance.</h2>
+                <p>
+                    Asistente de Cátedra te proporciona los datos actualizados
+                    del Currículum Acedémico Ecuatoriano para que no pierdas el
+                    tiempo buscándolos por tu cuenta.
+                </p>
+            </div>
+            <div class="curriculum-img">
+                <img class="imagen" src="{% static 'img/curriculum.png' %}" alt="Currículum">
+            </div>
+        </div>
+    </section>
+    <!-- curriculum ends here -->
+
+    <!-- dispositivos starts here -->
+    <section class="dispositivos" id="dispositivos">
+        <div class="main-container">
+            <div class="dispositivos-img">
+                <img class="imagen" src="{% static 'img/responsive.png' %}" alt="Dispositivos">
+            </div>
+            <div class="dispositivos-text">
+                <h2 class="titulo-secundario">Ingresa desde cualquier lugar</h2>
+                <p>
+                    Puedes comenzar a usar ya al Asistente de Cátedra desde
+                    cualquier dispositivo.
+                </p>
+            </div>
+        </div>
+    </section>
+    <!-- dispositivos ends here -->
+
+    <!-- dispositivos starts here -->
+    <section class="exporting" id="exporting">
+        <div class="main-container">
+            <div class="exporting-text">
+                <h2 class="titulo-secundario">Descarga tus planificaciones</h2>
+                <p>
+                    Tienes también la opción de descargar tus planificaciones
+                    creadas en la plataforma, en formato Microsoft Word.
+                </p>
+            </div>
+            <div class="exporting-img">
+                <img class="exp-img-1 imagen" src="{% static 'img/exporting1.png' %}" alt="Exportación">
+                <img class="exp-img-2 imagen" src="{% static 'img/exporting2.png' %}" alt="Exportación">
+            </div>
+        </div>
+    </section>
+    <!-- exporting ends here -->
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'js/home/home.js' %}"></script>
+{% endblock scripts %}

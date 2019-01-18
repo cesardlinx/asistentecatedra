@@ -1,0 +1,473 @@
+//** Header
+
+header {
+  @include responsive(medium) {
+    height: 6em;
+  }
+
+  height: 3em;
+  width: 100%;
+  z-index: 999;
+}
+
+//## Navbar
+
+.navbar-asistente {
+  color: $white;
+  font-size: 1rem;
+  height: 3em;
+  text-align: center;
+  width: 100%;
+  z-index: 999;
+
+  // Navbar Top
+  .navbar-top {
+    @include responsive(medium) {
+      border-bottom: 0;
+    }
+
+    border-bottom: 1px solid $secondary-color;
+    height: 3em;
+
+    .navbar-container {
+      display: flex;
+      margin: 0 auto;
+      height: 100%;
+      max-width: 1400px;
+    }
+  }
+}
+
+
+//## Logo
+
+.logo {
+  @include responsive(extra-small) {
+    width: 350px;
+  }
+
+  display: block;
+  height: 100%;
+  width: 100%;
+
+  a {
+    display: flex;
+    align-items: center;
+    color: $black;
+    flex-direction: row;
+    font-family: $secondary-font;
+    font-size: 1rem;
+    height: 100%;
+    justify-content: flex-start;
+    text-decoration: none;
+
+    .logo-img {
+      margin-left: 1em;
+      width: 70px;
+    }
+
+    img {
+      width: 100%;
+    }
+
+    .logo-text {
+      @include responsive(extra-small) {
+        width: auto;
+      }
+
+      margin: 0 1em;
+      width: 40%;
+
+      p {
+        font-size: .9rem;
+        font-weight: bold;
+        margin-bottom: 0;
+        text-transform: uppercase;
+      }
+    }
+  }
+}
+
+// Area de inicio de sesión y registro
+.session-buttons {
+  display: flex;
+  flex: 1 1;
+  align-items: center;
+  justify-content: flex-end;
+  width: 60%;
+
+  .login,
+  .register {
+    @include responsive(medium) {
+      display: block;
+    }
+
+    display: none;
+  }
+}
+
+.user-account {
+  @include responsive(medium) {
+    display: block;
+  }
+
+  display: none;
+  position: relative;
+  margin-right: 2em;
+  min-width: 100px;
+  padding: 4px;
+
+  &:hover {
+    .user-dropdown {
+      text-decoration: none;
+      color: $primary-color;
+      cursor: pointer;
+    }
+  }
+}
+
+.dropdown-menu {
+  display: block;
+  border: 1px solid $gray;
+  clear: both;
+  left: auto;
+  opacity: 0;
+  pointer-events: none;
+  right: 1em;
+  top: 46px;
+  transform: perspective(50em);
+  transform-origin: 0% 0%;
+  transform-style: preserve-3d;
+
+  &.dropdown-active {
+    pointer-events: auto;
+
+    animation: {
+      name: open-dropdown;
+      duration: $std-time;
+      timing-function: ease-in-out;
+      fill-mode: forwards;
+    }
+
+    ;
+  }
+
+  &.dropdown-inactive {
+    pointer-events: none;
+
+    animation: {
+      name: close-dropdown;
+      duration: $std-time;
+      timing-function: ease-in-out;
+      fill-mode: forwards;
+    }
+
+    ;
+  }
+
+  .dropdown-item {
+    transition: color 200ms ease;
+
+    &:hover {
+      color: $primary-color;
+    }
+  }
+}
+
+
+.user-dropdown {
+  text-align: center;
+  color: $secondary-color;
+  transition: all 200ms ease-in-out;
+}
+
+
+// Menu Button
+
+.menu-button {
+  // Se oculta el menú desde el tamaño medium
+  @include responsive(medium) {
+    display: none;
+  }
+
+  position: absolute;
+  background: $primary-color;
+  font-size: 1.1rem;
+  border: 1px solid $primary-color;
+  width: 2em;
+  height: 2em;
+  cursor: pointer;
+  color: $white;
+  top: .364em;
+  right: 16px;
+  transition: all ease $std-time;
+  z-index: 999;
+
+  &.cross {
+    .bars {
+      background: $secondary-color;
+    }
+
+    .bars-before {
+      transform: translateY(1.5px) rotate(-45deg);
+    }
+
+    .bars-after {
+      transform: translateY(-1.5px) rotate(45deg);
+    }
+  }
+}
+
+// Hamburguer Menu
+.bars,
+.bars-before,
+.bars-after {
+  display: block;
+  margin: 0 auto;
+  width: 44%;
+  height: .1em;
+  z-index: 999;
+  background: $white;
+  border-radius: 1px;
+  margin-bottom: 0;
+  transition: all $std-time ease-in-out;
+}
+
+.bars-before {
+  transform: translateY(-5px);
+}
+
+.bars-after {
+  transform: translateY(5px);
+}
+
+
+
+// Navbar Menu
+.menu {
+  @include responsive(medium) {
+    display: block;
+    position: static;
+    width: 100%;
+    height: 3em;
+    background: none;
+  }
+
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: $black-70;
+  z-index: 777;
+
+  &.is-active {
+    animation: {
+      name: open-overlay;
+      duration: $std-time;
+      timing-function: ease-in-out;
+      fill-mode: forwards;
+    };
+
+    .navbar-items {
+      animation: {
+        name: open-menu;
+        duration: $std-time;
+        timing-function: ease-in-out;
+        fill-mode: forwards;
+      };
+    }
+  }
+
+  &.is-inactive {
+    pointer-events: none;
+
+    animation: {
+      name: close-overlay;
+      duration: $std-time;
+      timing-function: ease-in-out;
+      fill-mode: forwards;
+    };
+
+    .navbar-items {
+      animation: {
+        name: close-menu;
+        duration: $std-time;
+        timing-function: ease-in-out;
+        fill-mode: forwards;
+      };
+    }
+  }
+
+  .navbar-items {
+    @include responsive(medium) {
+      display: flex;
+      position: static;
+      margin: 0;
+      transform: translateX(0);
+      height: 100%;
+      width: 100%;
+      justify-content: center;
+    }
+
+    position: absolute;
+    width: 317px;
+    right: 0;
+    transform: translateX(317px);
+    list-style: none;
+    background: $secondary-color;
+    height: 100vh;
+
+    .session-link {
+      @include responsive(medium) {
+        display: none;
+      }
+    }
+  }
+}
+
+.navbar-item {
+  @include responsive(medium) {
+    height: 100%;
+  }
+
+  &:hover {
+    @include responsive(medium) {
+      background: $white;
+    }
+
+    .navbar-link {
+      @include responsive(medium) {
+        color: $black;
+      }
+    }
+  }
+
+  &:nth-child(5) {
+    a {
+      @include responsive(medium) {
+        border-bottom: 0;
+      }
+
+      border-bottom: 1px solid $white;
+    }
+  }
+
+  .navbar-link {
+    @include responsive(medium) {
+      display: block;
+      color: $white;
+      text-decoration: none;
+      line-height: 48px;
+      font-size: .9rem;
+      font-family: $primary-font;
+      height: 100%;
+      padding: 0 3em;
+      transition: all ease $std-time;
+    }
+
+    display: block;
+    color: $white;
+    text-decoration: none;
+    line-height: 48px;
+    font-size: .9rem;
+    font-family: $primary-font;
+    height: 100%;
+    padding: 0 3em;
+  }
+}
+
+//## Animations
+
+@keyframes open-overlay {
+  0% {
+    background: $black-0;
+  }
+
+  100% {
+    background: $black-70;
+  }
+}
+
+@keyframes open-menu {
+  0% {
+    transform: translateX(317px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes close-overlay {
+  0% {
+    background: $black-70;
+  }
+
+  100% {
+    background: $black-0;
+  }
+}
+
+@keyframes close-menu {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(317px);
+  }
+}
+
+@keyframes open-dropdown {
+  0% {
+    opacity: 0;
+    transform: rotateX(-30deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes close-dropdown {
+  0% {
+    opacity: 1;
+    transform: rotateX(0deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotateX(-30deg);
+  }
+}
+
+// stroke effect
+.stroke {
+  a {
+    position: relative;
+
+    &::after {
+      display: block;
+      position: absolute;
+      margin: auto;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: $primary-color;
+      width: 0%;
+      content: '';
+      height: 4px;
+      transition: all ease 400ms;
+    }
+
+    &:hover {
+      &::after {
+        width: 100%;
+        background: $primary-color;
+      }
+    }
+  }
+}

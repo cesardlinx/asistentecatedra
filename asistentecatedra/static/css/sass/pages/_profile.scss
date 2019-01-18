@@ -1,0 +1,103 @@
+//** Perfil de Usuario
+
+.profile {
+  .container {
+    margin: 2em auto;
+  }
+}
+
+.profile-content {
+  @include responsive(extra-large) {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .profile-img-container {
+    @include responsive(extra-large) {
+      min-width: 230px;
+      height: 300px;
+    }
+
+    @include responsive(super-large) {
+      min-width: 400px;
+    }
+
+    border: 1px solid $gray;
+    border-radius: 6px;
+  }
+
+  form {
+    @include responsive(extra-large) {
+      padding: 0 1em 0 2em;
+    }
+
+    margin-top: 1em;
+  }
+}
+
+
+.notifications-body {
+  @include responsive(medium) {
+    flex-direction: row;
+  }
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+
+  .notifications-text {
+    @include responsive(medium) {
+      margin-bottom: 0;
+    }
+    display: inline-block;
+    color: $gray-muted;
+    width: 90%;
+  }
+
+  .toggle-switch {
+    @include responsive(medium) {
+      margin: 0;
+    }
+    margin: .5em auto;
+  }
+}
+
+
+.user {
+  margin: 1em auto 0;
+  width: 180px;
+
+  .profile-img {
+    position: relative;
+    width: 180px;
+
+    .image {
+      height: 180px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  }
+
+  p {
+    margin: .5em 0;
+    text-align: center;
+  }
+}
+
+.action-buttons {
+  margin: 2em 0 1em;
+
+  .action-btns-wrapper {
+    display: flex;
+    margin: 0 auto;
+    justify-content: flex-end;
+    flex-flow: row wrap;
+
+    button {
+      margin: .5em;
+      font-size: 1rem;
+      width: auto;
+    }
+  }
+}
+
+

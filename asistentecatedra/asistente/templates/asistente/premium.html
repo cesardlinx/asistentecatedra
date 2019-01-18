@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <!-- premium section starts here -->
+    <section class="premium">
+        <div class="main-container">
+            <div class="premium-text vertically-center">
+                <h2 class="titulo-principal slide-up-fast">
+                    Obten Premium por tan solo 4.99 USD mensuales.
+                </h2>
+                <p class="premium-info slide-up-slow">
+                    Con la suscripción premium podrás realizar cualquier
+                    tipo de planificación.
+                </p>
+                <button class="comenzar-button zoom">Obtener Premium</button>
+            </div>
+            <div class="premium-img">
+                <img class="imagen" src="{% static 'img/profesora.png' %}" alt="Profesora">
+            </div>
+        </div>
+    </section>
+    <!-- premium section starts here -->
+
+    <!-- comparison starts here -->
+    <section class="comparison">
+        <div class="main-container">
+            <h4>
+                Puedes comenzar a crear gratis tus planificaciones o
+                suscribirte a nuestro Plan Premium.
+            </h4>
+            <div class="subscription">
+                <div class="subscription-card sub-gratuita">
+                    <div class="sub-header">
+                        <h5>Subscripción Gratuita</h5>
+                        <div class="price">
+                            <h3>0.00 USD</h3><small>al mes</small>
+                        </div>
+                    </div>
+                    <div class="sub-content">
+                        <p>Puedes crear y almacenar tus:</p>
+                        <ul>
+                            <li>Planes de Clase</li>
+                            <li class="inactive-feature">Planificaciones de Unidad Didáctica</li>
+                            <li class="inactive-feature">Planificación de Destrezas</li>
+                            <li class="inactive-feature">Planificación Curricular Anual</li>
+                        </ul>
+                        <button class="sub-button secondary-button">Usar Gratis</button>
+                    </div>
+                </div>
+                <div class="subscription-card sub-premium">
+                    <div class="sub-header">
+                        <h5>Subscripción Premium</h5>
+                        <div class="price">
+                            <h3>4.99 USD</h3><small>al mes</small>
+                        </div>
+                    </div>
+                    <div class="sub-content">
+                        <p>Puedes crear y almacenar tus:</p>
+                        <ul>
+                            <li>Planes de Clase</li>
+                            <li>Planificaciones de Unidad Didáctica</li>
+                            <li>Planificación de Destrezas</li>
+                            <li>Planificación Curricular Anual</li>
+                        </ul>
+                        <button class="sub-button primary-button">Obtener Premium</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- comparison ends here -->
+{% endblock %}

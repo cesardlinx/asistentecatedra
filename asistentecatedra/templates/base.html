@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Asistente de Cátedra</title>
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,400i,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/vendors/bootstrap/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/vendors/jquery-ui/jquery-ui.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css'%}">
+</head>
+<body>
+    <!-- header starts here -->
+    <header>
+        <div class="navbar-asistente">
+            <div class="navbar-top">
+                <div class="navbar-container">
+                    <div class="logo">
+                        <a href="{% url 'home' %}">
+                            <div class="logo-img">
+                                <img src="{% static 'img/logo.png' %}" alt="Asistente de Cátedra" />
+                            </div>
+                            <div class="logo-text">
+                                <p>Asistente de Cátedra</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="session-buttons">
+                        <button type="button" class="btn secondary-button login" id="login">Iniciar Sesión</button>
+                        <button type="button" class="btn primary-button register" id="register">Regístrate!</button>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="menu stroke">
+                <ul class="navbar-items">
+                    <li class="navbar-item">
+                        <a href="{% url 'home' %}" class="navbar-link">Inicio</a>
+                    </li>
+                    <li class="navbar-item">
+                        <a href="{% url 'planificaciones' %}" class="navbar-link">Planificaciones</a>
+                    </li>
+                    <li class="navbar-item">
+                        <a href="{% url 'biblioteca' %}" class="navbar-link">Biblioteca</a>
+                    </li>
+                    <li class="navbar-item">
+                        <a href="{% url 'ayuda' %}" class="navbar-link">Ayuda</a>
+                    </li>
+                    <li class="navbar-item">
+                        <a href="{% url 'premium' %}" class="navbar-link">Premium</a>
+                    </li>
+                    <li class="navbar-item session-link">
+                        <a href="#" class="navbar-link">Iniciar Sesión</a>
+                    </li>
+                    <li class="navbar-item session-link">
+                        <a href="#" class="navbar-link">Registrarse</a>
+                    </li>
+                </ul>
+            </nav>
+            <button id="menu-button" class="menu-button">
+                <span class="bars-before"></span>
+                <span class="bars"></span>
+                <span class="bars-after"></span>
+            </button>
+        </div>
+    </header>
+    <!-- header ends here -->
+
+    <!-- content starts here -->
+    <section class="content">
+        {% block content %}{% endblock content%}
+    </section>
+    <!-- content ends here -->
+
+    <!-- footer starts here -->
+    <footer>
+        <div class="container footer-menu">
+            <div class="footer-list-wrapper">
+                <nav>
+                    <ul class="footer-list">
+                        <li class="footer-list-item"><a href="#">Contáctanos</a></li>
+                        <li class="footer-list-item"><a href="{% url 'biblioteca' %}">Biblioteca</a></li>
+                        <li class="footer-list-item"><a href="{% url 'ayuda' %}">Ayuda</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="footer-list-wrapper">
+                <nav>
+                    <ul class="footer-list">
+                        <li class="footer-list-item"><a href="#">Política de Privacidad</a></li>
+                        <li class="footer-list-item"><a href="#">Política de Cookies</a></li>
+                        <li class="footer-list-item"><a href="#">Legal</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="footer-list-wrapper">
+                <h5>Síguenos!</h5>
+                <a href="#" class="social"><span class="fab fa-facebook-f"></span></a>
+                <a href="#" class="social"><span class="fab fa-twitter"></span></a>
+            </div>
+        </div>
+        <div class="container">
+            <div class="copyright">
+                <img src="{% static 'img/flag.png' %}" alt="Ecuador">
+                <p class="pais">Made in Ecuador</p>
+                <p class="copy">&copy; 2018 Asistente de Cátedra - Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    <!-- footer ends here -->
+
+    <script src="{% static 'js/vendors/jquery/jquery_3.3.1.js' %}"></script>
+    <script src="{% static 'js/vendors/jquery-ui/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'js/vendors/fontawesome/all.min.js' %}"></script>
+    <script src="{% static 'js/helpers/useful_functions.js' %}"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block scripts %}
+    {% endblock scripts %}
+</body>
+</html>

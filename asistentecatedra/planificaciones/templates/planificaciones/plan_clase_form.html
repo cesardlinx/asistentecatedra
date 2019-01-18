@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block titulo %}
+    Nuevo Plan de Clase
+{% endblock titulo %}
+
+{% block content %}
+    <section class="detail">
+        <div class="planification-title">
+            <h3 class="main-title">Nuevo Plan de Clase</h3>
+        </div>
+        <form method="post" id="planClaseForm"
+            load-cursos-url={% url 'ajax_load_cursos' %}
+            load-objetivos-url={% url 'ajax_load_objetivos' %}
+            load-destrezas-url={% url 'ajax_load_destrezas' %}
+            load-indicadores-url={% url 'ajax_load_indicadores' %}
+            novalidate>
+            {% csrf_token %}
+            {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
+
+            {{ form.non_field_errors }}
+
+            {{ form.source.errors }}
+            {{ form.source }}
+
+            <section class="datos-informativos">
+                <h5 class="form-label">Datos Informativos:</h5>
+
+                <div class="form-group-2">
+                    <div class="form-group-float">
+                        {{ form.numero_plan|add_label_class:"form-control-placeholder" }}
+                        {% render_field form.numero_plan class="form-control floating-input" type="text"%}
+                    </div>
+
+                    <div class="form-group-float">
+                        {{ form.name|add_label_class:"form-control-placeholder"}}
+                        {% render_field form.name class="form-control floating-input" %}
+                    </div>
+                </div>
+
+                <div class="form-group-2">
+                    <div class="form-group-float">
+                        {{ form.fecha|add_label_class:"form-control-placeholder" }}
+                        {% render_field form.fecha class="form-control floating-input" %}
+                    </div>
+
+                    <div class="select-wrapper">
+                        {% render_field form.asignatura class="custom-select" %}
+                    </div>
+                </div>
+
+                <div class="form-group-2">
+                    <div class="form-group-float">
+                        {{ form.paralelos|add_label_class:"form-control-placeholder" }}
+                        {% render_field form.paralelos class="form-control floating-input" %}
+                    </div>
+
+                    <div class="form-group-float">
+                        {{ form.numero_estudiantes|add_label_class:"form-control-placeholder" }}
+                        {% render_field form.numero_estudiantes class="form-control floating-input" %}
+                    </div>
+                </div>
+
+                <div class="form-group-2">
+                    <div class="form-group-float">
+                        {{ form.tema|add_label_class:"form-control-placeholder" }}
+                        {% render_field form.tema class="form-control floating-input" %}
+                    </div>
+
+                    <div class="form-group-float">
+                        {{ form.periodos|add_label_class:"form-control-placeholder" }}
+                        {% render_field form.periodos class="form-control floating-input" %}
+                    </div>
+                </div>
+
+                <div class="form-group-2">
+                    <div class="form-group-float">
+                        {{ form.metodologia|add_label_class:"form-control-placeholder" }}
+                        {% render_field form.metodologia class="form-control floating-input" %}
+                    </div>
+
+                    <div class="form-group-float">
+                        {{ form.tecnica|add_label_class:"form-control-placeholder" }}
+                        {% render_field form.tecnica class="form-control floating-input" %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.cursos|add_label_class:"form-label" }}
+                    {% render_field form.cursos class="checkbox-list" %}
+
+                </div>
+                <div class="form-group">
+                    {{ form.objetivos|add_label_class:"form-label" }}
+                    {{ form.objetivos }}
+                    {{ form.objetivos_generales }}
+
+                </div>
+
+                <h5 class="form-label">Relación de Elementos Curriculares:</h5>
+            </section>
+
+
+            <section class="table-responsive elem-curric-container">
+                <table class="elementos-curriculares" id="elementos-curriculares">
+                    <thead>
+                        <tr>
+                            <th class="col-title col-lg" rowspan="2">Destreza con Criterio de Desempeño</th>
+                            <th class="col-title" rowspan="2">Conocimientos Asociados</th>
+                            <th class="col-title" rowspan="2">Proceso Didáctico</th>
+                            <th class="col-title" rowspan="2">Tiempo</th>
+                            <th class="col-title" rowspan="2">Recursos</th>
+                            <th class="col-title" colspan="2">Evaluación</th>
+                        </tr>
+
+                        <tr>
+                            <th class="col-subtitle col-lg">Indicadores de Logro</th>
+                            <th class="col-subtitle">Actividades de Evaluación</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {{ elementos_formset.management_form }}
+                        {{ elementos_formset.non_form_errors }}
+                        {% for elementos_form in elementos_formset %}
+
+                            {% if form.instance.pk %} {% comment %}  Solo para update {% endcomment %}
+                                {{ elementos_form.id }}
+                            {% endif %}
+
+                            <tr>
+                                <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
+                                    {% with field=elementos_form.destreza %}
+                                    <div class="cell-wrapper-select">
+                                        <div class="select-wrapper">
+                                            {% render_field field class="destrezas custom-select" %}
+                                        </div>
+                                    </div>
+                                    {% endwith %}
+                                </td>
+                                <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
+                                    {% with field=elementos_form.conocimientos_asociados %}
+                                    <div class="cell-wrapper-lg">
+                                        {% render_field field class="table-textarea textarea-full" placeholder="Conocimientos Asociados" %}
+                                    </div>
+                                    {% endwith %}
+                                </td>
+
+                                {# Formset Anidado de procesos didácticos (Primera fila) #}
+                                {% if elementos_form.nested %}
+                                    {{ elementos_form.nested.management_form }}
+                                    {{ elementos_form.nested.non_form_errors }}
+
+
+                                    {% for procesos_form in elementos_form.nested.forms %}
+
+                                        {% if form.instance.pk %} {% comment %}  Solo para update {% endcomment %}
+                                            {{ procesos_form.id }}
+                                        {% endif %}
+
+                                        {% if forloop.first %}
+                                            {% include 'planificaciones/includes/procesos_didacticos_form.html' %}
+                                        {% endif %}
+
+                                    {% endfor %}
+
+                                {% endif %}
+                                {# Fin de Formset Anidado de procesos didácticos #}
+
+                                <td class="indicadores elementos-form" rowspan="{{ elementos_form.nested.total_form_count }}">
+                                    {% with field=elementos_form.indicadores_logro %}
+                                    {{ field }}
+                                    {% endwith %}
+                                </td>
+
+                                <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
+                                    {% with field=elementos_form.actividades_evaluacion %}
+                                    <div class="cell-wrapper-md">
+                                        {% render_field field class="table-textarea textarea-full" placeholder="Actividades de Evaluación" %}
+                                    </div>
+                                    {% endwith %}
+                                </td>
+                            </tr>
+
+                            {# Formset Anidado de procesos didácticos (filas restantes) #}
+                            {# Esto es para que estén en otra fila independiente #}
+                            {% for procesos_form in elementos_form.nested.forms %}
+
+                                {% if not forloop.first %}
+                                    <tr rowspan="1">
+                                        {% include 'planificaciones/includes/procesos_didacticos_form.html' %}
+                                    </tr>
+                                {% endif %}
+
+                            {% endfor %}
+                            {# Fin del Formset Anidado de procesos didácticos (filas restantes) #}
+                        {%  endfor %}
+                    </tbody>
+
+                </table>
+
+            </section>
+
+            <div class="destrezas-buttons">
+                <button type="button" class="btn primary-button common-btn" id="agregar-destreza">
+                    <span class="fas fa-plus"></span> Agregar Destreza
+                </button>
+
+                {% if elementos_formset.total_form_count > 1 %}
+                    <button class="secondary-button delete-btn" type="button" id="eliminar-destreza">
+                        <span class="fas fa-minus"></span> Eliminar Destreza
+                    </button>
+                {% endif %}
+            </div>
+
+            <section class="form-footer">
+                {% for field in form %}
+                    {% if forloop.counter > 13 and forloop.counter < 18 %}
+                        <div class="form-group">
+                            {{ field|add_label_class:"form-label" }}
+                            {{ field }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <div class="form-group">
+                    {{ form.observaciones|add_label_class:"form-label" }}
+                    {% render_field form.observaciones class="textarea-full" placeholder="Escriba sus observaciones." %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.aprobado_por|add_label_class:"form-label" }}
+                    {{ form.aprobado_por }}
+                </div>
+
+                <input type="submit" value="Guardar Planificación" class="btn primary-button submit-btn">
+
+            </section>
+        </form>
+    </section>
+{% endblock content%}
+
+{% block scripts %}
+    <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
+    <script src="{% static 'js/helpers/special_fields.js' %}"></script>
+    <script src="{% static 'js/vendors/autosize/autosize.min.js' %}"></script>
+    <script src="{% static 'js/plan_clase/plan_clase.js' %}"></script>
+{% endblock scripts %}

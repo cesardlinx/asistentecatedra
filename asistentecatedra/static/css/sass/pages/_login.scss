@@ -1,0 +1,59 @@
+//** Login
+
+.login-container {
+  background: $gray-soft;
+}
+
+.login {
+  .container {
+    text-align: center;
+
+    .login-img {
+      margin: 1em auto;
+      width: 130px;
+    }
+
+    h3 {
+      font-weight: lighter;
+    }
+
+    form {
+      margin: 2em auto;
+      max-width: 450px;
+      padding: 2em 4em;
+      border: 1px solid $black;
+      text-align: left;
+      border-radius: 10px;
+      background: $white;
+
+      a {
+        display: block;
+        text-align: right;
+        font-size: .8rem;
+        color: $turquoise-dark;
+
+        &:hover {
+          color: $turquoise-dark;
+        }
+      }
+    }
+  }
+
+  .registrate {
+    margin-bottom: 2em;
+
+    p {
+      margin-bottom: 0;
+    }
+
+    a {
+      color: $turquoise-dark;
+      font-size: .9rem;
+
+      &:hover {
+        color: $turquoise-dark;
+      }
+    }
+  }
+}
+

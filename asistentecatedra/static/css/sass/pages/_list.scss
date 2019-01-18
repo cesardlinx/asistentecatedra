@@ -1,0 +1,127 @@
+//** Pagina de listado de planificaciones
+
+.list-buttons {
+  display: flex;
+  margin: 0 0 1em;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.list-btn {
+  margin: .5em 1em .5em 0;
+  font-size: 1.2rem;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  &.back-menu {
+    margin: .5em 0;
+    background: $secondary-color;
+
+    &:hover {
+      background: $white;
+      border: 1px solid $secondary-color;
+      color: $secondary-color;
+    }
+  }
+}
+
+.pagination {
+  .pag-wrapper {
+    @include responsive(small) {
+      margin: 1em auto;
+    }
+
+    display: inline-block;
+    margin: 0 auto;
+
+    button {
+      @include responsive(small) {
+        display: inline-block;
+      }
+      display: block;
+      margin: 0 auto;
+    }
+
+    .primary-button {
+      @include responsive(small) {
+        margin: 0;
+      }
+      margin-bottom: 2em;
+    }
+
+    .secondary-button {
+      @include responsive(small) {
+        margin: 0 1em 0 0;
+      }
+    }
+
+    p {
+      @include responsive(small) {
+        display: inline-block;
+        margin-right: 1em;
+      }
+
+      display: block;
+      margin: .9em 0;
+      font-size: .9rem;
+    }
+  }
+}
+
+.icon {
+  font-size: 1.3rem;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  &.delete {
+    color: $danger;
+
+    &:hover {
+      color: $danger-light;
+    }
+  }
+
+  &.word {
+    color: $secondary-color;
+
+    &:hover {
+      color: $secondary-light;
+    }
+  }
+
+  &.edit {
+    color: $primary-color;
+
+    &:hover {
+      color: $primary-light;
+    }
+  }
+}
+
+.resp-column-sm {
+  @include responsive(small) {
+    display: table-cell;
+  }
+
+  display: none;
+}
+
+.resp-column-md {
+  @include responsive(medium) {
+    display: table-cell;
+  }
+
+  display: none;
+}
+
+.resp-column-lg {
+  @include responsive(large) {
+    display: table-cell;
+  }
+
+  display: none;
+}

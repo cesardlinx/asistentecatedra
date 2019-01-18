@@ -1,0 +1,9 @@
+{% for curso in cursos %}
+    <li class="inline-list-item">
+        <input type="checkbox" name="cursos" class="custom-checkbox"
+            value="{{ curso.pk }}" id="id_cursos_{{ forloop.counter0 }}" />
+        <label class="check-label" for="id_cursos_{{ forloop.counter0 }}">
+            {{ curso.name }}
+        </label>
+    </li>
+{% endfor %}

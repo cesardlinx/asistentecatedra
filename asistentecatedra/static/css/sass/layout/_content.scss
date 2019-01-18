@@ -1,0 +1,63 @@
+//** Content
+
+//## Content
+.content {
+  flex: 1 0 auto;
+}
+
+.recursos-profesor {
+  .container {
+    margin: 2em auto;
+  }
+}
+
+.flat-content {
+  margin-top: 2em;
+}
+
+// Imágenes
+.imagen {
+  display: block;
+  width: 100%;
+}
+
+.content-body {
+
+}
+
+//## Contenido
+
+.main-container {
+  @include responsive(small) {
+    padding: 0 3em;
+  }
+
+  display: flex;
+  margin: 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  padding: 0 1em;
+  max-width: 1115px;
+  overflow: hidden;
+}
+
+.titulo-principal {
+  font-size: 3.5rem;
+  font-weight: bold;
+}
+
+.titulo-secundario {
+  @include responsive(small) {
+    font-size: 2.7rem;
+  }
+
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.vertically-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

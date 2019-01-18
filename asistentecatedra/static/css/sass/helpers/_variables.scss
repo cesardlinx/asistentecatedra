@@ -1,0 +1,64 @@
+//** Variables
+
+//## Fonts
+$primary-font: 'Raleway', Helvetica, sans-serif;
+$secondary-font: 'Orbitron', Helvetica, sans-serif;
+
+//## Colors
+$gray: #ccc;
+$gray-light: #ededed;
+$white: #fff;
+$black: #000;
+$black-0: rgba($black, 0);
+$black-40: rgba($black, .4);
+$black-50: rgba($black, .5);
+$black-70: rgba($black, .7);
+$primary-color: #16a085;
+$primary-light: lighten($primary-color, 8%);
+$primary-25: rgba($primary-color, .25);
+$secondary-color: #2c3e50;
+$secondary-light: lighten($secondary-color, 20%);
+$secondary-dark-13: darken($secondary-color, 13%);
+$celeste: #3fccfc;
+$turquoise: #1db598;
+$turquoise-dark: darken($turquoise, 10%);
+$yellow: #f1c40f;
+$yellow-light: lighten($yellow, 12%);
+$purple: #9b59b6;
+$purple-light: lighten($purple, 12%);
+$blue: #3498db;
+$blue-light: lighten($blue, 12%);
+$indigo: #6331ff;
+$pink: #9b54b6;
+$danger: #dc3545;
+$danger-dark: darken($danger, 10%);
+$danger-light: lighten($danger, 10%);
+$danger-25: rgba($danger, .25);
+$gray-forms: #ced4da;
+$gray-muted: #6c757d;
+$gray-soft: #ecf0f1;
+$outline: rgba(59, 153, 252, .5);
+
+// Colores de Areas
+$cultural-color: #f08100;
+$edfisica-color: #fc0;
+$literatura-color: #871f82;
+$literatura-light: lighten($literatura-color, 10%);
+$ingles-color: #00b3f0;
+$ingles-light: lighten($ingles-color, 10%);
+$matematica-color: #007dc6;
+$matematica-light: lighten($matematica-color, 10%);
+$naturales-color: #91c251;
+$naturales-light: lighten($naturales-color, 10%);
+$sociales-color: #cc1258;
+$sociales-light: lighten($sociales-color, 10%);
+$emprendimiento-color: #bd3223;
+$emprendimiento-light: lighten($emprendimiento-color, 10%);
+$preparatoria-color: #b1b4b6;
+$preparatoria-light: lighten($preparatoria-color, 10%);
+
+//## Animation Time
+$std-time: 300ms;
+
+//## Planifications
+$plan-width: 800px;

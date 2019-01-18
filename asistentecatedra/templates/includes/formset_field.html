@@ -1,0 +1,27 @@
+{% load widget_tweaks %}
+
+{% if formset.is_bound %}
+    {% if field.errors %}
+        {% with class|add:" invalid-field" as clase %}
+            {% render_field field class=clase placeholder=placeholder %}
+            {% for error in field.errors %}
+            <div class="invalid-feedback">
+                {{ error | escape }}
+            </div>
+            {% endfor %}
+        {% endwith %}
+    {% else %}
+        {% with class|add:" valid-field" as clase %}
+            {% render_field field class=clase placeholder=placeholder %}
+        {% endwith %}
+    {% endif %}
+{% else %}
+    {% render_field field class=class placeholder=placeholder %}
+{% endif %}
+
+
+{% if field.help_text %}
+    <small class="form-text text-muted">
+    {{ field.help_text }}
+    </small>
+{% endif %}

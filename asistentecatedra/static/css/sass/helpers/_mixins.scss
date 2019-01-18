@@ -1,0 +1,44 @@
+//** Mixins
+
+//## Mixin for Responsive Design
+@mixin responsive($size) {
+  @if $size == hyper-small {
+    @media only screen and (min-width: 388px) {
+      @content;
+    }
+  } @else if $size == extra-small {
+    @media only screen and (min-width: 400px) {
+      @content;
+    }
+  } @else if $size == super-small {
+    @media only screen and (min-width: 424px) {
+      @content;
+    }
+  } @else if $size == small {
+    @media only screen and (min-width: 576px) {
+      @content;
+    }
+  } @else if $size == medium {
+    @media only screen and (min-width: 768px) {
+      @content;
+    }
+  } @else if $size == large {
+    @media only screen and (min-width: 976px) {
+      @content;
+    }
+  } @else if $size == extra-large {
+    @media only screen and (min-width: 992px) {
+      @content;
+    }
+  } @else if $size == super-large {
+    @media only screen and (min-width: 1200px) {
+      @content;
+    }
+  }
+}
+
+//## Mixin for Gradient Background
+@mixin gradient($angle, $start-color, $end-color) {
+  background: linear-gradient($angle, $start-color 0%, $end-color 68%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$start-color', endColorstr='$end-color', GradientType=1);
+}
