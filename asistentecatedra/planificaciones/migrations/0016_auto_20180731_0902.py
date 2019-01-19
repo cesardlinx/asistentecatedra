@@ -7,6 +7,7 @@ def create_unidades(apps, schema_editor):
     Asignatura = apps.get_model('planificaciones', 'Asignatura')
 
     # Cursos
+    primero_egb = Curso.objects.get(pk=1)
     segundo_egb = Curso.objects.get(pk=2)
     tercero_egb = Curso.objects.get(pk=3)
     cuarto_egb = Curso.objects.get(pk=4)
@@ -60,6 +61,98 @@ def create_unidades(apps, schema_editor):
     emprendimiento_gestion = Asignatura.objects.get(
         name="Emprendimiento y Gestión"
     )
+
+    # Añade los cursos a las Asignaturas
+
+    lengua_literatura.cursos.add(
+        primero_egb,
+        segundo_egb,
+        tercero_egb,
+        cuarto_egb,
+        quinto_egb,
+        sexto_egb,
+        septimo_egb,
+        octavo_egb,
+        noveno_egb,
+        decimo_egb,
+        primero_bgu,
+        segundo_bgu,
+        tercero_bgu
+    )
+    matematica.cursos.add(
+        primero_egb,
+        segundo_egb,
+        tercero_egb,
+        cuarto_egb,
+        quinto_egb,
+        sexto_egb,
+        septimo_egb,
+        octavo_egb,
+        noveno_egb,
+        decimo_egb,
+        primero_bgu,
+        segundo_bgu,
+        tercero_bgu
+    )
+    ciencias_naturales.cursos.add(
+        primero_egb,
+        segundo_egb,
+        tercero_egb,
+        cuarto_egb,
+        quinto_egb,
+        sexto_egb,
+        septimo_egb,
+        octavo_egb,
+        noveno_egb,
+        decimo_egb,
+    )
+    estudios_sociales.cursos.add(
+        primero_egb,
+        segundo_egb,
+        tercero_egb,
+        cuarto_egb,
+        quinto_egb,
+        sexto_egb,
+        septimo_egb,
+        octavo_egb,
+        noveno_egb,
+        decimo_egb,
+    )
+    biologia.cursos.add(
+        primero_bgu,
+        segundo_bgu,
+        tercero_bgu
+    )
+    quimica.cursos.add(
+        primero_bgu,
+        segundo_bgu,
+        tercero_bgu
+    )
+    fisica.cursos.add(
+        primero_bgu,
+        segundo_bgu,
+        tercero_bgu
+    )
+    historia.cursos.add(
+        primero_bgu,
+        segundo_bgu,
+        tercero_bgu
+    )
+    filosofia.cursos.add(
+        primero_bgu,
+        segundo_bgu,
+    )
+    educacion_ciudadania.cursos.add(
+        primero_bgu,
+        segundo_bgu,
+    )
+    emprendimiento_gestion.cursos.add(
+        primero_bgu,
+        segundo_bgu,
+        tercero_bgu
+    )
+
+    # Añade las unidades
 
     for unidad in range(1, 5):
         for curso in cursos_egb:

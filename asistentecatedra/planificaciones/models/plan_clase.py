@@ -6,6 +6,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.core.validators import MaxValueValidator, MinLengthValidator, \
     MinValueValidator
 from django.db import models
+from django.urls import reverse
 
 
 class PlanClase(Planificacion):
@@ -38,3 +39,7 @@ class PlanClase(Planificacion):
     class Meta:
         db_table = 'planes_clase'
         verbose_name_plural = "planes de clase"
+
+    def get_absolute_url(self):
+        kwargs = {'pk': self.pk, 'slug': self.slug}
+        return reverse('plan_clase_update', kwargs=kwargs)

@@ -12,8 +12,8 @@ class ObjetivoManager(models.Manager):
                 asignatura__id=asignatura_id,
                 unidades__curso__id=curso_id
             ).order_by('pk', 'codigo').distinct('pk')
+            # Queryset addition without duplicates
             objetivos = objetivos | objetivos_query
-
         return objetivos
 
 

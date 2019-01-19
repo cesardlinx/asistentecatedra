@@ -2,10 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from .asignatura import Asignatura
 from .curso import Curso
+from django.template.defaultfilters import slugify
 
 
 class Planificacion(models.Model):
     name = models.CharField(max_length=40)
+    slug = models.SlugField()
     fecha = models.DateField()
     asignatura = models.ForeignKey(
         Asignatura,
@@ -29,3 +31,10 @@ class Planificacion(models.Model):
 
     class Meta:
         abstract = True
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwargs)

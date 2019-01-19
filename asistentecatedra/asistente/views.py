@@ -9,7 +9,7 @@ def home(request):
 
 def biblioteca(request):
     """Biblioteca"""
-    context = Libro.objects.get_all_books()
+    context = Libro.objects.get_libros_por_asignaturas()
     return render(request, 'asistente/biblioteca.html', context)
 
 

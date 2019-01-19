@@ -9,8 +9,8 @@ from django.dispatch.dispatcher import receiver
 
 
 class LibroManager(models.Manager):
-    def get_all_books(self):
-        """Regresa un diccionario con todos los libros"""
+    def get_libros_por_asignaturas(self):
+        """Regresa un diccionario con los libros clasificados por asignatura"""
         result = {
             'asignaturas': {
                 'matematica': {
@@ -101,18 +101,18 @@ class Libro(models.Model):
         if match:
             return match.group(1)
 
-        return ''
+        return 'El archivo no es un pdf'
 
     def __str__(self):
         return self.name
 
-# Para que se borre también el archivo
+# Para que caundo se borre la instancia, se elimine también el archivo
 # Receive the pre_delete signal and delete the file associated with the model
 # instance.
 
 
 @receiver(pre_delete, sender=Libro)
-def mymodel_delete(sender, instance, **kwargs):
+def libro_delete(sender, instance, **kwargs):
     # Pass false so FileField doesn't save the model.
     instance.archivo.delete(False)
 

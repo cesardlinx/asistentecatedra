@@ -36,6 +36,5 @@ class Unidad(models.Model):
         verbose_name_plural = "unidades"
 
     def __str__(self):
-        return self.numero_unidad
-
-
+        return '{} {} {}'.format(
+            self.numero_unidad, self.curso, self.asignatura)

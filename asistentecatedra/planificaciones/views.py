@@ -6,6 +6,7 @@ from .models.curso import Curso
 from .models.destreza import Destreza
 from .models.indicador import Indicador
 from .models.objetivo import Objetivo
+from .models.asignatura import Asignatura
 from .models.objetivo_general import ObjetivoGeneral
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
@@ -92,7 +93,8 @@ def load_cursos(request):
     """Regresa los cursos por asignatura si la solicitud fue via ajax"""
     asignatura_id = request.GET.get('asignatura')
     if request.is_ajax():
-        cursos = Curso.objects.get_cursos_by_asignatura(asignatura_id)
+        asignatura = Asignatura.objects.get(pk=asignatura_id)
+        cursos = asignatura.cursos.all()
         context = {'cursos': cursos}
         return render(
             request, 'planificaciones/ajax/cursos_checklist_options.html',

@@ -26,3 +26,6 @@ class ElementoCurricular(models.Model):
     class Meta:
         db_table = 'elementos_curriculares'
         verbose_name_plural = "elementos curriculares"
+
+    def __str__(self):
+        return 'Destreza: {}'.format(self.destreza.codigo)

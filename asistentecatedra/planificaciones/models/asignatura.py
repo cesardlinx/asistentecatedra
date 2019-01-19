@@ -1,5 +1,6 @@
 from django.db import models
 from .area import Area
+from .curso import Curso
 
 
 class Asignatura(models.Model):
@@ -9,6 +10,11 @@ class Asignatura(models.Model):
         related_name='asignaturas',
         on_delete=models.CASCADE
     )
+    cursos = models.ManyToManyField(
+        Curso,
+        related_name='asignaturas',
+        blank=True
+    )
 
     class Meta:
         db_table = 'asignaturas'
@@ -16,5 +22,3 @@ class Asignatura(models.Model):
 
     def __str__(self):
         return self.name
-
-

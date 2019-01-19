@@ -49,5 +49,3 @@ class Destreza(models.Model):
     def __str__(self):
         truncated_description = Truncator(self.description)
         return "{} - {}".format(self.codigo, truncated_description.chars(50))
-
-
