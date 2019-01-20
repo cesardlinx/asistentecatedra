@@ -1,23 +1,27 @@
 from django.shortcuts import render
+from django.views.generic.base import TemplateView
+from django.views.generic.list import ListView
 from .models import Libro
+from .models import Pregunta
 
 
-def home(request):
+class HomeTemplateView(TemplateView):
     """Vista principal de la aplicación"""
-    return render(request, 'asistente/home.html')
+    template_name = 'asistente/home.html'
 
 
-def biblioteca(request):
+class BibliotecaListView(ListView):
     """Biblioteca"""
-    context = Libro.objects.get_libros_por_asignaturas()
-    return render(request, 'asistente/biblioteca.html', context)
+    template_name = 'asistente/biblioteca.html'
+    queryset = Libro.objects.get_libros_por_asignaturas()
 
 
-def ayuda(request):
+class AyudaListView(ListView):
     """Ayuda"""
-    return render(request, 'asistente/ayuda.html')
+    template_name = 'asistente/ayuda.html'
+    model = Pregunta
 
 
-def premium(request):
+class PremiumTemplateView(TemplateView):
     """Vista de la pantalla para subscripción Premium"""
-    return render(request, 'asistente/premium.html')
+    template_name = 'asistente/premium.html'

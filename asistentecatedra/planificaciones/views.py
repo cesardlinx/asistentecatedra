@@ -2,7 +2,6 @@ import json
 
 from .forms import ElementoCurricularFormset, PlanClaseForm
 from .models.plan_clase import PlanClase
-from .models.curso import Curso
 from .models.destreza import Destreza
 from .models.indicador import Indicador
 from .models.objetivo import Objetivo
@@ -13,19 +12,20 @@ from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.generic.base import TemplateView
+from django.views.generic.list import ListView
 
 
-def planificaciones(request):
+class PlanificacionesTemplateView(TemplateView):
     """Vista para elegir el tipo de planificación"""
-    return render(request, 'planificaciones/planificaciones.html')
+    template_name = 'planificaciones/planificaciones.html'
 
 
-def plan_clase_list(request):
+class PlanClaseListView(ListView):
     """Vista para listado de planes de clase"""
-    context = {
-        'planes': PlanClase.objects.all()
-    }
-    return render(request, 'planificaciones/planificacion_list.html', context)
+    template_name = 'planificaciones/planificacion_list.html'
+    queryset = PlanClase.objects.all()
+    context_object_name = 'planes'
 
 
 def plan_clase_create(request):
@@ -51,7 +51,6 @@ def plan_clase_create(request):
                     request.POST, instance=plan_clase)
                 if elementos_formset.is_valid():
                     elemento_curricular = elementos_formset.save()
-
                     return redirect('home')
 
     context = {
