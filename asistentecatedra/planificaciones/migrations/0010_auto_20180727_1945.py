@@ -99,5 +99,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_objetivos_cultural)
+        migrations.RunPython(create_objetivos_cultural,
+                             reverse_code=migrations.RunPython.noop)
     ]

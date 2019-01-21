@@ -84,5 +84,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_asignaturas)
+        migrations.RunPython(create_asignaturas,
+                             reverse_code=migrations.RunPython.noop)
     ]

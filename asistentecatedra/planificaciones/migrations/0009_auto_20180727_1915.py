@@ -107,5 +107,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_objetivos_edfisica)
+        migrations.RunPython(create_objetivos_edfisica,
+                             reverse_code=migrations.RunPython.noop)
     ]

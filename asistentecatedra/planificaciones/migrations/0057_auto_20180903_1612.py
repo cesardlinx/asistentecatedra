@@ -521,5 +521,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_indicadores)
+        migrations.RunPython(create_indicadores,
+                             reverse_code=migrations.RunPython.noop)
     ]

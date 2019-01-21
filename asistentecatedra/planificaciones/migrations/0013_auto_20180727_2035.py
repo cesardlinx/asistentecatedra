@@ -89,5 +89,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_objetivos_matematica)
+        migrations.RunPython(create_objetivos_matematica,
+                             reverse_code=migrations.RunPython.noop)
     ]

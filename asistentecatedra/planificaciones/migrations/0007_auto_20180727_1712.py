@@ -207,5 +207,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_bloques)
+        migrations.RunPython(
+            create_bloques, reverse_code=migrations.RunPython.noop)
     ]

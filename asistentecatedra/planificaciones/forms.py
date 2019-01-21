@@ -2,6 +2,7 @@ from .models.curso import Curso
 from .models.destreza import Destreza
 from .models.indicador import Indicador
 from .models.objetivo import Objetivo
+from .models.asignatura import Asignatura
 from .models.objetivo_general import ObjetivoGeneral
 from .models.plan_clase import PlanClase
 from .models.elemento_curricular import ElementoCurricular
@@ -97,9 +98,8 @@ class PlanClaseForm(forms.ModelForm):
         if 'asignatura' in self.data:
             try:
                 asignatura_id = int(self.data.get('asignatura'))
-
-                self.fields['cursos'].queryset = Curso.objects\
-                    .get_cursos_by_asignatura(asignatura_id)
+                asignatura = Asignatura.objects.get(pk=asignatura_id)
+                self.fields['cursos'].queryset = asignatura.cursos.all()
 
             except (ValueError, TypeError):
                 # invalid input from the client; ignore and
@@ -116,7 +116,7 @@ class PlanClaseForm(forms.ModelForm):
         if 'asignatura' in self.data and 'cursos' in self.data:
             try:
                 asignatura_id = int(self.data.get('asignatura'))
-                cursos_id = list(self.data.getlist('cursos'))
+                cursos_id = list(self.data.get('cursos'))
 
                 objetivos = Objetivo.objects\
                     .get_objetivos_by_asignatura_cursos(
@@ -216,7 +216,7 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
             if 'asignatura' in form.data and 'cursos' in form.data:
                 try:
                     asignatura_id = int(form.data.get('asignatura'))
-                    cursos_id = list(form.data.getlist('cursos'))
+                    cursos_id = list(form.data.get('cursos'))
                     form.fields['destreza'].queryset = Destreza.objects\
                         .get_destrezas_by_asignatura_cursos(
                             asignatura_id, cursos_id)

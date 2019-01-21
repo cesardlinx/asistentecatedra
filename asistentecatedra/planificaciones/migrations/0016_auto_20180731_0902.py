@@ -285,5 +285,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_unidades)
+        migrations.RunPython(create_unidades,
+                             reverse_code=migrations.RunPython.noop)
     ]

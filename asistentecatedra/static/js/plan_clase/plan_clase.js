@@ -148,9 +148,9 @@ $(document).ready(function() {
 
     // Complete Form Validation
     var isFormValid = function() {
-        var result = (form.valid() && extraFields.arevalid()) ? true : false;
+        var result = (form.valid() && extraFields.areValid()) ? true : false;
         return result;
-    }
+    };
 
     // Envio del formulario
     $('#planClaseForm').submit(function(e) {

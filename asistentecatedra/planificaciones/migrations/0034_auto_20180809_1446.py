@@ -305,5 +305,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_criterios)
+        migrations.RunPython(
+            create_criterios, reverse_code=migrations.RunPython.noop)
     ]

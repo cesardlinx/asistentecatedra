@@ -13,7 +13,7 @@ class Asignatura(models.Model):
     cursos = models.ManyToManyField(
         Curso,
         related_name='asignaturas',
-        blank=True
+        blank=True,
     )
 
     class Meta:

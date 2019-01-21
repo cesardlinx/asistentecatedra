@@ -970,5 +970,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_unit_relationships)
+        migrations.RunPython(create_unit_relationships,
+                             reverse_code=migrations.RunPython.noop)
     ]

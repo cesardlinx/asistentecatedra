@@ -125,5 +125,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_objetivos_literatura)
+        migrations.RunPython(create_objetivos_literatura,
+                             reverse_code=migrations.RunPython.noop)
     ]

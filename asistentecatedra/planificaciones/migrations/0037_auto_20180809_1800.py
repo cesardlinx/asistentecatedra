@@ -1528,5 +1528,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_destrezas)
+        migrations.RunPython(
+            create_destrezas, reverse_code=migrations.RunPython.noop)
     ]

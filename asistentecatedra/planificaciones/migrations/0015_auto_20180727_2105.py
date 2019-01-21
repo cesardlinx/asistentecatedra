@@ -94,5 +94,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_objetivos_interdisciplinar)
+        migrations.RunPython(create_objetivos_interdisciplinar,
+                             reverse_code=migrations.RunPython.noop)
     ]
