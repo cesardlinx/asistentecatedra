@@ -8,6 +8,7 @@ from .models.plan_clase import PlanClase
 from .models.elemento_curricular import ElementoCurricular
 from .models.proceso_didactico import ProcesoDidactico
 from django import forms
+from django.http import QueryDict
 from django.forms import BaseInlineFormSet, inlineformset_factory
 
 
@@ -58,28 +59,6 @@ class PlanClaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Placeholders de campos
-        # self.fields['name'].widget.attrs.update(
-        #     {'placeholder': 'Nombre del Plan de Clase'})
-        # self.fields['numero_plan'].widget.attrs.update(
-        #     {'placeholder': 'Número de Plan de Clase'})
-        # self.fields['fecha'].widget.attrs.update(
-        #     {'placeholder': 'Fecha'})
-        # self.fields['paralelos'].widget.attrs.update(
-        #     {'placeholder': 'Paralelos'})
-        # self.fields['numero_estudiantes'].widget.attrs.update(
-        #     {'placeholder': 'Número de Estudiantes'})
-        # self.fields['tema'].widget.attrs.update(
-        #     {'placeholder': 'Tema'})
-        # self.fields['periodos'].widget.attrs.update(
-        #     {'placeholder': 'Períodos'})
-        # self.fields['metodologia'].widget.attrs.update(
-        #     {'placeholder': 'Metodología'})
-        # self.fields['tecnica'].widget.attrs.update(
-        #     {'placeholder': 'Técnica'})
-        # self.fields['bibliografia'].widget.attrs.update(
-        #     {'placeholder': 'Bibliografía'})
-
         # Inicialización de campos
         self.fields['cursos'].queryset = Curso.objects.none()
         self.fields['objetivos'].queryset = Objetivo.objects.none()
@@ -108,15 +87,19 @@ class PlanClaseForm(forms.ModelForm):
 
         elif self.instance.pk:
             asignatura_id = self.instance.asignatura.pk
-            self.fields['cursos'].queryset = Curso.objects\
-                .get_cursos_by_asignatura(asignatura_id)
+            asignatura = Asignatura.objects.get(pk=asignatura_id)
+            self.fields['cursos'].queryset = asignatura.cursos.all()
 
         # Para convertir el id de objetivo en una instancia de
         # Objetivo en el form
         if 'asignatura' in self.data and 'cursos' in self.data:
             try:
                 asignatura_id = int(self.data.get('asignatura'))
-                cursos_id = list(self.data.get('cursos'))
+
+                if isinstance(self.data, QueryDict):
+                    cursos_id = list(self.data.getlist('cursos'))
+                else:
+                    cursos_id = list(self.data.get('cursos'))
 
                 objetivos = Objetivo.objects\
                     .get_objetivos_by_asignatura_cursos(
@@ -137,11 +120,7 @@ class PlanClaseForm(forms.ModelForm):
 
         elif self.instance.pk:
             asignatura_id = self.instance.asignatura.pk
-            cursos = self.instance.cursos.all()
-            cursos_id = []
-
-            for curso in cursos:
-                cursos_id.append(curso.pk)
+            cursos_id = self.instance.cursos.all()
 
             objetivos = Objetivo.objects.get_objetivos_by_asignatura_cursos(
                 asignatura_id, cursos_id)
@@ -171,13 +150,7 @@ class BaseProcesoDidacticoFormset(BaseInlineFormSet):
         if self.data or self.files:
             return self.management_form.cleaned_data['TOTAL_FORMS']
         else:
-            if self.initial_form_count() > 0:
-                total_forms = self.initial_form_count()
-            else:
-                total_forms = self.initial_form_count() + self.extra
-            # Limite de max_num
-            if total_forms > self.max_num > 0:
-                total_forms = self.max_num
+            total_forms = self.initial_form_count() + self.extra
             return total_forms
 
 
@@ -186,6 +159,7 @@ ProcesoDidacticoFormset = inlineformset_factory(
     ProcesoDidactico,
     fields=('name', 'description', 'tiempo', 'recursos'),
     formset=BaseProcesoDidacticoFormset,
+    max_num=10,
     extra=1
 )
 
@@ -216,7 +190,12 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
             if 'asignatura' in form.data and 'cursos' in form.data:
                 try:
                     asignatura_id = int(form.data.get('asignatura'))
-                    cursos_id = list(form.data.get('cursos'))
+
+                    if isinstance(self.data, QueryDict):
+                        cursos_id = list(self.data.getlist('cursos'))
+                    else:
+                        cursos_id = list(self.data.get('cursos'))
+
                     form.fields['destreza'].queryset = Destreza.objects\
                         .get_destrezas_by_asignatura_cursos(
                             asignatura_id, cursos_id)
@@ -224,15 +203,7 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
                     pass
             elif form.instance.pk:
                 asignatura_id = form.instance.plan_clase.asignatura.pk
-                cursos = form.instance.plan_clase.cursos.all()
-                cursos_id = []
-
-                for curso in cursos:
-                    cursos_id.append(curso.pk)
-
-                # for_print = Destreza.objects\
-                #     .get_destrezas_by_asignatura_cursos(
-                #         asignatura_id, cursos_id)
+                cursos_id = form.instance.plan_clase.cursos.all()
 
                 form.fields['destreza'].queryset = Destreza.objects\
                     .get_destrezas_by_asignatura_cursos(
@@ -300,18 +271,12 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
         if self.data or self.files:
             return self.management_form.cleaned_data['TOTAL_FORMS']
         else:
-            if self.initial_form_count() > 0:
-                total_forms = self.initial_form_count()
-            else:
-                total_forms = self.initial_form_count() + self.extra
-            # Limite de max_num
-            if total_forms > self.max_num > 0:
-                total_forms = self.max_num
+            total_forms = self.initial_form_count() + self.extra
             return total_forms
 
 
 # Creación del formset para ElementoCurricular
-ElementoCurricularFormset = inlineformset_factory(  # TODO: Añadir un límite
+ElementoCurricularFormset = inlineformset_factory(
     PlanClase,
     ElementoCurricular,
     fields=('destreza', 'conocimientos_asociados', 'indicadores_logro',
@@ -320,5 +285,6 @@ ElementoCurricularFormset = inlineformset_factory(  # TODO: Añadir un límite
         'indicadores_logro': forms.CheckboxSelectMultiple,
     },
     formset=BaseElementoCurricularFormset,
+    max_num=10,
     extra=1,
 )

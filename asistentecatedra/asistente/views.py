@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 from .models import Libro
@@ -12,14 +11,18 @@ class HomeTemplateView(TemplateView):
 
 class BibliotecaListView(ListView):
     """Biblioteca"""
+    model = Libro
     template_name = 'asistente/biblioteca.html'
-    queryset = Libro.objects.get_libros_por_asignaturas()
+
+    def get_context_data(self, **kwargs):
+        return Libro.objects.get_libros_por_asignaturas()
 
 
 class AyudaListView(ListView):
     """Ayuda"""
     template_name = 'asistente/ayuda.html'
     model = Pregunta
+    context_object_name = 'preguntas'
 
 
 class PremiumTemplateView(TemplateView):

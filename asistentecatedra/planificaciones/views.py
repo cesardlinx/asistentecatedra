@@ -1,5 +1,6 @@
 import json
-
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from .forms import ElementoCurricularFormset, PlanClaseForm
 from .models.plan_clase import PlanClase
 from .models.destreza import Destreza
@@ -7,7 +8,6 @@ from .models.indicador import Indicador
 from .models.objetivo import Objetivo
 from .models.asignatura import Asignatura
 from .models.objetivo_general import ObjetivoGeneral
-from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -16,22 +16,21 @@ from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 
 
-class PlanificacionesTemplateView(TemplateView):
+class PlanificacionesTemplateView(LoginRequiredMixin, TemplateView):
     """Vista para elegir el tipo de planificación"""
     template_name = 'planificaciones/planificaciones.html'
 
 
-class PlanClaseListView(ListView):
+class PlanClaseListView(LoginRequiredMixin, ListView):
     """Vista para listado de planes de clase"""
     template_name = 'planificaciones/planificacion_list.html'
     queryset = PlanClase.objects.all()
     context_object_name = 'planes'
 
 
+@login_required
 def plan_clase_create(request):
     """Vista para la creación de planes de clase"""
-    user = User.objects.first()
-
     if request.method == 'GET':
         form = PlanClaseForm()
         elementos_formset = ElementoCurricularFormset()
@@ -41,8 +40,9 @@ def plan_clase_create(request):
             request.POST)
 
         if form.is_valid() and elementos_formset.is_valid():
+
             plan_clase = form.save(commit=False)
-            plan_clase.elaborado_por = user
+            plan_clase.elaborado_por = request.user
             plan_clase.save()
             form._save_m2m()
 
@@ -60,10 +60,10 @@ def plan_clase_create(request):
     return render(request, 'planificaciones/plan_clase_form.html', context)
 
 
-def plan_clase_update(request, pk):
+@login_required
+def plan_clase_update(request, pk, slug):
     """Vista para la edición de planes de clase"""
-    user = User.objects.first()
-    plan_clase = get_object_or_404(PlanClase, pk=pk)
+    plan_clase = get_object_or_404(PlanClase, pk=pk, slug=slug)
 
     if request.method == 'GET':
         form = PlanClaseForm(instance=plan_clase)
@@ -88,6 +88,7 @@ def plan_clase_update(request, pk):
     return render(request, 'planificaciones/plan_clase_form.html', context)
 
 
+@login_required
 def load_cursos(request):
     """Regresa los cursos por asignatura si la solicitud fue via ajax"""
     asignatura_id = request.GET.get('asignatura')
@@ -99,9 +100,10 @@ def load_cursos(request):
             request, 'planificaciones/ajax/cursos_checklist_options.html',
             context)
     else:
-        return HttpResponse('')
+        return HttpResponse('Not Allowed.')
 
 
+@login_required
 def load_objetivos(request):
     """Regresa los objetivos por asignatura y cursos si la solicitud
     fue via ajax"""
@@ -129,9 +131,11 @@ def load_objetivos(request):
 
         return JsonResponse(json.dumps(response), status=200, safe=False)
     else:
-        return JsonResponse(json.dumps({}), status=200, safe=False)
+        return JsonResponse(json.dumps({'allowed': False}), status=200,
+                            safe=False)
 
 
+@login_required
 def load_destrezas(request):
     """Regresa las destrezas por asignatura y cursos si la solicitud
     fue via ajax"""
@@ -149,6 +153,7 @@ def load_destrezas(request):
         return HttpResponse('<option>---------</option>')
 
 
+@login_required
 def load_indicadores(request):
     """Regresa los indicadores por destreza si la solicitud fue via ajax"""
     destreza_id = request.GET.get('destreza')
@@ -162,4 +167,4 @@ def load_indicadores(request):
             request, 'planificaciones/ajax/indicadores_checklist_options.html',
             context)
     else:
-        return HttpResponse('')
+        return HttpResponse('Not Allowed.')

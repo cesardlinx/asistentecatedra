@@ -1,0 +1,27 @@
+import pytest
+from django.test import RequestFactory
+from django.contrib.auth.models import AnonymousUser
+from mixer.backend.django import mixer
+from planificaciones import views
+pytestmark = pytest.mark.django_db
+
+
+class TestPlanificacionesTemplateView:
+
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.PlanificacionesTemplateView.as_view()(request)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_auth_user(self):
+        """Tests that an authenticated user can access the view"""
+        user = mixer.blend('auth.User')
+        request = RequestFactory().get('/')
+        request.user = user
+        response = views.PlanificacionesTemplateView.as_view()(request)
+        assert response.status_code == 200, 'Authenticated user can access'
+        assert 'planificaciones/planificaciones.html' in \
+            response.template_name, \
+            'Product list template should be rendered in the view'
