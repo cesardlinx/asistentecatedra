@@ -148,6 +148,26 @@ class PlanClaseTestCaseCreateView(PlanClaseTestCase):
         request.user = self.user
         response = views.plan_clase_create(request)
         assert response.status_code == 200, 'Authenticated user can access'
+        # Tempĺate Testing
+        self.assertContains(response, 'name="name"')
+        self.assertContains(response, 'name="numero_plan"')
+        self.assertContains(response, 'name="fecha"')
+        self.assertContains(response, 'name="asignatura"')
+        self.assertContains(response, 'id="id_cursos"')
+        self.assertContains(response, 'name="paralelos"')
+        self.assertContains(response, 'name="numero_estudiantes"')
+        self.assertContains(response, 'name="tema"')
+        self.assertContains(response, 'name="periodos"')
+        self.assertContains(response, 'name="metodologia"')
+        self.assertContains(response, 'name="tecnica"')
+        self.assertContains(response, 'id="id_objetivos"')
+        self.assertContains(response, 'id="id_objetivos_generales"')
+        self.assertContains(response, 'name="bibliografia"')
+        self.assertContains(response, 'name="contenido_cientifico"')
+        self.assertContains(response, 'name="material_didactico"')
+        self.assertContains(response, 'name="instrumento_evaluacion"')
+        self.assertContains(response, 'name="observaciones"')
+        self.assertContains(response, 'name="aprobado_por"')
 
     def test_post(self):
         """Prueba la creación de planes de clase"""
@@ -196,6 +216,26 @@ class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
         request.user = self.user
         response = views.plan_clase_update(request, pk=plan.pk, slug=plan.slug)
         assert response.status_code == 200, 'Authenticated user can access'
+        # Tempĺate Testing
+        self.assertContains(response, 'name="name"')
+        self.assertContains(response, 'name="numero_plan"')
+        self.assertContains(response, 'name="fecha"')
+        self.assertContains(response, 'name="asignatura"')
+        self.assertContains(response, 'id="id_cursos"')
+        self.assertContains(response, 'name="paralelos"')
+        self.assertContains(response, 'name="numero_estudiantes"')
+        self.assertContains(response, 'name="tema"')
+        self.assertContains(response, 'name="periodos"')
+        self.assertContains(response, 'name="metodologia"')
+        self.assertContains(response, 'name="tecnica"')
+        self.assertContains(response, 'id="id_objetivos"')
+        self.assertContains(response, 'id="id_objetivos_generales"')
+        self.assertContains(response, 'name="bibliografia"')
+        self.assertContains(response, 'name="contenido_cientifico"')
+        self.assertContains(response, 'name="material_didactico"')
+        self.assertContains(response, 'name="instrumento_evaluacion"')
+        self.assertContains(response, 'name="observaciones"')
+        self.assertContains(response, 'name="aprobado_por"')
 
     def test_post(self):
         """Prueba la actualización de planes de clase"""
