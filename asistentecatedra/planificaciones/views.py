@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
+from django.db import transaction
 
 
 class PlanificacionesTemplateView(LoginRequiredMixin, TemplateView):
@@ -41,17 +42,15 @@ def plan_clase_create(request):
 
         if form.is_valid() and elementos_formset.is_valid():
 
-            plan_clase = form.save(commit=False)
-            plan_clase.elaborado_por = request.user
-            plan_clase.save()
-            form._save_m2m()
-
-            if plan_clase:
-                elementos_formset = ElementoCurricularFormset(
-                    request.POST, instance=plan_clase)
-                if elementos_formset.is_valid():
-                    elemento_curricular = elementos_formset.save()
-                    return redirect('home')
+            with transaction.atomic():
+                plan_clase = form.save(commit=False)
+                plan_clase.elaborado_por = request.user
+                plan_clase.save()
+                form._save_m2m()
+                # Almacenado del formset
+                elementos_formset.instance = plan_clase
+                elementos_formset.save()
+                return redirect('home')
 
     context = {
         'form': form,
@@ -74,12 +73,14 @@ def plan_clase_update(request, pk, slug):
         elementos_formset = ElementoCurricularFormset(
             request.POST, instance=plan_clase)
         if form.is_valid() and elementos_formset.is_valid():
-            plan_clase = form.save(commit=False)
-            plan_clase.updated_at = timezone.now()
-            plan_clase.save()
-            elementos_formset.save()
-            form._save_m2m()
-            return redirect('home')
+
+            with transaction.atomic():
+                plan_clase = form.save(commit=False)
+                plan_clase.updated_at = timezone.now()
+                plan_clase.save()
+                elementos_formset.save()
+                form._save_m2m()
+                return redirect('home')
 
     context = {
         'form': form,
