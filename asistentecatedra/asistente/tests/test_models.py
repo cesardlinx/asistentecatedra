@@ -8,7 +8,7 @@ from django.db.models.signals import pre_delete
 pytestmark = pytest.mark.django_db
 
 
-class TestLibro(object):
+class TestLibro:
     def test_model(self):
         libro = mixer.blend('asistente.Libro', archivo='libros/test_book.pdf')
         libro2 = mixer.blend('asistente.Libro')

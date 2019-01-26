@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- content starts here -->
+    <section class="content">
+        <section class="register">
+            <section class="container">
+                <div class="register-header">
+                    <h3 class="main-title">Crea una cuenta</h3>
+                    <p>Empieza a realizar ya tus planificaciones.</p>
+                </div>
+                <form action="" method="POST">
+                    <div class="form-group-2">
+                        <div class="form-group-float">
+                            <label class="form-control-placeholder" for="name">Nombre</label>
+                            <input class="form-control floating-input" type="text" name="name" id="name">
+                        </div>
+                        <div class="form-group-float">
+                            <label class="form-control-placeholder" for="lastname">Apellido</label>
+                            <input class="form-control floating-input" type="text" name="lastname" id="lastname">
+                        </div>
+                    </div>
+                    <div class="form-group-2">
+                        <div class="form-group-float">
+                            <label class="form-control-placeholder" for="email">Correo *</label>
+                            <input class="form-control floating-input" type="text" name="email" id="email">
+                        </div>
+                        <div class="form-group-float">
+                            <label class="form-control-placeholder" for="institution">Nombre de la Institución *</label>
+                            <input class="form-control floating-input" type="text" name="institution" id="institution">
+                        </div>
+                    </div>
+                    <div class="form-group-2">
+                        <div class="form-group-float">
+                            <label class="form-control-placeholder" for="password">Contraseña *</label>
+                            <input class="form-control floating-input" type="password" name="password" id="password">
+                            <small class="form-text text-muted">
+                                Asegúrese que la contraseña contenga más de 10 caracteres, incluidos un número y una
+                                mayúscula.
+                            </small>
+                        </div>
+                        <div class="form-group-float">
+                            <label class="form-control-placeholder" for="repeat_password">Repetir Contraseña *</label>
+                            <input class="form-control floating-input" type="password" name="repeat_password" id="repeat_password">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="primary-button submit-btn">REGÍSTRATE</button>
+                </form>
+                <div class="register-footer">
+                    <p>¿Ya estas registrado?</p><a href="#">Inicia Sesión</a>
+                </div>
+            </section>
+        </section>
+    </section>
+    <!-- content ends here -->
+
+{% endblock content %}
