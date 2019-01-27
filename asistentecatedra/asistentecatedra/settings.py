@@ -211,3 +211,24 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # User model
 AUTH_USER_MODEL = 'accounts.User'
 
+# Password Validators
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',  # noqa E501
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',  # noqa E501
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',  # noqa E501
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',  # noqa E501
+    },
+    {'NAME': 'accounts.validators.NumberValidator', },
+    {'NAME': 'accounts.validators.UppercaseValidator', },
+    {'NAME': 'accounts.validators.LowercaseValidator', },
+]

@@ -58,3 +58,21 @@ class TestSignupForm(TestCase):
         form = SignupForm({})
         assert form.is_valid() is False, \
             'The form should be invalid with empty data'
+
+    def test_number_validator(self):
+        form = SignupForm({'password1': 'asd', 'password2': 'asd'})
+        field_errors = form.errors.get('password2')
+        assert "La contraseña debe tener la menos 1 dígito, 0-9." \
+            in field_errors
+
+    def test_uppercase_validator(self):
+        form = SignupForm({'password1': 'asd', 'password2': 'asd'})
+        field_errors = form.errors.get('password2')
+        assert "La contraseña debe tener la menos 1 letra mayúscula, A-Z." \
+            in field_errors
+
+    def test_lowercase_validator(self):
+        form = SignupForm({'password1': 'ASD', 'password2': 'ASD'})
+        field_errors = form.errors.get('password2')
+        assert "La contraseña debe tener la menos 1 letra minúscula, a-z." \
+            in field_errors

@@ -30,5 +30,5 @@ class SignupForm(UserCreationForm):
         """Makes email to be required"""
         super().__init__(*args, **kwargs)
         self.fields['password1'].help_text = \
-            'Asegúrese que la contraseña contenga más de 10 caracteres, '\
+            'Asegúrese que la contraseña tenga al menos 8 caracteres, '\
             'incluidos un número y una mayúscula.'
