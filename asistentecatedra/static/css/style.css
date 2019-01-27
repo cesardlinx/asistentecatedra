@@ -2147,24 +2147,25 @@ footer {
   }
 }
 
-.login-container {
+.auth {
+  padding-top: 1em;
   background: #ecf0f1;
 }
 
-.login .container {
+.auth .container {
   text-align: center;
 }
 
-.login .container .login-img {
-  margin: 1em auto;
+.auth .container .auth-img {
+  margin: 0 auto 1em;
   width: 130px;
 }
 
-.login .container h3 {
+.auth .container h3 {
   font-weight: lighter;
 }
 
-.login .container form {
+.auth .container form {
   margin: 2em auto;
   max-width: 450px;
   padding: 2em 4em;
@@ -2174,31 +2175,39 @@ footer {
   background: #fff;
 }
 
-.login .container form a {
+.auth .container form .form-check-label {
+  font-size: .8rem;
+}
+
+.auth .container form a {
   display: block;
   text-align: right;
   font-size: .8rem;
   color: #168973;
 }
 
-.login .container form a:hover {
+.auth .container form a.terms {
+  display: inline;
+}
+
+.auth .container form a:hover {
   color: #168973;
 }
 
-.login .registrate {
-  margin-bottom: 2em;
+.auth .auth-footer {
+  padding-bottom: 2em;
 }
 
-.login .registrate p {
+.auth .auth-footer p {
   margin-bottom: 0;
 }
 
-.login .registrate a {
+.auth .auth-footer a {
   color: #168973;
   font-size: .9rem;
 }
 
-.login .registrate a:hover {
+.auth .auth-footer a:hover {
   color: #168973;
 }
 
@@ -2633,54 +2642,6 @@ footer {
   margin: .5em;
   font-size: 1rem;
   width: auto;
-}
-
-@media only screen and (min-width: 768px) {
-  .register .container {
-    max-width: 720px;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  .register .container .submit-btn {
-    display: block;
-    margin: 0 auto;
-    width: 50%;
-  }
-}
-
-.register-header {
-  margin: 2em 0;
-}
-
-@media only screen and (min-width: 992px) {
-  .register-header {
-    width: 70%;
-  }
-}
-
-.register-header p {
-  font-weight: lighter;
-}
-
-.register-footer {
-  margin: 2em auto 4em;
-  font-size: .8rem;
-  text-align: center;
-}
-
-.register-footer p {
-  display: inline-block;
-  margin: 0 .5em;
-}
-
-.register-footer a {
-  display: inline-block;
-  color: #168973;
-}
-
-.register-footer a:hover {
-  color: #168973;
 }
 
 .books {

@@ -1,9 +1,10 @@
+from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 
 
 class Plan(models.Model):
@@ -33,6 +34,10 @@ class Plan(models.Model):
     def __str__(self):
         """Unicode representation of Plan."""
         return self.plan_type
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
 
 class UserManager(BaseUserManager):
@@ -72,7 +77,8 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     """Custom User model."""
     # username = None
-    email = models.EmailField(_('email address'), unique=True)
+    name = models.CharField(_('name'), max_length=50)
+    email = models.EmailField(_('email'), unique=True)
     institution = models.CharField(max_length=100, blank=True, null=True)
     institution_logo = models.ImageField(
         upload_to='logos/',

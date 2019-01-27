@@ -1,9 +1,8 @@
 import os
 from os.path import join  # noqa F401
-from decouple import config, Csv
 
+from decouple import Csv, config
 from django.conf.global_settings import STATICFILES_DIRS
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -211,3 +210,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # User model
 AUTH_USER_MODEL = 'accounts.User'
+
