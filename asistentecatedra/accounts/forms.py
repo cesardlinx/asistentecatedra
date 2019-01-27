@@ -1,18 +1,16 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils.safestring import mark_safe
+
+User = get_user_model()
 
 
 class SignupForm(UserCreationForm):
-    institution = forms.CharField(
-        label='Institución',
-        max_length=100,
-        required=False,
-    )
+
     terms = forms.BooleanField(
         label=mark_safe(
-            'Acepto las <a href="#">Condiciones de Servicio</a> y la '\
+            'Acepto las <a href="#">Condiciones de Servicio</a> y la '
             '<a href="#">Política de Privacidad</a> de Asistente de Cátedra'),
         required=True
     )
@@ -24,13 +22,14 @@ class SignupForm(UserCreationForm):
             'first_name',
             'last_name',
             'email',
-            'username',
             'password1',
-            'password2'
+            'password2',
+            'institution'
         )
         labels = {
             'first_name': 'Nombre',
             'last_name': 'Apellido',
+            'institution': 'Institución',
         }
 
     def __init__(self, *args, **kwargs):

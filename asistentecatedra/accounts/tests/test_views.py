@@ -2,7 +2,8 @@ import os
 from base64 import urlsafe_b64encode
 
 import pytest
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import (LoginView, PasswordChangeDoneView,
                                        PasswordChangeView,
@@ -22,6 +23,7 @@ from accounts.forms import SignupForm
 from accounts import views
 
 pytestmark = pytest.mark.django_db
+User = get_user_model()
 
 
 class TestSignupView(TestCase):
@@ -136,7 +138,7 @@ class TestProfileView:
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
-        self.user = mixer.blend('auth.User')
+        self.user = mixer.blend(User)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -189,7 +191,7 @@ class TestPasswordResetView:
 
     def test_post_success(self):
         """Email de usuario existente enviado a la vista Password Reset"""
-        mixer.blend('auth.User', email='tester@tester.com')
+        mixer.blend(User, email='tester@tester.com')
         data = {
             'email': 'tester@tester.com'
         }
@@ -226,7 +228,7 @@ class TestPasswordResetDoneView:
 class TestPasswordResetConfirmView(TestCase):
     def test_get_success(self):
         """Sending a valid token and coded id"""
-        user = mixer.blend('auth.User')
+        user = mixer.blend(User)
         password_before = user.password
         uid = urlsafe_b64encode(force_bytes(user.pk)).decode()
         token = default_token_generator.make_token(user)
@@ -242,7 +244,7 @@ class TestPasswordResetConfirmView(TestCase):
 
     def test_get_invalid(self):
         """Sending a invalid token and user id"""
-        user = mixer.blend('auth.User', password='p455w0rd')
+        user = mixer.blend(User, password='p455w0rd')
         uid = urlsafe_b64encode(force_bytes(user.pk)).decode()
         token = default_token_generator.make_token(user)
         data = {
@@ -274,7 +276,7 @@ class TestPasswordResetCompleteView:
 
 class TestPasswordResetEmail(TestCase):
     def setUp(self):
-        mixer.blend('auth.User', email='tester@tester.com', username='tester')
+        mixer.blend(User, email='tester@tester.com', username='tester')
         data = {
             'email': 'tester@tester.com'
         }
@@ -310,7 +312,7 @@ class TestPasswordChangeView(TestCase):
     authenticated
     """
     def setUp(self):
-        self.user = mixer.blend('auth.User', password='p455w0rd')
+        self.user = mixer.blend(User, password='p455w0rd')
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""

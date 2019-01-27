@@ -1,12 +1,11 @@
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.views import auth_login
 from django.db import transaction
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 
 from .forms import SignupForm
+User = get_user_model()
 
 
 class SignupView(CreateView):

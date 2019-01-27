@@ -19,7 +19,7 @@ class TestAccountsUrls:
         assert view.func.view_class == views.SignupView, \
             'Should resolve to the Signup View'
 
-    def test_signup(self):
+    def test_profile(self):
         path = reverse('profile')
         view = resolve(path)
         assert view.func.view_class == views.ProfileView, \

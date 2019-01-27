@@ -41,8 +41,11 @@
                             {% render_field form.email class="form-control floating-input" %}
                         </div>
                         <div class="form-group-float">
-                            {{ form.username | add_label_class:"form-control-placeholder" }}
-                            {% render_field form.username class="form-control floating-input" %}
+                            {{ form.institution | add_label_class:"form-control-placeholder" }}
+                            {% render_field form.institution class="form-control floating-input" %}
+                            <small class="form-text text-muted">
+                                {{ form.institution.help_text }}
+                            </small>
                         </div>
                     </div>
                     <div class="form-group-2">
@@ -59,17 +62,8 @@
                         </div>
                     </div>
 
-                    <div class="form-group-2">
-                        <div class="form-group-float">
-                            {{ form.institution | add_label_class:"form-control-placeholder" }}
-                            {% render_field form.institution class="form-control floating-input" %}
-                            <small class="form-text text-muted">
-                                {{ form.institution.help_text }}
-                            </small>
-                        </div>
-                        {% render_field form.terms %}
-                        {{ form.terms.label_tag }}
-                    </div>
+                    {% render_field form.terms %}
+                    {{ form.terms.label_tag }}
 
                     <button type="submit" class="primary-button submit-btn">REGÍSTRATE</button>
                 </form>

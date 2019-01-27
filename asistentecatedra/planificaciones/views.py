@@ -50,7 +50,7 @@ def plan_clase_create(request):
                 elementos_formset = ElementoCurricularFormset(
                     request.POST, instance=plan_clase)
                 if elementos_formset.is_valid():
-                    elemento_curricular = elementos_formset.save()
+                    elementos_formset.save()
                     return redirect('home')
 
     context = {

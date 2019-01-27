@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from .asignatura import Asignatura
 from .curso import Curso
 from django.template.defaultfilters import slugify
@@ -20,7 +20,7 @@ class Planificacion(models.Model):
         related_name='planes_clase',
     )
     elaborado_por = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name='planes_clase',
         on_delete=models.CASCADE
     )

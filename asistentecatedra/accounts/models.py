@@ -1,8 +1,9 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 
 class Plan(models.Model):
@@ -34,10 +35,44 @@ class Plan(models.Model):
         return self.plan_type
 
 
-class Profile(models.Model):
-    """Model definition for User's Profile."""
-    slug = models.SlugField()
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+class UserManager(BaseUserManager):
+    """Define a model manager for User model with no username field."""
+
+    use_in_migrations = True
+
+    def _create_user(self, email, password, **extra_fields):
+        """Create and save a User with the given email and password."""
+        if not email:
+            raise ValueError('The given email must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email, password=None, **extra_fields):
+        """Create and save a regular User with the given email and password."""
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        return self._create_user(email, password, **extra_fields)
+
+    def create_superuser(self, email, password, **extra_fields):
+        """Create and save a SuperUser with the given email and password."""
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self._create_user(email, password, **extra_fields)
+
+
+class User(AbstractUser):
+    """Custom User model."""
+    # username = None
+    email = models.EmailField(_('email address'), unique=True)
     institution = models.CharField(max_length=100, blank=True, null=True)
     institution_logo = models.ImageField(
         upload_to='logos/',
@@ -56,25 +91,10 @@ class Profile(models.Model):
     )
     stripe_customer_id = models.CharField(max_length=40)
     modified_at = models.DateTimeField(auto_now=True, editable=False)
+    objects = UserManager()
 
-    class Meta:
-        """
-        Definition of table's name and the plural verbose name
-        """
-        db_table = 'perfiles'
-        verbose_name_plural = 'perfiles'
-
-    def __str__(self):
-        """Unicode representation of Profile."""
-        return self.user.username
-
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """Creates a profile when user is created"""
-    if created:
-        Profile.objects.create(user=instance)
-    instance.profile.save()
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
 
 class Subscription(models.Model):
@@ -83,7 +103,8 @@ class Subscription(models.Model):
     por medio de Stripe
 
     """
-    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     stripe_subscription_id = models.CharField(max_length=40)
     active = models.BooleanField(default=True)
 
@@ -96,6 +117,3 @@ class Subscription(models.Model):
     def __str__(self):
         """Unicode representation of Subscription."""
         return self.profile.user.username
-
-
-

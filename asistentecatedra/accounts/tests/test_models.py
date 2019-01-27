@@ -1,8 +1,10 @@
 import pytest
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from mixer.backend.django import mixer
 from accounts.models import Profile, Plan, Subscription
 pytestmark = pytest.mark.django_db
+
+User = get_user_model()
 
 
 class TestPlan:
@@ -40,7 +42,7 @@ class TestProfile:
 
 class TestSubscription:
     def test_model(self):
-        user = mixer.blend('auth.User')
+        user = mixer.blend(User)
         subscription = mixer.blend('accounts.Subscription',
                                    profile=user.profile)
         assert isinstance(subscription, Subscription), \
