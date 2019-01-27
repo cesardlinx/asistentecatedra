@@ -19,8 +19,8 @@ class SignupView(CreateView):
             user = form.save()
             user.refresh_from_db()
             user.profile.institution = form.cleaned_data.get('institution')
-            user.profile.institution_logo = form.cleaned_data.get(
-                'institution_logo')
+            # user.profile.institution_logo = form.cleaned_data.get(
+            #     'institution_logo')
             user.save()
 
             # Authentication and Login
