@@ -15,22 +15,19 @@
                 <img class="imagen" src="{% static 'img/logo_grande.png' %}" alt="Asistente de Cátedra">
             </div>
             <h3>Bienvenido a "Asistente de Cátedra"</h3>
-            <form action="" method="POST" novalidate>
+            <form action="" method="POST" novalidate id="signUpForm">
                 {% csrf_token %}
                 <div class="form-group-float">
                     {{ form.name | add_label_class:"form-control-placeholder" }}
                     {% render_field form.name class="form-control floating-input" %}
-                    {{ form.name.errors }}
                 </div>
                 <div class="form-group-float">
                     {{ form.email | add_label_class:"form-control-placeholder" }}
                     {% render_field form.email class="form-control floating-input" %}
-                    {{ form.email.errors }}
                 </div>
                 <div class="form-group-float">
                     {{ form.password1 | add_label_class:"form-control-placeholder" }}
                     {% render_field form.password1 class="form-control floating-input" %}
-                    {{ form.password1.errors }}
                     <small class="form-text text-muted">
                         {{ form.password1.help_text }}
                     </small>
@@ -38,12 +35,10 @@
                 <div class="form-group-float">
                     {{ form.password2 | add_label_class:"form-control-placeholder" }}
                     {% render_field form.password2 class="form-control floating-input" %}
-                    {{ form.password2.errors }}
                 </div>
                 <div class="form-check">
                     {% render_field form.terms class="form-check-input" %}
                     {{ form.terms | add_label_class:"form-check-label" }}
-                    {{ form.terms.errors }}
                 </div>
                 <button type="submit" class="primary-button submit-btn">REGÍSTRATE</button>
             </form>
@@ -54,3 +49,10 @@
     </section>
 
 {% endblock content %}
+
+{% block scripts %}
+    <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
+    <script src="{% static 'js/vendors/js-cookie/js.cookie.js' %}"></script>
+    <script src="{% static 'js/signup/signup.js' %}"></script>
+{% endblock scripts %}

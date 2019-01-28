@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, MinLengthValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
+from .validators import validate_alpha
 
 
 class Plan(models.Model):
@@ -36,7 +37,7 @@ class Plan(models.Model):
         return self.plan_type
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        self.slug = slugify(self.plan_type)
         super().save(*args, **kwargs)
 
 
@@ -45,24 +46,28 @@ class UserManager(BaseUserManager):
 
     use_in_migrations = True
 
-    def _create_user(self, email, password, **extra_fields):
-        """Create and save a User with the given email and password."""
+    def _create_user(self, name, email, password, **extra_fields):
+        """Create and save a User with the given name, email and password."""
         if not email:
             raise ValueError('The given email must be set')
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, name=name, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
-        """Create and save a regular User with the given email and password."""
+    def create_user(self, name, email, password=None, **extra_fields):
+        """
+        Create and save a regular User with the given name, email and password.
+        """
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(name, email, password, **extra_fields)
 
-    def create_superuser(self, email, password, **extra_fields):
-        """Create and save a SuperUser with the given email and password."""
+    def create_superuser(self, name, email, password, **extra_fields):
+        """
+        Create and save a SuperUser with the given name, email and password.
+        """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -71,13 +76,13 @@ class UserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(name, email, password, **extra_fields)
 
 
 class User(AbstractUser):
     """Custom User model."""
-    # username = None
-    name = models.CharField(_('name'), max_length=50)
+    name = models.CharField(_('name'), max_length=50,
+                            validators=[MinLengthValidator(3), validate_alpha])
     email = models.EmailField(_('email'), unique=True)
     institution = models.CharField(max_length=100, blank=True, null=True)
     institution_logo = models.ImageField(
@@ -91,7 +96,7 @@ class User(AbstractUser):
     email_confirmed = models.BooleanField(default=False)
     plan = models.ForeignKey(
         Plan,
-        related_name='profiles',
+        related_name='users',
         on_delete=models.SET_NULL,
         null=True
     )
@@ -100,7 +105,7 @@ class User(AbstractUser):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['name']
 
 
 class Subscription(models.Model):

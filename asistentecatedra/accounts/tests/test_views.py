@@ -1,4 +1,3 @@
-import os
 from base64 import urlsafe_b64encode
 
 import pytest
@@ -12,12 +11,10 @@ from django.contrib.auth.views import (LoginView, PasswordChangeDoneView,
                                        PasswordResetDoneView,
                                        PasswordResetView)
 from django.core import mail
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from mixer.backend.django import mixer
-from PIL import Image
 from accounts.forms import SignupForm
 
 from accounts import views
@@ -40,84 +37,42 @@ class TestSignupView(TestCase):
         assert response.status_code == 200, 'Should be callable by anonymous'
         assert response.template_name[0] == 'accounts/signup.html'
         # Campos en el template (Template Testing)
-        self.assertContains(response, 'name="username"')
+        self.assertContains(response, 'name="name"')
+        self.assertContains(response, 'name="email"')
         self.assertContains(response, 'name="password1"')
         self.assertContains(response, 'name="password2"')
-        self.assertContains(response, 'name="email"')
-        self.assertContains(response, 'name="first_name"')
-        self.assertContains(response, 'name="last_name"')
-        self.assertContains(response, 'name="institution"')
-        self.assertContains(response, 'name="institution_logo"')
+        self.assertContains(response, 'name="terms"')
 
     def test_post_success(self):
         """
         Test for user creation and authentication
         """
 
-        # Image creation
-        img = Image.new('RGB', (60, 30), color=(73, 109, 137))
-        img.save('media/test_image.png')
-
-        img = open('media/test_image.png', 'rb')
-        img_content = img.read()
-
-        image = SimpleUploadedFile(
-            name='test_image.png',
-            content=img_content,
-            content_type='image/jpeg'
-        )
-        img.close()
-
         # Data sending
         data = {
-            'username': 'tester',
-            'password1': 'p455w0rd',
-            'password2': 'p455w0rd',
+            'name': 'David Padilla',
+            'password1': 'P455w0rd',
+            'password2': 'P455w0rd',
             'email': 'tester@tester.com',
-            'first_name': 'David',
-            'last_name': 'Padilla',
-            'institution': 'Colegio Benalcázar',
-            'institution_logo': image
+            'terms': True
         }
 
         url = reverse('signup')
         response = self.client.post(url, data)
 
-        # Image removal
-        os.remove('media/test_image.png')
-
         user = User.objects.last()
 
+        # Should redirect to planificaciones
         self.assertRedirects(response, reverse('planificaciones'))
-        assert response.status_code == 302, \
-            'Should redirect to planificaciones'
         assert User.objects.exists() is True, 'Should create a user'
         user = User.objects.last()
-        assert 'logos/test_image_' in user.profile.institution_logo.name, \
-            'User should have an institution logo'
-        assert user.username == 'tester',  \
-            "The user's username should be tester"
+        assert user.name == 'David Padilla',  \
+            "The user's name should be David Padilla"
         # Authentication testing
         response = self.client.get(reverse('home'))
         user = response.context.get('user')
         assert user.is_authenticated is True, \
             'User should be authenticated'
-
-    def test_optional_fields(self):
-        data = {
-            'username': 'tester',
-            'password1': 'p455w0rd',
-            'password2': 'p455w0rd',
-            'email': 'tester@tester.com',
-        }
-
-        url = reverse('signup')
-        self.client.post(url, data)
-
-        user = User.objects.last()
-        assert user.username == 'tester', 'Should create a user'
-        assert str(user.profile) == 'tester', 'Should have a profile'
-        assert user.profile.institution == ''
 
     def test_post_invalid(self):
         """Test for invalid data in signup"""
@@ -132,7 +87,7 @@ class TestSignupView(TestCase):
             'The view should not create a user'
 
 
-class TestProfileView:
+class TestProfileView(TestCase):
     """Tests para la vista de Perfil de usuario"""
 
     def setUp(self):

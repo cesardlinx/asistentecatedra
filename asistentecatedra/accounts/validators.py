@@ -37,3 +37,11 @@ class LowercaseValidator:
 
     def get_help_text(self):
         return "La contraseña debe tener la menos 1 letra minúscula, a-z."
+
+
+def validate_alpha(value):
+    if not re.findall(r'^[a-zA-ZñÑáéíóúÁÉÍÓÚäëïöüÄËÏÖÜ\s]+$', value):
+        raise ValidationError(
+            'Este campo solo permite letras',
+            params={'value': value},
+        )

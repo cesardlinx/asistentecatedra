@@ -74,3 +74,9 @@ class TestAccountsUrls:
         view = resolve(path)
         assert view.func.view_class == PasswordChangeDoneView, \
             'Should resolve to the PasswordChangeDone View'
+
+    def test_unique_email_validator(self):
+        path = reverse('ajax_unique_email_validator')
+        view = resolve(path)
+        assert view.func == views.unique_email_validator, \
+            'Should resolve to the unique_email_validator View'
