@@ -1,5 +1,3 @@
-from base64 import urlsafe_b64encode
-
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -15,9 +13,11 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from mixer.backend.django import mixer
+from django.conf import settings
 from accounts.forms import SignupForm
 
 from accounts import views
+from django.utils.http import urlsafe_base64_encode
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -66,8 +66,15 @@ class TestSignupView(TestCase):
         self.assertRedirects(response, reverse('planificaciones'))
         assert User.objects.exists() is True, 'Should create a user'
         user = User.objects.last()
+        leading_part_of_email = user.email.split('@', 1)[0]
+        derived_username = '{}_{}'.format(leading_part_of_email, user.pk)
+        assert user.username == derived_username, \
+            'Username creation should be derived from email'
         assert user.name == 'David Padilla',  \
             "The user's name should be David Padilla"
+        assert user.email_confirmed is False, \
+            "Email shouldn't be confirmed"
+        assert len(mail.outbox) == 1, 'Should exist an email in outbox'
         # Authentication testing
         response = self.client.get(reverse('home'))
         user = response.context.get('user')
@@ -85,6 +92,93 @@ class TestSignupView(TestCase):
             'The form should have errors'
         assert User.objects.exists() is False, \
             'The view should not create a user'
+
+
+class TestConfirmationEmail(TestCase):
+    """
+    Caso de prueba para probar el correo electrónico enviado al usuario
+    para que este pueda verificar su email.
+    """
+    def setUp(self):
+        """Obtención del email"""
+        data = {
+            'name': 'David Padilla',
+            'password1': 'P455w0rd',
+            'password2': 'P455w0rd',
+            'email': 'tester@tester.com',
+            'terms': True
+        }
+        url = reverse('signup')
+        response = self.client.post(url, data)
+        self.uid = response.context.get('uid')
+        self.token = response.context.get('token')
+        self.email = mail.outbox[0]
+
+    def test_email_body(self):
+
+        confirm_url = reverse('confirm_email', kwargs={
+            'uidb64': self.uid,
+            'token': self.token
+        })
+
+        assert confirm_url in self.email.body, \
+            'Link for email confirmation should be in email body'
+        assert settings.DOMAIN in self.email.body, \
+            'Domain name should be in email body'
+        assert 'David Padilla' in self.email.body, \
+            'Name should be in email body'
+        assert 'Asistente de Cátedra | Confirmar Correo Electrónico' in \
+            self.email.subject, 'The subject of email'
+        assert 'tester@tester.com' in self.email.to, \
+            "The user's email should be in email's field TO "
+
+
+class TestEmailConfirmationView(TestCase):
+    """
+    Caso de prueba para probar la vista que confirma el correo electrónico
+    del usuario.
+    """
+    def setUp(self):
+        """Obtención del email"""
+        data = {
+            'name': 'David Padilla',
+            'password1': 'P455w0rd',
+            'password2': 'P455w0rd',
+            'email': 'tester@tester.com',
+            'terms': True
+        }
+        url = reverse('signup')
+        response = self.client.post(url, data)
+        self.user = User.objects.get(email='tester@tester.com')
+        self.uid = response.context.get('uid')
+        self.token = response.context.get('token')
+        self.confirm_url = reverse(
+            'confirm_email', kwargs={'uidb64': self.uid, 'token': self.token})
+
+    def test_success_confirmation(self):
+        assert self.user.email_confirmed is False, \
+            'The user should not have the email confirmed yet'
+        response = self.client.get(self.confirm_url)
+        assert response.status_code == 200, \
+            'The view should be callable by Anonymous user'
+        self.user.refresh_from_db()
+        assert self.user.email_confirmed is True, \
+            'The user should have his email confirmed now'
+        response = self.client.get(reverse('home'))
+        user = response.context.get('user')
+        assert user.is_authenticated is True, \
+            'The user should be authenticated'
+
+    def test_invalid_confirmation(self):
+        assert self.user.email_confirmed is False, \
+            'The user should not have the email confirmed yet'
+        # Invalidates the token
+        self.user.set_password('New_password_2')
+        response = self.client.get(self.confirm_url)
+        assert response.status_code == 200, \
+            'The view should be callable by Anonymous user'
+        assert self.user.email_confirmed is False, \
+            'The user should not have the email confirmed'
 
 
 class TestProfileView(TestCase):
@@ -185,7 +279,7 @@ class TestPasswordResetConfirmView(TestCase):
         """Sending a valid token and coded id"""
         user = mixer.blend(User)
         password_before = user.password
-        uid = urlsafe_b64encode(force_bytes(user.pk)).decode()
+        uid = urlsafe_base64_encode(force_bytes(user.pk)).decode()
         token = default_token_generator.make_token(user)
         data = {
             'uidb64': uid,
@@ -200,7 +294,7 @@ class TestPasswordResetConfirmView(TestCase):
     def test_get_invalid(self):
         """Sending a invalid token and user id"""
         user = mixer.blend(User, password='p455w0rd')
-        uid = urlsafe_b64encode(force_bytes(user.pk)).decode()
+        uid = urlsafe_base64_encode(force_bytes(user.pk)).decode()
         token = default_token_generator.make_token(user)
         data = {
             'uidb64': uid,
@@ -231,6 +325,7 @@ class TestPasswordResetCompleteView:
 
 class TestPasswordResetEmail(TestCase):
     def setUp(self):
+        """Obtención del email"""
         mixer.blend(User, email='tester@tester.com', username='tester')
         data = {
             'email': 'tester@tester.com'

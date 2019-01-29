@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from mixer.backend.django import mixer
-from accounts.models import Profile, Plan, Subscription
+from accounts.models import Plan, Subscription
 pytestmark = pytest.mark.django_db
 
 User = get_user_model()
@@ -19,25 +19,13 @@ class TestPlan:
             'The plural name should be "planes"'
 
 
-class TestProfile:
-    """Tests del modelo para perfil de usuario"""
+class TestUser:
+    """Tests del modelo de usuario"""
     def test_model(self):
-        user = User.objects.create_user(
-            username='tester',
-            email='tester@tester.com',
-            password='p455w0rd'
-        )
-        profile = user.profile
-
-        assert isinstance(profile, Profile), 'Should be an instance of Profile'
-        assert isinstance(profile.user, User), \
-            'Should be an instance of Profile'
-        assert str(profile) == profile.user.username, \
-            "The string representation should be the user's username"
-        assert profile._meta.db_table == 'perfiles', \
-            'The table should be named "areas"'
-        assert profile._meta.verbose_name_plural == 'perfiles', \
-            'The plural name should be "áreas"'
+        user = mixer.blend(User)
+        assert isinstance(user, User), 'Should be an instance of Profile'
+        assert isinstance(user.plan, Plan), \
+            'The plan field should be an instance of Plan'
 
 
 class TestSubscription:

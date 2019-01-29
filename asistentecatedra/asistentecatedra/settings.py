@@ -2,11 +2,12 @@ import os
 from os.path import join  # noqa F401
 
 from decouple import Csv, config
-from django.conf.global_settings import STATICFILES_DIRS
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+PROTOCOL = config('PROTOCOL')
+DOMAIN = config('DOMAIN')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
@@ -107,6 +108,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'accounts',
     'planificaciones',
     'asistente',
@@ -114,6 +116,8 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'widget_tweaks'
 ]
+
+SITE_ID = config('SITE_ID', cast=int)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -210,6 +214,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # User model
 AUTH_USER_MODEL = 'accounts.User'
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = True
 
 # Password Validators
 AUTH_PASSWORD_VALIDATORS = [
