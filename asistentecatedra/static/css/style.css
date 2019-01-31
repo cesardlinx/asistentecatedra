@@ -2843,6 +2843,10 @@ footer {
   padding-left: 13px;
 }
 
+.alert {
+  margin-bottom: 0;
+}
+
 .StripeElement {
   background-color: #fff;
   height: 40px;

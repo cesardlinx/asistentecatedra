@@ -19,6 +19,7 @@ from mixer.backend.django import mixer
 from django.contrib.sites.models import Site
 from accounts import views
 from accounts.forms import SignupForm
+from django.contrib.messages import get_messages
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -70,6 +71,11 @@ class TestSignupView(SignupTestCase):
         response = self.client.post(self.url, self.data)
         user = User.objects.last()
 
+        messages = list(get_messages(response.wsgi_request))
+        assert len(messages) == 1, 'There should be one message'
+        assert 'Exito!, un mensaje ha sido enviado a tu correo para que '\
+               'verifiques tu cuenta.' == messages[0].message, \
+               'Should return a success message'
         self.assertRedirects(response, reverse('planificaciones'))
         assert User.objects.exists() is True, 'Should create a user'
         user = User.objects.last()
@@ -86,6 +92,22 @@ class TestSignupView(SignupTestCase):
         user = response.context.get('user')
         assert user.is_authenticated is True, \
             'User should be authenticated'
+
+    @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
+           autospec=True)
+    def test_recaptcha_invalid(self, mock_recaptcha):
+        """
+        Test for signup when recaptcha is invalid
+        """
+        # Mocking recaptcha
+        mock_recaptcha.return_value = False
+        response = self.client.post(self.url, self.data)
+
+        self.assertRedirects(response, self.url)
+        messages = list(get_messages(response.wsgi_request))
+        assert len(messages) == 1, 'There should be one message'
+        assert 'reCAPTCHA no válido. Por favor intente de nuevo.'\
+               == messages[0].message, 'Should return error message'
 
     @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
            autospec=True)

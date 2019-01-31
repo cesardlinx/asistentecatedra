@@ -11,7 +11,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.generic.edit import CreateView
-
+from django.contrib import messages
 from .forms import SignupForm
 from .mixins import CheckRecaptchaMixin
 from .tokens import account_token_generator
@@ -62,7 +62,19 @@ class SignupView(CheckRecaptchaMixin, CreateView):
 
             # Authentication and Login
             auth_login(self.request, user)
+            messages.success(
+                self.request,
+                'Exito!, un mensaje ha sido enviado a tu correo para que '
+                'verifiques tu cuenta.'
+            )
             return redirect('planificaciones')
+        else:
+            messages.error(
+                self.request,
+                'reCAPTCHA no válido. Por favor intente de nuevo.'
+            )
+            # Regresar a la misma página
+            return HttpResponseRedirect(self.request.path_info)
 
     def get_context_data(self, **kwargs):
         """Sends uid and token in context for testing"""

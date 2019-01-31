@@ -1,5 +1,6 @@
 import os
 from os.path import join  # noqa F401
+from django.contrib.messages import constants as messages
 
 from decouple import Csv, config
 
@@ -247,3 +248,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Recaptcha
 GOOGLE_RECAPTCHA_SECRET_KEY = config('GOOGLE_RECAPTCHA_SECRET_KEY')
+
+# Messages
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-info',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
