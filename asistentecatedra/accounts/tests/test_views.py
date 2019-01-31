@@ -1,4 +1,6 @@
+from unittest.mock import patch
 import pytest
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.tokens import default_token_generator
@@ -12,18 +14,30 @@ from django.core import mail
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
-from mixer.backend.django import mixer
-from django.conf import settings
-from accounts.forms import SignupForm
-
-from accounts import views
 from django.utils.http import urlsafe_base64_encode
+from mixer.backend.django import mixer
+from django.contrib.sites.models import Site
+from accounts import views
+from accounts.forms import SignupForm
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
 
 
-class TestSignupView(TestCase):
+class SignupTestCase(TestCase):
+
+    def setUp(self):
+        self.data = {
+            'name': 'David Padilla',
+            'password1': 'P455w0rd',
+            'password2': 'P455w0rd',
+            'email': 'tester@tester.com',
+            'terms': True
+        }
+        self.url = reverse('signup')
+
+
+class TestSignupView(SignupTestCase):
     """Tests para la vista de Signup"""
 
     def test_get(self):
@@ -42,27 +56,20 @@ class TestSignupView(TestCase):
         self.assertContains(response, 'name="password1"')
         self.assertContains(response, 'name="password2"')
         self.assertContains(response, 'name="terms"')
+        self.assertContains(response, 'name="g-recaptcha-response"')
 
-    def test_post_success(self):
+    @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
+           autospec=True)
+    def test_post_success(self, mock_recaptcha):
         """
         Test for user creation and authentication
         """
+        # Mocking recaptcha
+        mock_recaptcha.return_value = True
 
-        # Data sending
-        data = {
-            'name': 'David Padilla',
-            'password1': 'P455w0rd',
-            'password2': 'P455w0rd',
-            'email': 'tester@tester.com',
-            'terms': True
-        }
-
-        url = reverse('signup')
-        response = self.client.post(url, data)
-
+        response = self.client.post(self.url, self.data)
         user = User.objects.last()
 
-        # Should redirect to planificaciones
         self.assertRedirects(response, reverse('planificaciones'))
         assert User.objects.exists() is True, 'Should create a user'
         user = User.objects.last()
@@ -75,17 +82,20 @@ class TestSignupView(TestCase):
         assert user.email_confirmed is False, \
             "Email shouldn't be confirmed"
         assert len(mail.outbox) == 1, 'Should exist an email in outbox'
-        # Authentication testing
         response = self.client.get(reverse('home'))
         user = response.context.get('user')
         assert user.is_authenticated is True, \
             'User should be authenticated'
 
-    def test_post_invalid(self):
+    @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
+           autospec=True)
+    def test_post_invalid(self, mock_recaptcha):
         """Test for invalid data in signup"""
-        url = reverse('signup')
-        response = self.client.post(url, {})
-        form = response.context.get('form')
+        # Mocking recaptcha
+        mock_recaptcha.return_value = True
+        response = self.client.post(self.url, {})
+
+        form = response.context_data.get('form')
         assert response.status_code == 200, \
             'Should not redirect'
         assert form.errors is not None, \
@@ -94,22 +104,27 @@ class TestSignupView(TestCase):
             'The view should not create a user'
 
 
-class TestConfirmationEmail(TestCase):
+class TestConfirmationEmail(SignupTestCase):
     """
     Caso de prueba para probar el correo electrónico enviado al usuario
     para que este pueda verificar su email.
     """
-    def setUp(self):
-        """Obtención del email"""
-        data = {
-            'name': 'David Padilla',
-            'password1': 'P455w0rd',
-            'password2': 'P455w0rd',
-            'email': 'tester@tester.com',
-            'terms': True
-        }
-        url = reverse('signup')
-        response = self.client.post(url, data)
+    @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
+           autospec=True)
+    def setUp(self, mock_recaptcha):
+        """Obtención del correo"""
+
+        super().setUp()
+
+        # Mocking recaptcha
+        mock_recaptcha.return_value = True
+
+        # Site configuration
+        site = Site.objects.get(pk=1)
+        site.domain = 'localhost:8000'
+        site.save()
+
+        response = self.client.post(self.url, self.data)
         self.uid = response.context.get('uid')
         self.token = response.context.get('token')
         self.email = mail.outbox[0]
@@ -133,22 +148,21 @@ class TestConfirmationEmail(TestCase):
             "The user's email should be in email's field TO "
 
 
-class TestEmailConfirmationView(TestCase):
+class TestEmailConfirmationView(SignupTestCase):
     """
     Caso de prueba para probar la vista que confirma el correo electrónico
     del usuario.
     """
-    def setUp(self):
-        """Obtención del email"""
-        data = {
-            'name': 'David Padilla',
-            'password1': 'P455w0rd',
-            'password2': 'P455w0rd',
-            'email': 'tester@tester.com',
-            'terms': True
-        }
-        url = reverse('signup')
-        response = self.client.post(url, data)
+    @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
+           autospec=True)
+    def setUp(self, mock_recaptcha):
+        """Obtención del uid y token"""
+        super().setUp()
+
+        # Mocking recaptcha
+        mock_recaptcha.return_value = True
+
+        response = self.client.post(self.url, self.data)
         self.user = User.objects.get(email='tester@tester.com')
         self.uid = response.context.get('uid')
         self.token = response.context.get('token')

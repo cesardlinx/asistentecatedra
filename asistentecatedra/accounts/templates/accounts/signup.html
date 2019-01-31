@@ -7,6 +7,10 @@
     Asistente de Cátedra | Registro
 {% endblock titulo %}
 
+{% block head_scripts %}
+        <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?render=6Leq1I0UAAAAACZSr9Fa8VaVs7vEeSepcq-a97L6"></script>
+{% endblock head_scripts %}
+
 {% block content %}
 
     <section class="auth">
@@ -40,6 +44,7 @@
                     {% render_field form.terms class="form-check-input" %}
                     {{ form.terms | add_label_class:"form-check-label" }}
                 </div>
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
                 <button type="submit" class="primary-button submit-btn">REGÍSTRATE</button>
             </form>
             <div class="auth-footer">
@@ -54,5 +59,6 @@
     <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
     <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
     <script src="{% static 'js/vendors/js-cookie/js.cookie.js' %}"></script>
+    <script src="{% static 'js/vendors/recaptchav3/recaptchaToken.js' %}"></script>
     <script src="{% static 'js/signup/signup.js' %}"></script>
 {% endblock scripts %}

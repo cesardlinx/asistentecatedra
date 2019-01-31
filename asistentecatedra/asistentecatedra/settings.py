@@ -244,3 +244,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'accounts.validators.UppercaseValidator', },
     {'NAME': 'accounts.validators.LowercaseValidator', },
 ]
+
+# Recaptcha
+GOOGLE_RECAPTCHA_SECRET_KEY = config('GOOGLE_RECAPTCHA_SECRET_KEY')

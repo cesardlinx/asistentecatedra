@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/vendors/bootstrap/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/vendors/jquery-ui/jquery-ui.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css'%}">
+    {% block head_scripts %}{% endblock head_scripts %}
 </head>
 <body>
     <!-- header starts here -->
@@ -114,6 +115,7 @@
     <!-- footer ends here -->
 
     <script src="{% static 'js/vendors/jquery/jquery_3.3.1.js' %}"></script>
+    <script src="{% static 'js/vendors/bootstrap/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/vendors/jquery-ui/jquery-ui.min.js' %}"></script>
     <script src="{% static 'js/vendors/fontawesome/all.min.js' %}"></script>
     <script src="{% static 'js/helpers/useful_functions.js' %}"></script>

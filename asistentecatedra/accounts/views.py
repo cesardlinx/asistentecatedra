@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import auth_login
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django.http import Http404, HttpResponse
+from django.core.mail import EmailMultiAlternatives
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text
@@ -13,17 +13,21 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.generic.edit import CreateView
 
 from .forms import SignupForm
+from .mixins import CheckRecaptchaMixin
 from .tokens import account_token_generator
 
 User = get_user_model()
 
 
-class SignupView(CreateView):
+class SignupView(CheckRecaptchaMixin, CreateView):
     form_class = SignupForm
     model = User
     template_name = 'accounts/signup.html'
 
     def form_valid(self, form):
+        # import pdb; pdb.set_trace()
+        if self.is_recaptcha_valid(self.request):
+
             # User save
             user = form.save()
             user.save()
