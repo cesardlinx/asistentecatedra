@@ -257,3 +257,7 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+MIGRATION_MODULES = {
+    'sites': 'asistentecatedra.fixtures.sites_migrations',
+}
