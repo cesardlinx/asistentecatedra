@@ -6,10 +6,12 @@ from accounts.forms import SignupForm
 class TestSignupForm(TestCase):
     def setUp(self):
         self.data = {
-            'name': 'David Padilla',
+            'first_name': 'David',
+            'last_name': 'David',
+            'email': 'tester@tester.com',
             'password1': 'P455w0rd',
             'password2': 'P455w0rd',
-            'email': 'tester@tester.com',
+            'institution': 'Colegio Benalcázar',
             'terms': True
         }
 
@@ -76,12 +78,12 @@ class TestSignupForm(TestCase):
             not in field_errors
 
     def test_alpha_validator(self):
-        form = SignupForm({'name': '123'})
-        field_errors = form.errors.get('name')
+        form = SignupForm({'first_name': '123'})
+        field_errors = form.errors.get('first_name')
         assert "Este campo solo permite letras" \
             in field_errors
 
     def test_alpha_validator_no_error(self):
-        form = SignupForm({'name': 'César David'})
+        form = SignupForm({'first_name': 'David'})
         assert "Este campo solo permite letras" \
             not in form.errors

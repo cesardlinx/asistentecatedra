@@ -81,10 +81,18 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     """Custom User model."""
-    name = models.CharField(_('name'), max_length=50,
-                            validators=[MinLengthValidator(3), validate_alpha])
+    first_name = models.CharField(
+        _('first name'),
+        max_length=30,
+        validators=[MinLengthValidator(3), validate_alpha]
+    )
+    last_name = models.CharField(
+        _('last name'),
+        max_length=30,
+        validators=[MinLengthValidator(3), validate_alpha]
+    )
     email = models.EmailField(_('email'), unique=True)
-    institution = models.CharField(max_length=100, blank=True, null=True)
+    institution = models.CharField(max_length=100)
     institution_logo = models.ImageField(
         upload_to='logos/',
         verbose_name='logos',
@@ -127,4 +135,4 @@ class Subscription(models.Model):
 
     def __str__(self):
         """Unicode representation of Subscription."""
-        return self.profile.user.username
+        return self.user.username

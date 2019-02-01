@@ -29,10 +29,12 @@ class SignupTestCase(TestCase):
 
     def setUp(self):
         self.data = {
-            'name': 'David Padilla',
+            'first_name': 'David',
+            'last_name': 'Padilla',
             'password1': 'P455w0rd',
             'password2': 'P455w0rd',
             'email': 'tester@tester.com',
+            'institution': 'Colegio Benalcázar',
             'terms': True
         }
         self.url = reverse('signup')
@@ -52,10 +54,12 @@ class TestSignupView(SignupTestCase):
         assert response.status_code == 200, 'Should be callable by anonymous'
         assert response.template_name[0] == 'accounts/signup.html'
         # Campos en el template (Template Testing)
-        self.assertContains(response, 'name="name"')
+        self.assertContains(response, 'name="first_name"')
+        self.assertContains(response, 'name="last_name"')
         self.assertContains(response, 'name="email"')
         self.assertContains(response, 'name="password1"')
         self.assertContains(response, 'name="password2"')
+        self.assertContains(response, 'name="institution"')
         self.assertContains(response, 'name="terms"')
         self.assertContains(response, 'name="g-recaptcha-response"')
 
@@ -83,8 +87,8 @@ class TestSignupView(SignupTestCase):
         derived_username = '{}_{}'.format(leading_part_of_email, user.pk)
         assert user.username == derived_username, \
             'Username creation should be derived from email'
-        assert user.name == 'David Padilla',  \
-            "The user's name should be David Padilla"
+        assert user.first_name == 'David',  \
+            "The user's first name should be David"
         assert user.email_confirmed is False, \
             "Email shouldn't be confirmed"
         assert len(mail.outbox) == 1, 'Should exist an email in outbox'
@@ -162,7 +166,7 @@ class TestConfirmationEmail(SignupTestCase):
             'Link for email confirmation should be in email body'
         assert settings.DOMAIN in self.email.body, \
             'Domain name should be in email body'
-        assert 'David Padilla' in self.email.body, \
+        assert 'David' in self.email.body, \
             'Name should be in email body'
         assert 'Asistente de Cátedra | Confirmar Correo Electrónico' in \
             self.email.subject, 'The subject of email'

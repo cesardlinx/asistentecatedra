@@ -20,10 +20,12 @@ class SignupForm(UserCreationForm):
     class Meta:
         model = User
         fields = (
-            'name',
+            'first_name',
+            'last_name',
             'email',
             'password1',
             'password2',
+            'institution',
         )
 
     def __init__(self, *args, **kwargs):
@@ -32,3 +34,4 @@ class SignupForm(UserCreationForm):
         self.fields['password1'].help_text = \
             'Asegúrese que la contraseña tenga al menos 8 caracteres, '\
             'incluidos un número y una mayúscula.'
+        self.fields['institution'].label = 'Institución'

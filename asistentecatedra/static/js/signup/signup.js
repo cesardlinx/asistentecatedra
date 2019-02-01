@@ -31,9 +31,15 @@ $(document).ready(function() {
      */
     var form = $('#signUpForm').validate({
         rules: {
-            name: {
+            first_name: {
                 required: true,
-                maxlength: 50,
+                maxlength: 30,
+                minlength: 3,
+                alpha: true
+            },
+            last_name: {
+                required: true,
+                maxlength: 30,
                 minlength: 3,
                 alpha: true
             },
@@ -60,6 +66,10 @@ $(document).ready(function() {
             password2: {
                 required: true,
                 equalTo: "#id_password1"
+            },
+            institution: {
+                required: true,
+                maxlength: 100,
             },
             terms: {
                 required: true
