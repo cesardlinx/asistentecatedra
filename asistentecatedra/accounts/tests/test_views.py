@@ -99,6 +99,8 @@ class TestSignupView(SignupTestCase):
         assert 'Exito!, un mensaje ha sido enviado a tu correo para que '\
                'verifiques tu cuenta.' == messages[0].message, \
                'Should return a success message'
+        assert messages[0].tags == 'alert-success', \
+            'There should be a success message.'
         self.assertRedirects(response, reverse('planificaciones'))
         assert User.objects.exists() is True, 'Should create a user'
         user = User.objects.last()
@@ -130,6 +132,8 @@ class TestSignupView(SignupTestCase):
         assert len(messages) == 1, 'There should be one message'
         assert 'reCAPTCHA no válido. Por favor intente de nuevo.'\
                == messages[0].message, 'Should return error message'
+        assert messages[0].tags == 'alert-danger', \
+            'There should be an error message.'
 
     @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
            autospec=True)

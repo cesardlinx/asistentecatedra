@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block titulo %}
+    Asistente de Cátedra | Login
+{% endblock titulo %}
+
+{% block head_scripts %}
+        {% comment %} <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?render=6Leq1I0UAAAAACZSr9Fa8VaVs7vEeSepcq-a97L6"></script> {% endcomment %}
+{% endblock head_scripts %}
+
+{% block content %}
+
+    <section class="auth">
+        <section class="container">
+            <div class="auth-img">
+                <img class="imagen" src="{% static 'img/logo_grande.png' %}" alt="Asistente de Cátedra">
+            </div>
+            <h3>Bienvenido a "Asistente de Cátedra"</h3>
+            <form method="POST" id="loginForm" novalidate>
+                {% csrf_token %}
+                <div class="form-group-float">
+                    {{ form.username | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.username class="form-control floating-input" %}
+                </div>
+                <div class="form-group-float">
+                    {{ form.password | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.password class="form-control floating-input" %}
+                </div>
+                {% comment %} <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response"> {% endcomment %}
+                <button type="submit" class="primary-button submit-btn">INGRESO</button>
+            </form>
+            <div class="auth-footer">
+                <p>¿No tienes cuenta?</p>
+                <a href="{% url 'signup' %}">Regístrate</a>
+            </div>
+        </section>
+    </section>
+
+{% endblock content %}
+
+{% block scripts %}
+    {% comment %} <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
+    <script src="{% static 'js/vendors/js-cookie/js.cookie.js' %}"></script>
+    <script src="{% static 'js/vendors/recaptchav3/recaptchaToken.js' %}"></script> {% endcomment %}
+    {% comment %} <script src="{% static 'js/signup/signup.js' %}"></script> {% endcomment %}
+{% endblock scripts %}

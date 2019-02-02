@@ -31,8 +31,26 @@
                         </a>
                     </div>
                     <div class="session-buttons">
-                        <a href="#" class="btn secondary-button login" id="login">Iniciar Sesión</a>
+                        {% if user.is_authenticated %}
+
+                        <div class="user-account">
+                            <a class="nav-link dropdown-toggle user-dropdown" href="#" id="userDropdown">
+                                <span class="fas fa-user"></span> {{ user.first_name }}
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{% url 'profile' pk=user.pk slug=user.slug %}">Perfil</a>
+                                <a class="dropdown-item" href="{% url 'logout'  %}">Cerrar Sesión</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'premium' %}"><span class="fas fa-crown"></span> Obtener Premium</a>
+                            </div>
+                        </div>
+
+                        {% else %}
+
+                        <a href="{% url 'login' %}" class="btn secondary-button login" id="login">Iniciar Sesión</a>
                         <a href="{% url 'signup' %}" class="btn primary-button register" id="register">Regístrate!</a>
+
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -54,12 +72,29 @@
                     <li class="navbar-item">
                         <a href="{% url 'premium' %}" class="navbar-link">Premium</a>
                     </li>
-                    <li class="navbar-item session-link">
-                        <a href="#" class="navbar-link">Iniciar Sesión</a>
-                    </li>
-                    <li class="navbar-item session-link">
-                        <a href="#" class="navbar-link">Registrarse</a>
-                    </li>
+                    {% if user.is_authenticated %}
+
+                        <li class="navbar-item session-link">
+                            <a href="{% url 'profile' pk=user.pk slug=user.slug %}" class="navbar-link">Perfil</a>
+                        </li>
+                        <li class="navbar-item session-link">
+                            <a href="{% url 'logout' %}" class="navbar-link">Cerrar Sesión</a>
+                        </li>
+                        <li class="navbar-item session-link">
+                            <a href="{% url 'premium' %}" class="navbar-link"><span class="fas fa-crown"></span> Obtener Premium</a>
+                        </li>
+
+                    {% else %}
+
+                        <li class="navbar-item session-link">
+                            <a href="{% url 'login' %}" class="navbar-link">Iniciar Sesión</a>
+                        </li>
+                        <li class="navbar-item session-link">
+                            <a href="{% url 'signup' %}" class="navbar-link">Registrarse</a>
+                        </li>
+
+                    {% endif %}
+
                 </ul>
             </nav>
             <button id="menu-button" class="menu-button">

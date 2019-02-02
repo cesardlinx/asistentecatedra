@@ -261,3 +261,6 @@ MESSAGE_TAGS = {
 MIGRATION_MODULES = {
     'sites': 'asistentecatedra.fixtures.sites_migrations',
 }
+
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/planificaciones/'

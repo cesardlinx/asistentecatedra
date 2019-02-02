@@ -1,7 +1,7 @@
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib import messages
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import auth_login
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -10,8 +10,9 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_text
 from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
-from django.contrib import messages
+
 from .forms import SignupForm
 from .mixins import CheckRecaptchaMixin
 from .tokens import account_token_generator
@@ -61,7 +62,7 @@ class SignupView(CheckRecaptchaMixin, CreateView):
             email.send()
 
             # Authentication and Login
-            auth_login(self.request, user)
+            login(self.request, user)
             messages.success(
                 self.request,
                 'Exito!, un mensaje ha sido enviado a tu correo para que '
@@ -111,7 +112,12 @@ def confirm_email(request, uidb64, token):
     if user is not None and account_token_generator.check_token(user, token):
         user.email_confirmed = True
         user.save()
-        auth_login(request, user)
+        login(request, user)
         return HttpResponse('Thank you for your email confirmation.')
     else:
         return HttpResponse('Activation link is invalid!')
+
+# class ProfileView(DetailView):
+#     model = User
+def profile_view(request, pk, slug):
+    return HttpResponse('profile')
