@@ -8,8 +8,11 @@ from django.contrib.auth.views import (LoginView, LogoutView,
                                        PasswordResetView)
 from django.urls import resolve, reverse
 from accounts import views
+from django.contrib.auth import get_user_model
+from mixer.backend.django import mixer
 
 pytestmark = pytest.mark.django_db
+User = get_user_model()
 
 
 class TestAccountsUrls:
@@ -20,7 +23,8 @@ class TestAccountsUrls:
             'Should resolve to the Signup View'
 
     def test_profile(self):
-        path = reverse('profile')
+        user = mixer.blend(User)
+        path = reverse('profile', kwargs={'pk': user.pk, 'slug': user.slug})
         view = resolve(path)
         assert view.func.view_class == views.ProfileView, \
             'Should resolve to the Profile View'

@@ -1,4 +1,6 @@
+import os
 from unittest.mock import patch
+
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,19 +12,36 @@ from django.contrib.auth.views import (LoginView, PasswordChangeDoneView,
                                        PasswordResetConfirmView,
                                        PasswordResetDoneView,
                                        PasswordResetView)
+from django.contrib.messages import get_messages
+from django.contrib.messages.storage.fallback import FallbackStorage
+from django.contrib.sessions.middleware import SessionMiddleware
+from django.contrib.sites.models import Site
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from mixer.backend.django import mixer
-from django.contrib.sites.models import Site
+from PIL import Image
+
 from accounts import views
 from accounts.forms import SignupForm
-from django.contrib.messages import get_messages
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
+
+
+def add_middleware_to_request(request):
+        # Add session middleware
+        middleware = SessionMiddleware()
+        middleware.process_request(request)
+        request.session.save()
+
+        # Add messages middleware
+        messages = FallbackStorage(request)
+        request._messages = messages
+        return request
 
 
 class SignupTestCase(TestCase):
@@ -72,7 +91,7 @@ class TestSignupView(SignupTestCase):
         # Mocking recaptcha
         mock_recaptcha.return_value = True
 
-        response = self.client.post(self.url, self.data)
+        response = self.client.post(self.url, self.data, follow=True)
         user = User.objects.last()
 
         messages = list(get_messages(response.wsgi_request))
@@ -92,7 +111,6 @@ class TestSignupView(SignupTestCase):
         assert user.email_confirmed is False, \
             "Email shouldn't be confirmed"
         assert len(mail.outbox) == 1, 'Should exist an email in outbox'
-        response = self.client.get(reverse('home'))
         user = response.context.get('user')
         assert user.is_authenticated is True, \
             'User should be authenticated'
@@ -122,6 +140,17 @@ class TestSignupView(SignupTestCase):
         response = self.client.post(self.url, {})
 
         form = response.context_data.get('form')
+
+        # Errors
+        errors = form.errors
+        assert 'Este campo es obligatorio.' in errors.get('first_name')
+        assert 'Este campo es obligatorio.' in errors.get('last_name')
+        assert 'Este campo es obligatorio.' in errors.get('email')
+        assert 'Este campo es obligatorio.' in errors.get('password1')
+        assert 'Este campo es obligatorio.' in errors.get('password2')
+        assert 'Este campo es obligatorio.' in errors.get('terms')
+        assert 'Este campo es obligatorio.' in errors.get('institution')
+
         assert response.status_code == 200, \
             'Should not redirect'
         assert form.errors is not None, \
@@ -227,7 +256,18 @@ class TestProfileView(TestCase):
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
-        self.user = mixer.blend(User)
+        self.user = User.objects.create_user(
+            first_name='David',
+            last_name='Padilla',
+            email='tester@tester.com',
+            password='P455w0rd',
+            institution='Colegio Benalcazar'
+        )
+
+    def tearDown(self):
+        """Method to make the image removal when necesary"""
+        if os.path.isfile('media/test_image.png'):
+            os.remove('media/test_image.png')
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -240,28 +280,147 @@ class TestProfileView(TestCase):
         """Tests that an authenticated user can access the view"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.ProfileView.as_view()(request)
+        response = views.ProfileView.as_view()(request,
+                                               pk=self.user.pk,
+                                               slug=self.user.slug)
         assert response.status_code == 200, 'Authenticated user can access'
         # Campos en el template (Template Testing)
-        self.assertContains(response, 'name="username"')
-        self.assertContains(response, 'name="password1"')
-        self.assertContains(response, 'name="password2"')
-        self.assertContains(response, 'name="email"')
         self.assertContains(response, 'name="first_name"')
         self.assertContains(response, 'name="last_name"')
         self.assertContains(response, 'name="institution"')
         self.assertContains(response, 'name="institution_logo"')
 
+    def test_post_success(self):
+        """Tests that user can update his data"""
 
-class TestLoginView:
+        # Image creation
+        img = Image.new('RGB', (60, 30), color=(73, 109, 137))
+        img.save('media/test_image.png')
+
+        img = open('media/test_image.png', 'rb')
+        img_content = img.read()
+
+        image = SimpleUploadedFile(
+            name='test_image.png',
+            content=img_content,
+            content_type='image/jpeg'
+        )
+        img.close()
+
+        # Data sending
+        data = {
+            'first_name': 'Bruno',
+            'institution_logo': image
+        }
+
+        self.client.login(email=self.user, password='P455w0rd')
+
+        url = reverse('profile', kwargs={
+            'pk': self.user.pk,
+            'slug': self.user.slug
+        })
+        response = self.client.post(url, data)
+
+        assert response.status_code == 302, 'Should redirect to same page'
+        messages = list(get_messages(response.wsgi_request))
+        assert len(messages) == 1, 'There should be a message'
+        assert 'Sus datos han sido modificados con éxito.' \
+            == messages[0].message
+        assert 'alert-success' == messages[0].tags, \
+            'There should be a success message'
+        self.user.refresh_from_db()
+        assert self.user.last_name == 'Padilla', \
+            'The data untouched must remain the same'
+        assert self.user.first_name == 'Bruno', \
+            'First name should have changed'
+        assert 'logos/test_image' in str(self.user.institution_logo)
+
+    def test_post_invalid(self):
+        request = RequestFactory().post('/', data={'first_name': ''})
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.ProfileView.as_view()(request,
+                                               pk=self.user.pk,
+                                               slug=self.user.slug)
+
+        assert response.status_code == 302, 'Should redirect to same page'
+        assert self.user.first_name == 'David', \
+            "Should not have change user's data"
+
+
+class AuthTestCase(TestCase):
+    def setUp(self):
+        self.data = {
+            'email': 'tester@tester.com',
+            'password': 'P455w0rd'
+        }
+
+
+class TestLoginView(AuthTestCase):
     """Tests para la vista de Login"""
+
     def test_get(self):
         """Test access to view by anonymous"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = LoginView.as_view()(request)
+        request = add_middleware_to_request(request)
+        response = LoginView.as_view(
+            template_name='accounts/login.html')(request)
         assert response.status_code == 200, 'Should be callable by anonymous'
-        assert response.template_name == 'accounts/login.html'
+        assert response.template_name[0] == 'accounts/login.html'
+        self.assertContains(response, 'name="username"')
+        self.assertContains(response, 'name="password"')
+
+    def test_post_success(self):
+        """Test if login has been successful"""
+        user = User.objects.create_user(
+            email=self.data['email'],
+            password=self.data['password']
+        )
+        data = {
+            'username': self.data['email'],
+            'password': self.data['password']
+        }
+        url = reverse('login')
+        response = self.client.post(url, data, follow=True)
+        planificaciones_url = reverse('planificaciones')
+
+        self.assertRedirects(response, planificaciones_url)
+        user_session = response.wsgi_request.user
+        assert user_session.is_authenticated is True, \
+            'User should be authenticated'
+        assert user_session.email == user.email, \
+            'The session data should be the same as the database data'
+
+    def test_post_invalid(self):
+        """Test if data has been invalid"""
+        data = {
+            'username': 'usuario',
+            'password': 'C0ntr4553ñ4'
+        }
+        url = reverse('login')
+        response = self.client.post(url, data)
+
+        assert response.status_code == 200, 'Should return to same page'
+        user_session = response.context.get('user')
+        assert user_session.is_authenticated is False,\
+            'User should not be authenticated'
+
+
+class TestLogoutView(AuthTestCase):
+    def test_get(self):
+        user = User.objects.create_user(
+            email=self.data['email'],
+            password=self.data['password']
+        )
+
+        login_result = self.client.login(username=user.email,
+                                         password='P455w0rd')
+        assert login_result is True, 'User should be logged'
+        response = self.client.get(reverse('logout'))
+        session_user = response.wsgi_request.user
+        assert session_user.is_authenticated is False
+        self.assertRedirects(response, reverse('home'))
 
 
 # PASSWORD RESET TESTS
