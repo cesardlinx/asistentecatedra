@@ -1,19 +1,21 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.encoding import force_bytes, force_text
 from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.views.generic import DetailView
+from django.views.generic import UpdateView
 from django.views.generic.edit import CreateView
 
-from .forms import SignupForm
+from .forms import ProfileForm, SignupForm
 from .mixins import CheckRecaptchaMixin
 from .tokens import account_token_generator
 
@@ -117,7 +119,21 @@ def confirm_email(request, uidb64, token):
     else:
         return HttpResponse('Activation link is invalid!')
 
-# class ProfileView(DetailView):
-#     model = User
-def profile_view(request, pk, slug):
-    return HttpResponse('profile')
+
+class ProfileView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = ProfileForm
+    template_name = 'accounts/profile.html'
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        messages.success(
+            self.request,
+            'Sus datos han sido modificados con éxito.'
+        )
+        url = reverse('profile', kwargs={
+            'pk': self.object.pk,
+            'slug': self.object.slug
+        })
+        return redirect(url)
