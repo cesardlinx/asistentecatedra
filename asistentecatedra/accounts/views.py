@@ -2,13 +2,15 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import (PasswordChangeView,
+                                       PasswordResetConfirmView,
+                                       PasswordResetView)
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.encoding import force_bytes, force_text
 from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -79,16 +81,6 @@ class SignupView(CheckRecaptchaMixin, CreateView):
             # Regresar a la misma página
             return HttpResponseRedirect(self.request.path_info)
 
-    def get_context_data(self, **kwargs):
-        """Sends uid and token in context for testing"""
-        context = super().get_context_data(**kwargs)
-        try:
-            context['uid'] = self.uid
-            context['token'] = self.token
-        except AttributeError:
-            pass
-        return context
-
 
 def unique_email_validator(request):
     response_str = "false"
@@ -137,3 +129,50 @@ class ProfileView(LoginRequiredMixin, UpdateView):
             'slug': self.object.slug
         })
         return redirect(url)
+
+
+class CustomPasswordResetView(PasswordResetView):
+    """
+    Vista para reset de password que hereda de PasswordResetView para cambiar
+    los métodos http aceptados a solo 'post'
+    """
+    http_method_names = ['post']
+    success_url = reverse_lazy('login')
+    email_template_name = 'accounts/password_reset_email.html',
+    subject_template_name = 'accounts/password_reset_subject.txt'
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        users = list(form.get_users(email))
+        if users:
+            messages.success(
+                self.request,
+                'Un mensaje ha sido enviado a tu correo para que '
+                'reestablezcas tu contraseña.'
+            )
+        else:
+            messages.error(
+                self.request,
+                'La cuenta de correo que has escrito es incorrecta, verifica '
+                'tus datos.'
+            )
+        return super().form_valid(form)
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    """
+    Vista usada para ir al formulario para cambiar contraseña desde el email.
+    Luego de ingresar la nueva contraseña se enviará al usuario a la página
+    principal de planificaciones ya autenticado.
+    """
+    success_url = reverse_lazy('planificaciones')
+    post_reset_login = True
+    template_name = 'accounts/password_reset_confirm.html'
+
+    def form_valid(self, form):
+        """Method to add a success message"""
+        messages.success(
+            self.request,
+            'Tu contraseña ha sido cambiada exitosamente.'
+        )
+        return super().form_valid(form)
