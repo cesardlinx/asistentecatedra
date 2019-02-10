@@ -176,3 +176,21 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
             'Tu contraseña ha sido cambiada exitosamente.'
         )
         return super().form_valid(form)
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    """
+    Vista usada para ir al formulario para cambiar contraseña desde el email.
+    Luego de ingresar la nueva contraseña se enviará al usuario a la página
+    principal de planificaciones ya autenticado.
+    """
+    success_url = reverse_lazy('planificaciones')
+    template_name = 'accounts/password_change.html'
+
+    def form_valid(self, form):
+        """Method to add a success message"""
+        messages.success(
+            self.request,
+            'Tu contraseña ha sido cambiada exitosamente.'
+        )
+        return super().form_valid(form)
