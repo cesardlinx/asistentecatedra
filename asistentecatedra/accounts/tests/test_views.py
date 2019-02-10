@@ -4,14 +4,11 @@ from unittest.mock import patch
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import (LoginView, PasswordChangeDoneView,
-                                       PasswordChangeView,
-                                       PasswordResetCompleteView,
-                                       PasswordResetConfirmView,
-                                       PasswordResetDoneView,
-                                       PasswordResetView)
+from django.contrib.auth.views import LoginView
+
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
@@ -22,7 +19,6 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from mixer.backend.django import mixer
 from PIL import Image
 
 from accounts import views
@@ -33,19 +29,24 @@ User = get_user_model()
 
 
 def add_middleware_to_request(request):
-        # Add session middleware
-        middleware = SessionMiddleware()
-        middleware.process_request(request)
-        request.session.save()
+    """
+    Función para agregar middleware a un request creado con RequestFactory
+    """
+    # Add session middleware
+    middleware = SessionMiddleware()
+    middleware.process_request(request)
+    request.session.save()
 
-        # Add messages middleware
-        messages = FallbackStorage(request)
-        request._messages = messages
-        return request
+    # Add messages middleware
+    messages = FallbackStorage(request)
+    request._messages = messages
+    return request
 
 
 class SignupTestCase(TestCase):
-
+    """
+    TestCase general con todos los datos de un usuario de prueba
+    """
     def setUp(self):
         self.data = {
             'first_name': 'David',
@@ -189,7 +190,9 @@ class TestConfirmationEmail(SignupTestCase):
         self.email = mail.outbox[0]
 
     def test_email_body(self):
-
+        """
+        Test para probar los campos en el contenido del correo electrónico
+        """
         confirm_url = reverse('confirm_email', kwargs={
             'uidb64': self.uid,
             'token': self.token
@@ -229,6 +232,7 @@ class TestEmailConfirmationView(SignupTestCase):
             'confirm_email', kwargs={'uidb64': self.uid, 'token': self.token})
 
     def test_success_confirmation(self):
+        """Pruebas al recibir un link válido de confirmación de correo"""
         assert self.user.email_confirmed is False, \
             'The user should not have the email confirmed yet'
         response = self.client.get(self.confirm_url)
@@ -243,8 +247,10 @@ class TestEmailConfirmationView(SignupTestCase):
             'The user should be authenticated'
 
     def test_invalid_confirmation(self):
-        assert self.user.email_confirmed is False, \
-            'The user should not have the email confirmed yet'
+        """
+        Pruebas al recibir un link de confirmación de correo con un
+        token inválido.
+        """
         # Invalidates the token
         self.user.set_password('New_password_2')
         response = self.client.get(self.confirm_url)
@@ -252,6 +258,24 @@ class TestEmailConfirmationView(SignupTestCase):
             'The view should be callable by Anonymous user'
         assert self.user.email_confirmed is False, \
             'The user should not have the email confirmed'
+
+    def test_invalid_confirmation_data(self):
+        """
+        Pruebas al recibir un link de confirmación de correo con un
+        uid inválido.
+        """
+        confirm_url = reverse(
+            'confirm_email', kwargs={'uidb64': 123456, 'token': self.token})
+        response = self.client.get(confirm_url)
+        assert response.status_code == 200, \
+            'The view should be callable by Anonymous user'
+        assert self.user.email_confirmed is False, \
+            'The user should not have the email confirmed'
+        self.assertContains(response, 'Activation link is invalid')
+        # There should be no user
+        with pytest.raises(AttributeError,
+                           match="'NoneType' object has no attribute 'get'"):
+            response.context.get('user')
 
 
 class TestProfileView(TestCase):
@@ -317,7 +341,7 @@ class TestProfileView(TestCase):
             'institution_logo': image
         }
 
-        self.client.login(email=self.user, password='P455w0rd')
+        self.client.login(email=self.user.email, password='P455w0rd')
 
         url = reverse('profile', kwargs={
             'pk': self.user.pk,
@@ -353,6 +377,7 @@ class TestProfileView(TestCase):
 
 
 class AuthTestCase(TestCase):
+    """TestCase general con los dátos básicos para crear un usuario"""
     def setUp(self):
         self.data = {
             'email': 'tester@tester.com',
@@ -413,6 +438,7 @@ class TestLoginView(AuthTestCase):
 
 class TestLogoutView(AuthTestCase):
     def test_get(self):
+        """Test para probar que un usuario puede cerrar sesión"""
         user = User.objects.create_user(
             email=self.data['email'],
             password=self.data['password']
@@ -428,118 +454,190 @@ class TestLogoutView(AuthTestCase):
 
 
 # PASSWORD RESET TESTS
-class TestPasswordResetView:
+class TestPasswordResetView(TestCase):
     """
     Tests the view that resets the user's password when the user has
     forgoten it
     """
+    def setUp(self):
+        self.url = reverse('password_reset')
+
     def test_get(self):
         """Test access to view by anonymous"""
-        request = RequestFactory().get('/')
-        request.user = AnonymousUser()
-        response = PasswordResetView.as_view()(request)
-        assert response.status_code == 200, 'Should be callable by anonymous'
-        assert response.template_name == 'accounts/password_reset.html'
+        url = reverse('password_reset')
+        response = self.client.get(url)
+        assert response.status_code == 405, \
+            'Should not be callable by get method'
 
     def test_post_success(self):
-        """Email de usuario existente enviado a la vista Password Reset"""
-        mixer.blend(User, email='tester@tester.com')
+        """Test cuando el email de un usuario existente es enviado a la
+        vista Password Reset
+        """
+        User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd'
+        )
         data = {
-            'email': 'tester@tester.com'
+            'email': 'tester@tester.com',
         }
-        request = RequestFactory().post('/', data=data)
-        request.user = AnonymousUser()
-        response = PasswordResetView.as_view()(request)
-        assert response.status_code == 302, \
-            'Should redirect to password reset done'
+        response = self.client.post(self.url, data, follow=True)
+        messages = list(response.context.get('messages'))
+        self.assertRedirects(response, reverse('login'))
         assert len(mail.outbox) == 1, 'Should exist an email in outbox'
+        assert len(messages) == 1, 'Should exist a message'
+        assert messages[0].tags == 'alert-success',\
+            'Should return a success message'
+        assert messages[0].message == 'Un mensaje ha sido enviado '\
+                                      'a tu correo para que reestablezcas '\
+                                      'tu contraseña.', \
+                                      'Should return a success message'
 
     def test_post_invalid(self):
-        """Email perteneciente a ningún usuario enviado a Password Reset"""
+        """Test cuando un email perteneciente a ningún usuario es enviado a
+        la vista Password Reset
+        """
         data = {
             'email': 'david@tester.com'
         }
-        request = RequestFactory().post('/', data=data)
-        request.user = AnonymousUser()
-        response = PasswordResetView.as_view()(request)
-        assert response.status_code == 302, \
-            'Should redirect to password reset done'
+        response = self.client.post(self.url, data, follow=True)
+        self.assertRedirects(response, reverse('login'))
+        messages = list(response.context.get('messages'))
         assert len(mail.outbox) == 0, 'Should not exist an email in outbox'
-
-
-class TestPasswordResetDoneView:
-    def test_get(self):
-        """Test access to view by anonymous"""
-        request = RequestFactory().get('/')
-        request.user = AnonymousUser()
-        response = PasswordResetDoneView.as_view()(request)
-        assert response.status_code == 200, 'Should be callable by anonymous'
-        assert response.template_name == 'accounts/password_reset_done.html'
+        assert len(messages) == 1, 'Should exist a message'
+        assert messages[0].tags == 'alert-danger',\
+            'Should return an error message'
+        assert messages[0].message == 'La cuenta de correo que has escrito '\
+                                      'es incorrecta, verifica tus datos.', \
+                                      'Should return an error message'
 
 
 class TestPasswordResetConfirmView(TestCase):
+    """
+    Tests para probar la vista de confirmación de reset de contraseña
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd'
+        )
+        self.uid = urlsafe_base64_encode(force_bytes(self.user.pk)).decode()
+        self.token = default_token_generator.make_token(self.user)
+        self.url = reverse('password_reset_confirm', kwargs={
+            'uidb64': self.uid,
+            'token': self.token
+        })
+
     def test_get_success(self):
         """Sending a valid token and coded id"""
-        user = mixer.blend(User)
-        password_before = user.password
-        uid = urlsafe_base64_encode(force_bytes(user.pk)).decode()
-        token = default_token_generator.make_token(user)
-        data = {
-            'uidb64': uid,
-            'token': token
-        }
-        request = RequestFactory().get('/', data)
-        request.user = AnonymousUser()
-        response = PasswordResetConfirmView.as_view()(request)
+        response = self.client.get(self.url, follow=True)
+        form = response.context.get('form')
+        assert isinstance(form, SetPasswordForm)
         assert response.status_code == 200, 'Should be successful'
-        assert password_before != user.password
+        assert response.context.get('validlink') is True, \
+            'Path should be accepted as a valid link'
+        assert len(response.redirect_chain) == 1, \
+            'Should redirect to set password view'
+        assert response.templates[0].name == \
+            'accounts/password_reset_confirm.html'
+        self.assertContains(response, 'name="new_password1"')
+        self.assertContains(response, 'name="new_password2"')
 
     def test_get_invalid(self):
         """Sending a invalid token and user id"""
-        user = mixer.blend(User, password='p455w0rd')
-        uid = urlsafe_base64_encode(force_bytes(user.pk)).decode()
-        token = default_token_generator.make_token(user)
-        data = {
-            'uidb64': uid,
-            'token': token
-        }
-        user.set_password('p455w0rd_2')  # Invalidates the token
-        request = RequestFactory().get('/', data)
-        request.user = AnonymousUser()
-        response = PasswordResetConfirmView.as_view()(request)
-        assert response.status_code == 200, 'Should show the page'
-        self.assertContains(response, 'invalid password reset link'), \
-            'Should show an error message'
+        self.user.set_password('p455w0rd_2')  # Invalidates the token
+        self.user.save()
+        response = self.client.get(self.url, follow=True)
+        form = response.context.get('form')
+        assert form is None, 'There should be no form'
+        assert response.status_code == 200, 'Should return to same page'
+        assert len(response.redirect_chain) == 0, \
+            'Should not redirect to set password view'
+        self.assertContains(
+            response,
+            'Restablecimiento de contraseña fallido'
+        ), 'Should show an error message'
         password_reset_url = reverse('password_reset')
         # Should contain a link to the password reset view
-        self.assertContiains(response, 'href="{}"'.format(password_reset_url))
+        self.assertContains(response, 'href="{}"'.format(password_reset_url))
 
+    def test_post_success(self):
+        """Tests when user sends new password"""
+        session = self.client.session
+        session['_password_reset_token'] = self.token
+        session.save()
 
-class TestPasswordResetCompleteView:
-    def test_get(self):
-        """Test access to view by anonymous"""
-        request = RequestFactory().get('/')
-        request.user = AnonymousUser()
-        response = PasswordResetCompleteView.as_view()(request)
-        assert response.status_code == 200, 'Should be callable by anonymous'
-        assert response.template_name == \
-            'accounts/password_reset_complete.html'
+        url = reverse('password_reset_confirm', kwargs={
+            'uidb64': self.uid,
+            'token': 'set-password'
+        })
+
+        data = {
+            'new_password1': 'P455w0rd_2',
+            'new_password2': 'P455w0rd_2',
+        }
+
+        response = self.client.post(url, data, follow=True)
+        self.assertRedirects(response, reverse('planificaciones'))
+        user_session = response.context.get('user')
+        assert user_session.is_authenticated is True, \
+            'The user should be authenticated'
+        assert response.status_code == 200, \
+            'The login call should be successful'
+        self.user.refresh_from_db()
+        assert self.user.check_password('P455w0rd_2') is True, \
+            'Password should have changed to the new one'
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be one message'
+        assert messages[0].tags == 'alert-success', \
+            'There should be one success message'
+        assert messages[0].message == 'Tu contraseña ha sido cambiada ' \
+                                      'exitosamente.', \
+                                      'There should be one success message'
+
+    def test_post_invalid(self):
+        """Tests when user sends new password invalid data"""
+        session = self.client.session
+        session['_password_reset_token'] = self.token
+        session.save()
+
+        url = reverse('password_reset_confirm', kwargs={
+            'uidb64': self.uid,
+            'token': 'set-password'
+        })
+
+        data = {
+            'new_password1': 'P455w0rd_2',
+            'new_password2': 'P455w0rd_',
+        }
+
+        response = self.client.post(url, data)
+        assert response.status_code == 200, 'Should return same page'
+        form = response.context.get('form')
+        self.assertTrue(form.errors)
 
 
 class TestPasswordResetEmail(TestCase):
     def setUp(self):
         """Obtención del email"""
-        mixer.blend(User, email='tester@tester.com', username='tester')
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd',
+            first_name='David',
+            last_name='Padilla',
+        )
         data = {
-            'email': 'tester@tester.com'
+            'email': 'tester@tester.com',
         }
-        request = RequestFactory().post('/', data=data)
-        request.user = AnonymousUser()
-        self.response = PasswordResetView.as_view()(request)
+        url = reverse('password_reset')
+        self.response = self.client.post(url, data)
         self.email = mail.outbox[0]
 
     def test_email_body(self):
-        context = self.response.context_data
+        """
+        Test que prueba los campos en el correo enviado para reset de
+        contraseña.
+        """
+        context = self.response.context
         token = context.get('token')
         uid = context.get('uid')
         password_reset_confirm_url = reverse('password_reset_confirm', kwargs={
@@ -548,13 +646,11 @@ class TestPasswordResetEmail(TestCase):
         })
         assert password_reset_confirm_url in self.email.body, \
             'Link to password reset confirm should be in email body'
-        assert 'tester' in self.email.body, \
-            'Username should be in email body'
-        assert 'tester@tester.com' in self.email.body, \
-            'Email should be in email body'
+        assert 'David' in self.email.body, \
+            'First name should be in email body'
         assert 'Asistente de Cátedra | PASSWORD RESET' in self.email.subject, \
             'The subject of email'
-        assert ['tester@tester.com', ] in self.email.to, \
+        assert 'tester@tester.com' in self.email.to, \
             "The user's email should be in email's field TO "
 
 
@@ -565,69 +661,77 @@ class TestPasswordChangeView(TestCase):
     authenticated
     """
     def setUp(self):
-        self.user = mixer.blend(User, password='p455w0rd')
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd'
+        )
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = PasswordChangeView.as_view()(request)
+        response = views.CustomPasswordChangeView.as_view()(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get(self):
         """Tests that an authenticated user can access the view"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = PasswordChangeView.as_view()(request)
+        response = views.CustomPasswordChangeView.as_view()(request)
         assert response.status_code == 200, 'Authenticated user can access'
+        assert 'accounts/password_change.html' in response.template_name, \
+            'Template password change should be returned from view'
+        assert 'name="old_password"' in response.rendered_content, \
+            'Form should contain old_password field'
+        assert 'name="new_password1"' in response.rendered_content, \
+            'Form should contain new_password1 field'
+        assert 'name="new_password2"' in response.rendered_content, \
+            'Form should contain old_password2 field'
 
     def test_post_success(self):
+        """
+        Tests para probar el cambio exitoso de contraseña por parte de un
+        usuario logeado
+        """
         data = {
-            'old_password': 'p455w0rd',
-            'new_password': 'p455w0rd_2',
-            'new_password_confirmation': 'p455w0rd_2'
+            'old_password': 'P455w0rd',
+            'new_password1': 'P455w0rd_2',
+            'new_password2': 'P455w0rd_2'
         }
-        request = RequestFactory().post('/', data=data)
-        request.user = self.user
-        response = views.plan_clase_create(request)
-        assert response.status_code == 302, \
-            'Should redirect to password change done'
+        url = reverse('password_change')
+        self.client.login(email=self.user, password='P455w0rd')
+        response = self.client.post(url, data, follow=True)
+        assert response.status_code == 200, \
+            'We should get a successful redirection to planificaciones'
+        self.assertRedirects(response, reverse('planificaciones'))
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be one message'
+        assert messages[0].tags == 'alert-success', \
+            'There should be one success message'
+        assert messages[0].message == 'Tu contraseña ha sido cambiada ' \
+                                      'exitosamente.', \
+                                      'There should be one success message'
         self.user.refresh_from_db()
-        assert self.user.check_password('p455w0rd_2') is True, \
+        assert self.user.check_password('P455w0rd_2') is True, \
             'The password should have changed for the new one'
 
     def test_post_invalid(self):
+        """
+        Tests cuando el usuario ingresa mal los datos de la contraseña en el
+        formulario
+        """
         data = {
-            'old_password': 'p455w0rd',
-            'new_password': 'p455w0rd_2',
-            'new_password_confirmation': 'p455w0rd_2'
+            'old_password': 'P455w0rd',
+            'new_password1': 'P455w0rd_2',
+            'new_password2': 'P455w0rd_3'
         }
-        request = RequestFactory().post('/', data=data)
-        request.user = self.user
-        response = views.plan_clase_create(request)
-        assert response.status_code == 302, \
-            'Should redirect to password change done'
+        url = reverse('password_change')
+        self.client.login(email=self.user, password='P455w0rd')
+        response = self.client.post(url, data)
+        form = response.context.get('form')
+        assert response.status_code == 200, \
+            'Should go to same page'
         self.user.refresh_from_db()
-        assert self.user.check_password('p455w0rd_2') is True, \
-            'The password should have changed for the new one'
-
-
-class TestPasswordChangeDoneView(TestCase):
-    """
-    Tests the view that is showed when the password has changed
-    """
-    def test_anonymous(self):
-        """Tests that an anonymous user can't access the view"""
-        request = RequestFactory().get('/')
-        request.user = AnonymousUser()
-        response = PasswordChangeDoneView.as_view()(request)
-        assert 'login' in response.url, 'Should not be callable by anonymous'
-
-    def test_get(self):
-        """Tests that an authenticated user can access the view"""
-        request = RequestFactory().get('/')
-        request.user = self.user
-        response = PasswordChangeDoneView.as_view()(request)
-        assert response.status_code == 200, 'Authenticated user can access'
-        # Should show the password change done template
-        assert response.template_name == 'accounts/password_change_done.html'
+        assert self.user.check_password('P455w0rd') is True, \
+            'The password should not have changed.'
+        self.assertTrue(form.errors)  # Form has errors
