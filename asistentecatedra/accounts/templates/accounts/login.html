@@ -7,10 +7,6 @@
     Asistente de Cátedra | Login
 {% endblock titulo %}
 
-{% block head_scripts %}
-        {% comment %} <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?render=6Leq1I0UAAAAACZSr9Fa8VaVs7vEeSepcq-a97L6"></script> {% endcomment %}
-{% endblock head_scripts %}
-
 {% block content %}
 
     <section class="auth">
@@ -29,7 +25,7 @@
                     {{ form.password | add_label_class:"form-control-placeholder" }}
                     {% render_field form.password class="form-control floating-input" %}
                 </div>
-                {% comment %} <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response"> {% endcomment %}
+                <div><a class="modal-opening" modal-target="#password-reset" href="#">¿Olvidaste tu contraseña?</a></div>
                 <button type="submit" class="primary-button submit-btn">INGRESO</button>
             </form>
             <div class="auth-footer">
@@ -39,12 +35,26 @@
         </section>
     </section>
 
+    <div id="password-reset" class="modal-overlay">
+        <div class="modal-contenido">
+            <h4><span class="fas fa-key"></span> Reestablecer Contraseña</h4>
+            <p>
+                ¿Ha olvidado su clave? Introduzca su dirección de correo
+                a continuación y le enviaremos por correo electrónico las
+                instrucciones para establecer una nueva.
+            </p>
+            <form action="{% url 'password_reset' %}" method="POST" id="resetPasswordForm" novalidate>
+                {% csrf_token %}
+                {% include 'accounts/includes/password_reset_form.html' %}
+            </form>
+        </div>
+    </div>
+
 {% endblock content %}
 
 {% block scripts %}
-    {% comment %} <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
     <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
     <script src="{% static 'js/vendors/js-cookie/js.cookie.js' %}"></script>
-    <script src="{% static 'js/vendors/recaptchav3/recaptchaToken.js' %}"></script> {% endcomment %}
-    {% comment %} <script src="{% static 'js/signup/signup.js' %}"></script> {% endcomment %}
+    <script src="{% static 'js/accounts/reset_password.js' %}"></script>
 {% endblock scripts %}

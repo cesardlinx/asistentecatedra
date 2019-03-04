@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
+from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import (PasswordChangeView,
+from django.contrib.auth.views import (LoginView, PasswordChangeView,
                                        PasswordResetConfirmView,
                                        PasswordResetView)
 from django.contrib.sites.shortcuts import get_current_site
@@ -82,6 +83,15 @@ class SignupView(CheckRecaptchaMixin, CreateView):
             return HttpResponseRedirect(self.request.path_info)
 
 
+class CustomLoginView(LoginView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'reset_form': PasswordResetForm(),
+        })
+        return context
+
+
 def unique_email_validator(request):
     response_str = "false"
     if request.is_ajax():
@@ -93,6 +103,21 @@ def unique_email_validator(request):
                 response_str = "true"  # User doesn't exists
             else:
                 response_str = "false"  # User already exists
+
+    return HttpResponse("%s" % response_str)
+
+
+def exists_email_validator(request):
+    response_str = "false"
+    if request.is_ajax():
+        email = request.POST.get("email")
+        if email:
+            try:
+                get_object_or_404(User, email=email)
+            except Http404:
+                response_str = "false"  # User doesn't exists
+            else:
+                response_str = "true"  # User already exists
 
     return HttpResponse("%s" % response_str)
 
@@ -138,8 +163,9 @@ class CustomPasswordResetView(PasswordResetView):
     """
     http_method_names = ['post']
     success_url = reverse_lazy('login')
-    email_template_name = 'accounts/password_reset_email.html',
+    html_email_template_name = 'accounts/password_reset_email.html',
     subject_template_name = 'accounts/password_reset_subject.txt'
+    template_name = 'accounts/password_reset.html'
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
@@ -157,6 +183,13 @@ class CustomPasswordResetView(PasswordResetView):
                 'tus datos.'
             )
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)  # pragma: no cover
+        context.update({  # pragma: no cover
+            'reset_form': PasswordResetForm(),
+        })
+        return context  # pragma: no cover
 
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):

@@ -2820,6 +2820,33 @@ footer {
   font-size: 1rem;
 }
 
+@media only screen and (min-width: 768px) {
+  .password .container {
+    max-width: 800px;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .password .container .submit-btn {
+    display: block;
+    margin: 0 auto;
+    width: 50%;
+  }
+}
+
+.password .container form {
+  margin-bottom: 2em;
+}
+
+.password-header {
+  margin: 2em 0;
+}
+
+.password-header p {
+  margin: 1em 0;
+  font-weight: lighter;
+}
+
 .card-header {
   background: #2c3e50;
 }

@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LogoutView
 from django.urls import resolve, reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -29,7 +29,7 @@ class TestAccountsUrls:
     def test_login(self):
         path = reverse('login')
         view = resolve(path)
-        assert view.func.view_class == LoginView, \
+        assert view.func.view_class == views.CustomLoginView, \
             'Should resolve to the Login View'
 
     def test_logout(self):

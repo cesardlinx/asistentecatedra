@@ -4,11 +4,10 @@ from unittest.mock import patch
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import SetPasswordForm
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import LoginView
-
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
@@ -500,6 +499,11 @@ class TestPasswordResetView(TestCase):
             'email': 'david@tester.com'
         }
         response = self.client.post(self.url, data, follow=True)
+        password_reset_form = response.context.get('reset_form')
+        assert isinstance(password_reset_form, PasswordResetForm), \
+            'Should return an instance of PasswordResetForm'
+        assert response.context.get('view') is not None
+        # print(response.context)
         self.assertRedirects(response, reverse('login'))
         messages = list(response.context.get('messages'))
         assert len(mail.outbox) == 0, 'Should not exist an email in outbox'
@@ -648,7 +652,8 @@ class TestPasswordResetEmail(TestCase):
             'Link to password reset confirm should be in email body'
         assert 'David' in self.email.body, \
             'First name should be in email body'
-        assert 'Asistente de Cátedra | PASSWORD RESET' in self.email.subject, \
+        assert 'Asistente de Cátedra | Restablecimiento de contraseña' \
+            in self.email.subject, \
             'The subject of email'
         assert 'tester@tester.com' in self.email.to, \
             "The user's email should be in email's field TO "
