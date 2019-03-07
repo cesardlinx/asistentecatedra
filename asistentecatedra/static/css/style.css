@@ -2936,4 +2936,12 @@ footer {
   color: #fff;
   background: #2c3e50;
 }
+
+.errorlist {
+  list-style: none;
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1em;
+  margin-bottom: 3em;
+}
 /*# sourceMappingURL=style.css.map */

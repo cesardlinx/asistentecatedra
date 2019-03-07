@@ -1,0 +1,9 @@
+//# Django classes styles
+
+.errorlist {
+  list-style: none;
+  background: $error;
+  color: $error-dark;
+  padding: 1em;
+  margin-bottom: 3em;
+}

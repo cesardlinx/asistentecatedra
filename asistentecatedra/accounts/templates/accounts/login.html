@@ -17,6 +17,7 @@
             <h3>Bienvenido a "Asistente de Cátedra"</h3>
             <form method="POST" id="loginForm" novalidate>
                 {% csrf_token %}
+                {{ form.non_field_errors }}
                 <div class="form-group-float">
                     {{ form.username | add_label_class:"form-control-placeholder" }}
                     {% render_field form.username class="form-control floating-input" %}
@@ -56,5 +57,5 @@
     <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
     <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
     <script src="{% static 'js/vendors/js-cookie/js.cookie.js' %}"></script>
-    <script src="{% static 'js/accounts/reset_password.js' %}"></script>
+    <script src="{% static 'js/accounts/login.js' %}"></script>
 {% endblock scripts %}
