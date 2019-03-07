@@ -3,7 +3,7 @@ $(document).ready(function() {
     /**
      * Form Validation
      */
-    var form = $('#resetPasswordForm').validate({
+    var form = $('#passwordResetForm').validate({
         rules: {
              email: {
                  required: true,
@@ -64,16 +64,16 @@ $(document).ready(function() {
     });
 
     $('#guardarCambios').on('click', function() {
-        $('#resetPasswordForm').trigger('submit');
+        $('#passwordResetForm').trigger('submit');
     });
 
     // Envio del formulario
-    $('#resetPasswordForm').submit(function(e) {
+    $('#passwordResetForm').submit(function(e) {
         e.preventDefault();
         // Enviar formulario si es válido
 
         if (form.valid()) {
-            var formulario = document.getElementById('resetPasswordForm');
+            var formulario = document.getElementById('passwordResetForm');
             formulario.submit();
         }
     });

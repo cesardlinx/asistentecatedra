@@ -44,9 +44,10 @@
                 a continuación y le enviaremos por correo electrónico las
                 instrucciones para establecer una nueva.
             </p>
-            <form action="{% url 'password_reset' %}" method="POST" id="resetPasswordForm" novalidate>
+            <form action="{% url 'password_reset' %}" method="POST" id="passwordResetForm" novalidate>
                 {% csrf_token %}
                 {% include 'accounts/includes/password_reset_form.html' %}
+                <button type="submit" class="primary-button">Enviar Correo</button>
             </form>
         </div>
     </div>
@@ -58,4 +59,5 @@
     <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
     <script src="{% static 'js/vendors/js-cookie/js.cookie.js' %}"></script>
     <script src="{% static 'js/accounts/login.js' %}"></script>
+    <script src="{% static 'js/accounts/password_reset.js' %}"></script>
 {% endblock scripts %}
