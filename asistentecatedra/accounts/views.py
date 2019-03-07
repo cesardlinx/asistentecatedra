@@ -1,20 +1,20 @@
-from django.conf import settings
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (LoginView, PasswordChangeView,
                                        PasswordResetConfirmView,
                                        PasswordResetView)
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMultiAlternatives
+
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
-from django.template.loader import render_to_string
+from .helpers import send_confirmation_helper
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode
 from django.urls import reverse, reverse_lazy
-from django.utils.encoding import force_bytes, force_text
-from django.utils.html import strip_tags
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.generic import UpdateView
 from django.views.generic.edit import CreateView
 
@@ -27,12 +27,12 @@ User = get_user_model()
 
 
 class SignupView(AnonymousRequiredMixin, CheckRecaptchaMixin, CreateView):
+    """Vista para registro de usuarios"""
     form_class = SignupForm
     model = User
     template_name = 'accounts/signup.html'
 
     def form_valid(self, form):
-        # import pdb; pdb.set_trace()
         if self.is_recaptcha_valid(self.request):
 
             # User save
@@ -47,25 +47,7 @@ class SignupView(AnonymousRequiredMixin, CheckRecaptchaMixin, CreateView):
 
             # Email sending
             domain = get_current_site(self.request).domain
-            protocol = settings.PROTOCOL
-            mail_subject = 'Asistente de Cátedra | '\
-                           'Confirmar Correo Electrónico'
-            self.uid = urlsafe_base64_encode(force_bytes(user.pk)).decode()
-            self.token = account_token_generator.make_token(user)
-            html_email_body = render_to_string('accounts/confirm_email.html', {
-                'user': user,
-                'protocol': protocol,
-                'domain': domain,
-                'uid': self.uid,
-                'token': self.token,
-            })
-            text_email_body = strip_tags(html_email_body)
-            to_email = form.cleaned_data.get('email')
-
-            email = EmailMultiAlternatives(
-                mail_subject, text_email_body, to=[to_email])
-            email.attach_alternative(html_email_body, "text/html")
-            email.send()
+            send_confirmation_helper(user, domain)
 
             # Authentication and Login
             login(self.request, user)
@@ -84,7 +66,28 @@ class SignupView(AnonymousRequiredMixin, CheckRecaptchaMixin, CreateView):
             return HttpResponseRedirect(self.request.path_info)
 
 
+@login_required
+def send_confirmation_view(request):
+    """
+    Vista para enviar correo de confirmacion de email desde un
+    usuario logeado
+    """
+    if not request.user.email_confirmed:
+        domain = get_current_site(request).domain
+        send_confirmation_helper(request.user, domain)
+        previous_url = request.META.get('HTTP_REFERER')
+        messages.success(
+            request,
+            'Un mensaje ha sido enviado a tu correo para que '
+            'verifiques tu cuenta.'
+        )
+    else:
+        messages.info(request, 'Su cuenta ya está verificada')
+    return redirect(previous_url)
+
+
 class CustomLoginView(AnonymousRequiredMixin, LoginView):
+    """Vista para autenticación de usuarios"""
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
@@ -94,6 +97,7 @@ class CustomLoginView(AnonymousRequiredMixin, LoginView):
 
 
 def unique_email_validator(request):
+    """Validador remoto para verificar unicidad de correo"""
     response_str = "false"
     if request.is_ajax():
         email = request.POST.get("email")
@@ -109,6 +113,7 @@ def unique_email_validator(request):
 
 
 def exists_email_validator(request):
+    """Validador remoto para verificar si existe un correo"""
     response_str = "false"
     if request.is_ajax():
         email = request.POST.get("email")
@@ -124,21 +129,31 @@ def exists_email_validator(request):
 
 
 def confirm_email(request, uidb64, token):
+    """
+    Vista llamada el momento de seguir el link provisto en el correo
+    electrónico para confirmar el email
+    """
     try:
         uid = force_text(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
+
     if user is not None and account_token_generator.check_token(user, token):
         user.email_confirmed = True
         user.save()
         login(request, user)
-        return HttpResponse('Thank you for your email confirmation.')
+        messages.success(request, 'Su correo ha sido confirmado exitosamente')
+        if request.user.is_authenticated:
+            return redirect('planificaciones')
+        return redirect('login')
     else:
-        return HttpResponse('Activation link is invalid!')
+        messages.error(request, 'Error. El enlace no es válido o ha expirado.')
+        return redirect('home')
 
 
 class ProfileView(LoginRequiredMixin, UpdateView):
+    """Vista para ver y actualzar la información de usuario"""
     model = User
     form_class = ProfileForm
     template_name = 'accounts/profile.html'
