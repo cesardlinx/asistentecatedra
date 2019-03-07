@@ -38,7 +38,8 @@
                                 <span class="fas fa-user"></span> {{ user.first_name }}
                             </a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{% url 'profile' pk=user.pk slug=user.slug %}">Perfil</a>
+                                <a class="dropdown-item" href="{{ user.get_absolute_url }}">Perfil</a>
+                                <a class="dropdown-item" href="{% url 'password_change' %}">Cambiar Contraseña</a>
                                 <a class="dropdown-item" href="{% url 'logout'  %}">Cerrar Sesión</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{% url 'premium' %}"><span class="fas fa-crown"></span> Obtener Premium</a>
@@ -60,9 +61,12 @@
                     <li class="navbar-item">
                         <a href="{% url 'home' %}" class="navbar-link">Inicio</a>
                     </li>
+                    {% if user.is_authenticated %}
                     <li class="navbar-item">
                         <a href="{% url 'planificaciones' %}" class="navbar-link">Planificaciones</a>
                     </li>
+                    {% endif %}
+
                     <li class="navbar-item">
                         <a href="{% url 'biblioteca' %}" class="navbar-link">Biblioteca</a>
                     </li>

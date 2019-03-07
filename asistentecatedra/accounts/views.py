@@ -18,8 +18,8 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.generic import UpdateView
 from django.views.generic.edit import CreateView
 
-from .forms import ProfileForm, SignupForm
-from .mixins import CheckRecaptchaMixin
+from .forms import (CustomPasswordChangeForm, CustomSetPasswordForm,
+                    ProfileForm, SignupForm)
 from .mixins import AnonymousRequiredMixin, CheckRecaptchaMixin
 from .tokens import account_token_generator
 
@@ -199,6 +199,7 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     Luego de ingresar la nueva contraseña se enviará al usuario a la página
     principal de planificaciones ya autenticado.
     """
+    form_class = CustomSetPasswordForm
     success_url = reverse_lazy('planificaciones')
     post_reset_login = True
     template_name = 'accounts/password_reset_confirm.html'
@@ -218,6 +219,7 @@ class CustomPasswordChangeView(PasswordChangeView):
     Luego de ingresar la nueva contraseña se enviará al usuario a la página
     principal de planificaciones ya autenticado.
     """
+    form_class = CustomPasswordChangeForm
     success_url = reverse_lazy('planificaciones')
     template_name = 'accounts/password_change.html'
 

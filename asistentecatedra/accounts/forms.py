@@ -1,8 +1,11 @@
 from django import forms
-from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.forms import (AuthenticationForm, PasswordChangeForm,
+                                       PasswordResetForm, SetPasswordForm,
+                                       UserCreationForm)
 from django.forms import ModelForm
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
 
 User = get_user_model()
 
@@ -33,7 +36,7 @@ class SignupForm(UserCreationForm):
         """Makes email to be required"""
         super().__init__(*args, **kwargs)
         self.fields['password1'].help_text = \
-            'Asegúrese que la contraseña tenga al menos 8 caracteres, '\
+            'La contraseña debe tener al menos 8 caracteres, '\
             'incluidos un número y una mayúscula.'
         self.fields['institution'].label = 'Institución'
 
@@ -65,3 +68,31 @@ class ProfileForm(ModelForm):
         cleaned_data = {key: field for key, field in cleaned_data.items()
                         if field is not None}
         return cleaned_data
+
+
+class CustomSetPasswordForm(SetPasswordForm):
+    """
+    Formulario usado en Password Confirm para setear la contraseña.
+    Se hereda de SetPasswordForm para cambiar el help_text en el password
+    """
+    new_password1 = forms.CharField(
+        label=_("New password"),
+        widget=forms.PasswordInput,
+        strip=False,
+        help_text='La contraseña debe tener al menos 8 caracteres, '
+                  'incluidos un número y una mayúscula.'
+    )
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """
+    Formulario usado en Password Change para cambiar la contraseña.
+    Se hereda de PasswordChangeForm para cambiar el help_text en el password
+    """
+    new_password1 = forms.CharField(
+        label=_("New password"),
+        widget=forms.PasswordInput,
+        strip=False,
+        help_text='La contraseña debe tener al menos 8 caracteres, '
+                  'incluidos un número y una mayúscula.'
+    )
