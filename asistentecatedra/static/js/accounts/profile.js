@@ -23,10 +23,7 @@ $(document).ready(function() {
         },
         errorElement: "em",
         wrapper: 'div',
-        errorPlacement: function(error, element) {
-            error.addClass('invalid-feedback');
-            error.insertAfter(element);
-        },
+        errorPlacement: errorFeedback,
     });
 
     $('#guardarCambios').on('click', function(){
