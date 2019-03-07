@@ -20,12 +20,13 @@ from django.views.generic.edit import CreateView
 
 from .forms import ProfileForm, SignupForm
 from .mixins import CheckRecaptchaMixin
+from .mixins import AnonymousRequiredMixin, CheckRecaptchaMixin
 from .tokens import account_token_generator
 
 User = get_user_model()
 
 
-class SignupView(CheckRecaptchaMixin, CreateView):
+class SignupView(AnonymousRequiredMixin, CheckRecaptchaMixin, CreateView):
     form_class = SignupForm
     model = User
     template_name = 'accounts/signup.html'
@@ -83,7 +84,7 @@ class SignupView(CheckRecaptchaMixin, CreateView):
             return HttpResponseRedirect(self.request.path_info)
 
 
-class CustomLoginView(LoginView):
+class CustomLoginView(AnonymousRequiredMixin, LoginView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
