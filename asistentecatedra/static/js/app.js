@@ -5,6 +5,9 @@ $(document).ready(function(){
     var secondaryColor = '#2c3e50';
     var white = '#fff';
 
+    // Disables autofocus
+    $('input').blur();
+
     // Menu Button
     $('#menu-button').click(function() {
         // Funcionamiento del botón para abrir el menú
