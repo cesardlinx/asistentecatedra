@@ -12,7 +12,7 @@ def send_confirmation_helper(user, domain):
     protocol = settings.PROTOCOL
     mail_subject = 'Asistente de Cátedra | '\
                    'Confirmar Correo Electrónico'
-    uid = urlsafe_base64_encode(force_bytes(user.pk)).decode()
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = account_token_generator.make_token(user)
     html_email_body = render_to_string('accounts/confirm_email.html', {
         'user': user,

@@ -10,13 +10,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROTOCOL = config('PROTOCOL')
 DOMAIN = config('DOMAIN')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
@@ -101,7 +96,6 @@ CKEDITOR_CONFIGS = {
 }
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -155,8 +149,6 @@ WSGI_APPLICATION = 'asistentecatedra.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -169,28 +161,7 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', # noqa E501
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',  # noqa E501
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',  # noqa E501
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',  # noqa E501
-    },
-]
-
-
 # Internationalization
-# https://docs.djangoproject.com/en/2.0/topics/i18n/
-
 LANGUAGE_CODE = 'es-ec'
 
 TIME_ZONE = 'America/Guayaquil'
@@ -203,8 +174,6 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.0/howto/static-files/
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [  # noqa F811
     os.path.join(BASE_DIR, 'static')
@@ -241,9 +210,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',  # noqa E501
     },
-    {'NAME': 'accounts.validators.NumberValidator', },
-    {'NAME': 'accounts.validators.UppercaseValidator', },
-    {'NAME': 'accounts.validators.LowercaseValidator', },
 ]
 
 # Recaptcha

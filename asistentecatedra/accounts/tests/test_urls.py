@@ -48,9 +48,9 @@ class TestAccountsUrls:
     def test_password_reset_confirm(self):
         user = User.objects.create_user(
             email='tester@tester.com',
-            password='P455w0rd'
+            password='P455w0rd_testing'
         )
-        uid = urlsafe_base64_encode(force_bytes(user.pk)).decode()
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         path = reverse('password_reset_confirm', kwargs={
             'uidb64': uid,

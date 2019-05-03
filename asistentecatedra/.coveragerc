@@ -1,9 +1,0 @@
-[run]
-omit =
-    *apps.py,
-    *migrations/*,
-    *settings*,
-    *tests/*,
-    *wsgi.py,
-    accounts/mixins.py
-    manage.py

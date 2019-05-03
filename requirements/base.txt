@@ -1,0 +1,29 @@
+# Django
+Django==2.2.1
+pytz==2019.1
+sqlparse==0.3.0
+
+# Image manipulation
+Pillow==6.0.0
+
+# Python-Postgresql database adapter
+psycopg2-binary==2.8.2
+
+# Environoment variables reading
+python-decouple==3.1
+
+# CkEditor
+django-ckeditor==5.7.0
+django-js-asset==1.2.2
+
+# Widget tweaks
+django-widget-tweaks==1.4.3
+
+# Requests
+requests==2.21.0
+
+# Requests dependencies
+urllib3==1.25.2
+certifi==2019.3.9
+chardet==3.0.4
+idna==2.8

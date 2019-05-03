@@ -1,7 +1,7 @@
 from django import forms
-from django.contrib.auth import authenticate, get_user_model
-from django.contrib.auth.forms import (AuthenticationForm, PasswordChangeForm,
-                                       PasswordResetForm, SetPasswordForm,
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import (PasswordChangeForm,
+                                       SetPasswordForm,
                                        UserCreationForm)
 from django.forms import ModelForm
 from django.utils.safestring import mark_safe
