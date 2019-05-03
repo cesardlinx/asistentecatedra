@@ -115,7 +115,7 @@ INSTALLED_APPS = [
     'asistente',
     'ckeditor',
     'ckeditor_uploader',
-    'widget_tweaks'
+    'widget_tweaks',
 ]
 
 SITE_ID = config('SITE_ID', cast=int)
