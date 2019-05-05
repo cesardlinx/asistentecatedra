@@ -3,6 +3,9 @@ Django==2.2.1
 pytz==2019.1
 sqlparse==0.3.0
 
+# Settings Management
+django-split-settings==0.3.0
+
 # Image manipulation
 Pillow==6.0.0
 
