@@ -96,11 +96,18 @@ class User(AbstractUser):
         validators=[MinLengthValidator(3), validate_alpha],
         null=True
     )
+    photo = models.ImageField(
+        upload_to='photos/',
+        verbose_name='foto',
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(['jpg', 'png', 'svg'])]
+    )
     email = models.EmailField(_('email'), unique=True)
     institution = models.CharField(max_length=100, null=True)
     institution_logo = models.ImageField(
         upload_to='logos/',
-        verbose_name='logos',
+        verbose_name='logo de la institución',
         blank=True,
         null=True,
         validators=[FileExtensionValidator(['jpg', 'png', 'svg'])]

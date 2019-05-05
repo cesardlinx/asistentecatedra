@@ -24,7 +24,7 @@
                             <p>{{ user.first_name }} {{ user.last_name }}</p>
                         </div>
                     </div>
-                    <form method="POST" id="profileForm">
+                    <form method="POST" id="profileForm" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         <div class="form-group row">
@@ -51,6 +51,11 @@
                             {{ form.institution_logo }}
                             </div>
                         </div>
+                        {% if user.institution_logo %}
+                            <div>
+                                <img src="{{ user.institution_logo.url }}" alt="logo de la institución">
+                            </div>
+                        {% endif %}
 
                         <div class="notifications">
                             <div class="notifications-body">
