@@ -8,9 +8,6 @@ $(document).ready(function() {
             new_password1: {
                 required: true,
                 minlength: 8,
-                numbers: true,
-                uppercase: true,
-                lowercase: true
             },
             new_password2: {
                 required: true,

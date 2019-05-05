@@ -41,9 +41,6 @@ $(document).ready(function() {
             password1: {
                 required: true,
                 minlength: 8,
-                numbers: true,
-                uppercase: true,
-                lowercase: true
             },
             password2: {
                 required: true,

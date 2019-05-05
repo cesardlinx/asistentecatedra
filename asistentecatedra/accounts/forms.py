@@ -36,8 +36,7 @@ class SignupForm(UserCreationForm):
         """Makes email to be required"""
         super().__init__(*args, **kwargs)
         self.fields['password1'].help_text = \
-            'La contraseña debe tener al menos 8 caracteres, '\
-            'incluidos un número y una mayúscula.'
+            'La contraseña debe tener al menos 8 caracteres'
         self.fields['institution'].label = 'Institución'
 
 
@@ -80,7 +79,6 @@ class CustomSetPasswordForm(SetPasswordForm):
         widget=forms.PasswordInput,
         strip=False,
         help_text='La contraseña debe tener al menos 8 caracteres, '
-                  'incluidos un número y una mayúscula.'
     )
 
 
@@ -94,5 +92,4 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         widget=forms.PasswordInput,
         strip=False,
         help_text='La contraseña debe tener al menos 8 caracteres, '
-                  'incluidos un número y una mayúscula.'
     )
