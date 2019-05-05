@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block titulo %}
+    Asistente de Cátedra | Perfil de Usuario
+{% endblock titulo %}
+
+{% block content %}
+
+    <!-- content starts here -->
+    <section class="content">
+        <section class="profile">
+            <section class="container">
+                <h3 class="main-title">Perfil</h3>
+                <div class="profile-content">
+                    <div class="profile-img-container">
+                        <div class="user">
+                            <div class="profile-img">
+                                <img class="image" src="{% static 'img/user.png' %}" alt="Usuario">
+                                <span class="premium-badge">PREMIUM</span>
+                            </div>
+                            <p>{{ user.first_name }} {{ user.last_name }}</p>
+                        </div>
+                    </div>
+                    <form method="POST" id="profileForm">
+                        {% csrf_token %}
+
+                        <div class="form-group row">
+                            {{ form.first_name | add_label_class:"col-sm-2 col-form-label" }}
+                            <div class="col-sm-10">
+                            {% render_field form.first_name class="form-control" %}
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            {{ form.last_name | add_label_class:"col-sm-2 col-form-label" }}
+                            <div class="col-sm-10">
+                            {% render_field form.last_name class="form-control" %}
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            {{ form.institution | add_label_class:"col-sm-2 col-form-label" }}
+                            <div class="col-sm-10">
+                            {% render_field form.institution class="form-control" %}
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            {{ form.institution_logo | add_label_class:"col-sm-2 col-form-label" }}
+                            <div class="col-sm-10">
+                            {{ form.institution_logo }}
+                            </div>
+                        </div>
+
+                        <div class="notifications">
+                            <div class="notifications-body">
+                                <p class="notifications-text">
+                                    Deseo notificaciones, boletines informativos y promociones por
+                                    parte del equipo de Asistente de Cátedra.
+                                </p>
+                                <div class="toggle-switch-wrapper vertically-center">
+                                    <label class="toggle-switch" for="id_allow_notifications">
+                                        {{ form.allow_notifications }}
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="action-buttons">
+                    <div class="action-btns-wrapper">
+                        <form action="">
+                            <button class="secondary-button delete-btn">
+                                Eliminar Cuenta
+                            </button>
+                        </form>
+                        <button class="primary-button" id="guardarCambios">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+        </section>
+    </section>
+    <!-- content ends here -->
+
+{% endblock content %}
+
+{% block scripts %}
+    <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
+    <script src="{% static 'js/helpers/validators.js' %}"></script>
+    <script src="{% static 'js/accounts/profile.js' %}"></script>
+{% endblock scripts %}

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block titulo %}
+    Asistente de Cátedra | Login
+{% endblock titulo %}
+
+{% block content %}
+
+    <section class="auth">
+        <section class="container">
+            <div class="auth-img">
+                <img class="imagen" src="{% static 'img/logo_grande.png' %}" alt="Asistente de Cátedra">
+            </div>
+            <h3>Bienvenido a "Asistente de Cátedra"</h3>
+            <form method="POST" id="loginForm" novalidate>
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="form-group-float">
+                    {{ form.username | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.username class="form-control floating-input" %}
+                </div>
+                <div class="form-group-float">
+                    {{ form.password | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.password class="form-control floating-input" %}
+                </div>
+                <div><a class="modal-opening" modal-target="#password-reset" href="#">¿Olvidaste tu contraseña?</a></div>
+                <button type="submit" class="primary-button submit-btn">INGRESO</button>
+            </form>
+            <div class="auth-footer">
+                <p>¿No tienes cuenta?</p>
+                <a href="{% url 'signup' %}">Regístrate</a>
+            </div>
+        </section>
+    </section>
+
+    <div id="password-reset" class="modal-overlay">
+        <div class="modal-contenido">
+            <h4><span class="fas fa-key"></span> Reestablecer Contraseña</h4>
+            <p>
+                ¿Ha olvidado su clave? Introduzca su dirección de correo
+                a continuación y le enviaremos por correo electrónico las
+                instrucciones para establecer una nueva.
+            </p>
+            <form action="{% url 'password_reset' %}" method="POST" id="passwordResetForm" novalidate>
+                {% csrf_token %}
+                {% include 'accounts/includes/password_reset_form.html' %}
+                <button type="submit" class="primary-button">Enviar Correo</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block scripts %}
+    <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
+    <script src="{% static 'js/vendors/js-cookie/js.cookie.js' %}"></script>
+    <script src="{% static 'js/accounts/login.js' %}"></script>
+    <script src="{% static 'js/accounts/password_reset.js' %}"></script>
+{% endblock scripts %}

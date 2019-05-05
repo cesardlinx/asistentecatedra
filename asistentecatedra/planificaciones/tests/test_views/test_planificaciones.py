@@ -3,6 +3,9 @@ from django.test import RequestFactory
 from django.contrib.auth.models import AnonymousUser
 from mixer.backend.django import mixer
 from planificaciones import views
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 pytestmark = pytest.mark.django_db
 
 
@@ -17,7 +20,7 @@ class TestPlanificacionesTemplateView:
 
     def test_auth_user(self):
         """Tests that an authenticated user can access the view"""
-        user = mixer.blend('auth.User')
+        user = mixer.blend(User)
         request = RequestFactory().get('/')
         request.user = user
         response = views.PlanificacionesTemplateView.as_view()(request)

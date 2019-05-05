@@ -1,7 +1,7 @@
 import pytest
 from mixer.backend.django import mixer
 from django.utils.text import Truncator
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from planificaciones.models.area import Area
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.bloque_curricular import BloqueCurricular
@@ -17,7 +17,9 @@ from planificaciones.models.indicador import Indicador
 from planificaciones.models.plan_clase import PlanClase
 from planificaciones.models.elemento_curricular import ElementoCurricular
 from planificaciones.models.proceso_didactico import ProcesoDidactico
+
 pytestmark = pytest.mark.django_db
+User = get_user_model()
 
 
 class TestArea:

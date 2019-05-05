@@ -49,7 +49,7 @@ body {
 .secondary-button {
   font-size: .9rem;
   color: #16a085;
-  padding: 0 .75em;
+  padding: .1em .75em;
   border-radius: 50px;
   background: transparent;
   height: 2em;
@@ -2146,24 +2146,25 @@ footer {
   }
 }
 
-.login-container {
+.auth {
+  padding-top: 1em;
   background: #ecf0f1;
 }
 
-.login .container {
+.auth .container {
   text-align: center;
 }
 
-.login .container .login-img {
-  margin: 1em auto;
+.auth .container .auth-img {
+  margin: 0 auto 1em;
   width: 130px;
 }
 
-.login .container h3 {
+.auth .container h3 {
   font-weight: lighter;
 }
 
-.login .container form {
+.auth .container form {
   margin: 2em auto;
   max-width: 450px;
   padding: 2em 4em;
@@ -2173,31 +2174,39 @@ footer {
   background: #fff;
 }
 
-.login .container form a {
+.auth .container form .form-check-label {
+  font-size: .8rem;
+}
+
+.auth .container form a {
   display: block;
   text-align: right;
   font-size: .8rem;
   color: #168973;
 }
 
-.login .container form a:hover {
+.auth .container form a.terms {
+  display: inline;
+}
+
+.auth .container form a:hover {
   color: #168973;
 }
 
-.login .registrate {
-  margin-bottom: 2em;
+.auth .auth-footer {
+  padding-bottom: 2em;
 }
 
-.login .registrate p {
+.auth .auth-footer p {
   margin-bottom: 0;
 }
 
-.login .registrate a {
+.auth .auth-footer a {
   color: #168973;
   font-size: .9rem;
 }
 
-.login .registrate a:hover {
+.auth .auth-footer a:hover {
   color: #168973;
 }
 
@@ -2634,54 +2643,6 @@ footer {
   width: auto;
 }
 
-@media only screen and (min-width: 768px) {
-  .register .container {
-    max-width: 720px;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  .register .container .submit-btn {
-    display: block;
-    margin: 0 auto;
-    width: 50%;
-  }
-}
-
-.register-header {
-  margin: 2em 0;
-}
-
-@media only screen and (min-width: 992px) {
-  .register-header {
-    width: 70%;
-  }
-}
-
-.register-header p {
-  font-weight: lighter;
-}
-
-.register-footer {
-  margin: 2em auto 4em;
-  font-size: .8rem;
-  text-align: center;
-}
-
-.register-footer p {
-  display: inline-block;
-  margin: 0 .5em;
-}
-
-.register-footer a {
-  display: inline-block;
-  color: #168973;
-}
-
-.register-footer a:hover {
-  color: #168973;
-}
-
 .books {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -2858,6 +2819,33 @@ footer {
   font-size: 1rem;
 }
 
+@media only screen and (min-width: 768px) {
+  .password .container {
+    max-width: 800px;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .password .container .submit-btn {
+    display: block;
+    margin: 0 auto;
+    width: 50%;
+  }
+}
+
+.password .container form {
+  margin-bottom: 2em;
+}
+
+.password-header {
+  margin: 2em 0;
+}
+
+.password-header p {
+  margin: 1em 0;
+  font-weight: lighter;
+}
+
 .card-header {
   background: #2c3e50;
 }
@@ -2874,6 +2862,15 @@ footer {
 
 .card-header button:hover {
   color: #fff;
+}
+
+.form-text {
+  font-size: .75rem;
+  padding-left: 13px;
+}
+
+.alert {
+  margin-bottom: 0;
 }
 
 .StripeElement {
@@ -2937,5 +2934,13 @@ footer {
 .ui-datepicker .ui-datepicker-calendar a:hover {
   color: #fff;
   background: #2c3e50;
+}
+
+.errorlist {
+  list-style: none;
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1em;
+  margin-bottom: 3em;
 }
 /*# sourceMappingURL=style.css.map */

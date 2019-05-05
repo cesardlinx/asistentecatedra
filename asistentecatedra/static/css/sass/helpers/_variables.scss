@@ -31,6 +31,8 @@ $blue-light: lighten($blue, 12%);
 $indigo: #6331ff;
 $pink: #9b54b6;
 $danger: #dc3545;
+$error-dark: #721c24;
+$error: #f8d7da;
 $danger-dark: darken($danger, 10%);
 $danger-light: lighten($danger, 10%);
 $danger-25: rgba($danger, .25);

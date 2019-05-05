@@ -10,6 +10,7 @@ from planificaciones.models.destreza import Destreza
 from planificaciones.models.unidad import Unidad
 from planificaciones.models.subnivel import Subnivel
 from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
+from django.core.exceptions import ValidationError
 pytestmark = pytest.mark.django_db
 
 
@@ -149,8 +150,11 @@ class TestElementoCurricularFormset(TestPlanClase):
         assert formset.is_valid() is True, 'The formset should be valid'
 
     def test_empty_data(self):
-        formset = ElementoCurricularFormset({})
-        assert formset.is_valid() is False, 'The formset should be invalid'
+        with pytest.raises(ValidationError,
+                           match='Los datos de ManagementForm faltan o han '
+                                 'sido manipulados'):
+            formset = ElementoCurricularFormset({})
+            formset.is_valid()
 
     def test_invalid_data(self):
         data = self.data

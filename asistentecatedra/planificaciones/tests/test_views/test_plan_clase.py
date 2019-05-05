@@ -17,6 +17,9 @@ from planificaciones.models.elemento_curricular import ElementoCurricular
 from planificaciones.models.proceso_didactico import ProcesoDidactico
 from django.core.exceptions import ValidationError
 from django.http.response import Http404
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 pytestmark = pytest.mark.django_db
 
 
@@ -133,7 +136,7 @@ class PlanClaseTestCaseCreateView(PlanClaseTestCase):
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
-        self.user = mixer.blend('auth.User')
+        self.user = mixer.blend(User)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -198,7 +201,7 @@ class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
-        self.user = mixer.blend('auth.User')
+        self.user = mixer.blend(User)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""

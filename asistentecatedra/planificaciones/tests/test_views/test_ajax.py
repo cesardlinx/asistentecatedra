@@ -12,6 +12,9 @@ from planificaciones.models.destreza import Destreza
 from planificaciones.models.unidad import Unidad
 from planificaciones.models.subnivel import Subnivel
 from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 pytestmark = pytest.mark.django_db
 
 
@@ -48,7 +51,7 @@ class TestLoadCursosView(AjaxTestCase):
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
-        self.user = mixer.blend('auth.User')
+        self.user = mixer.blend(User)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -84,7 +87,7 @@ class TestLoadObjetivosView(AjaxTestCase):
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
-        self.user = mixer.blend('auth.User')
+        self.user = mixer.blend(User)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -127,7 +130,7 @@ class TestLoadDestrezasView(AjaxTestCase):
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
-        self.user = mixer.blend('auth.User')
+        self.user = mixer.blend(User)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -166,7 +169,7 @@ class TestLoadIndicadoresView(AjaxTestCase):
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
-        self.user = mixer.blend('auth.User')
+        self.user = mixer.blend(User)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""

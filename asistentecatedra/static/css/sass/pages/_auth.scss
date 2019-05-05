@@ -1,15 +1,14 @@
-//** Login
+//** Login and Register Styles
 
-.login-container {
+.auth {
+  padding-top: 1em;
   background: $gray-soft;
-}
 
-.login {
   .container {
     text-align: center;
 
-    .login-img {
-      margin: 1em auto;
+    .auth-img {
+      margin: 0 auto 1em;
       width: 130px;
     }
 
@@ -26,11 +25,19 @@
       border-radius: 10px;
       background: $white;
 
+      .form-check-label {
+        font-size: .8rem;
+      }
+
       a {
         display: block;
         text-align: right;
         font-size: .8rem;
         color: $turquoise-dark;
+
+        &.terms {
+          display: inline;
+        }
 
         &:hover {
           color: $turquoise-dark;
@@ -39,8 +46,8 @@
     }
   }
 
-  .registrate {
-    margin-bottom: 2em;
+  .auth-footer {
+    padding-bottom: 2em;
 
     p {
       margin-bottom: 0;

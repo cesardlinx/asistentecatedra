@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block titulo %}
+    Asistente de Cátedra | Registro
+{% endblock titulo %}
+
+{% block head_scripts %}
+        <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?render=6Leq1I0UAAAAACZSr9Fa8VaVs7vEeSepcq-a97L6"></script>
+{% endblock head_scripts %}
+
+{% block content %}
+
+    <section class="auth">
+        <section class="container">
+            <div class="auth-img">
+                <img class="imagen" src="{% static 'img/logo_grande.png' %}" alt="Asistente de Cátedra">
+            </div>
+            <h3>Bienvenido a "Asistente de Cátedra"</h3>
+            <form method="POST" novalidate id="signUpForm">
+                {% csrf_token %}
+                <div class="form-group-float">
+                    {{ form.first_name | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.first_name class="form-control floating-input" %}
+                </div>
+                <div class="form-group-float">
+                    {{ form.last_name | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.last_name class="form-control floating-input" %}
+                </div>
+                <div class="form-group-float">
+                    {{ form.email | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.email class="form-control floating-input" %}
+                </div>
+                <div class="form-group-float">
+                    {{ form.password1 | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.password1 class="form-control floating-input" %}
+                    <small class="form-text text-muted">
+                        {{ form.password1.help_text }}
+                    </small>
+                </div>
+                <div class="form-group-float">
+                    {{ form.password2 | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.password2 class="form-control floating-input" %}
+                </div>
+                <div class="form-group-float">
+                    {{ form.institution | add_label_class:"form-control-placeholder" }}
+                    {% render_field form.institution class="form-control floating-input" %}
+                </div>
+                <div class="form-check">
+                    {% render_field form.terms class="form-check-input" %}
+                    {{ form.terms | add_label_class:"form-check-label" }}
+                </div>
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                <button type="submit" class="primary-button submit-btn">REGÍSTRATE</button>
+            </form>
+            <div class="auth-footer">
+                <p>¿Ya estas registrado?</p><a href="{% url 'login' %}">Inicia Sesión</a>
+            </div>
+        </section>
+    </section>
+
+{% endblock content %}
+
+{% block scripts %}
+    <script src="{% static 'js/vendors/jquery-validation/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'js/vendors/jquery-validation/messages_es.js' %}"></script>
+    <script src="{% static 'js/vendors/js-cookie/js.cookie.js' %}"></script>
+    <script src="{% static 'js/vendors/recaptchav3/recaptchaToken.js' %}"></script>
+    <script src="{% static 'js/helpers/validators.js' %}"></script>
+    <script src="{% static 'js/accounts/signup.js' %}"></script>
+{% endblock scripts %}
