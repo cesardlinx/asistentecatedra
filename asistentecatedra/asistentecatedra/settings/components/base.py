@@ -59,12 +59,6 @@ ROOT_URLCONF = 'asistentecatedra.urls'
 
 WSGI_APPLICATION = 'asistentecatedra.wsgi.application'
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [  # noqa F811
-    os.path.join(BASE_DIR, 'static')
-]
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 

@@ -30,3 +30,6 @@ urllib3==1.25.2
 certifi==2019.3.9
 chardet==3.0.4
 idna==2.8
+
+# Javascript Frontend Dependencies
+django-npm==1.0.0

@@ -1,0 +1,37 @@
+{
+  "name": "asistentecatedra",
+  "version": "1.0.0-beta",
+  "description": "Aplicación web en Django que ayuda a docentes en Ecuador a la creación de planificaciónes curriculares",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cesardlinx/asistentecatedra.git"
+  },
+  "keywords": [
+    "planificaciones",
+    "Ecuador",
+    "docentes",
+    "Django"
+  ],
+  "author": "David Padilla",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cesardlinx/asistentecatedra/issues"
+  },
+  "homepage": "https://github.com/cesardlinx/asistentecatedra#readme",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.8.1",
+    "autosize": "^4.0.2",
+    "bootstrap": "^4.3.1",
+    "cropperjs": "^1.5.1",
+    "jquery": "^3.4.1",
+    "jquery-ui-dist": "^1.12.1",
+    "jquery-validation": "^1.19.0",
+    "js-cookie": "^2.2.0",
+    "popper.js": "^1.15.0",
+    "stripe": "^6.31.2"
+  }
+}

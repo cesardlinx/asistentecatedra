@@ -77,3 +77,6 @@ geckodriver.log
 .sass-lint.yml
 .vscode/
 
+# Static files
+static_root
+

@@ -6,6 +6,7 @@ ENV = config('DJANGO_ENV') or 'development'
 base_settings = [
     "components/base.py",
     "components/ckeditor.py",
+    "components/static.py",
     "components/common.py",
     "components/database.py",
     "components/email.py",
