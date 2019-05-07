@@ -72,18 +72,20 @@ def send_confirmation_view(request):
     Vista para enviar correo de confirmacion de email desde un
     usuario logeado
     """
-    if not request.user.email_confirmed:
-        domain = get_current_site(request).domain
-        send_confirmation_helper(request.user, domain)
-        previous_url = request.META.get('HTTP_REFERER')
-        messages.success(
-            request,
-            'Un mensaje ha sido enviado a tu correo para que '
-            'verifiques tu cuenta.'
-        )
+    if request.method == 'GET':
+        if not request.user.email_confirmed:
+            domain = get_current_site(request).domain
+            send_confirmation_helper(request.user, domain)
+            messages.success(
+                request,
+                'Un mensaje ha sido enviado a tu correo para que '
+                'verifiques tu cuenta.'
+            )
+        else:
+            messages.info(request, 'Su cuenta ya está verificada')
+        return redirect('profile', pk=request.user.pk, slug=request.user.slug)
     else:
-        messages.info(request, 'Su cuenta ya está verificada')
-    return redirect(previous_url)
+        return HttpResponse(status=405)
 
 
 class CustomLoginView(AnonymousRequiredMixin, LoginView):
@@ -113,19 +115,22 @@ def unique_email_validator(request):
 
 
 def exists_email_validator(request):
-    """Validador remoto para verificar si existe un correo"""
-    response_str = "false"
-    if request.is_ajax():
-        email = request.POST.get("email")
-        if email:
-            try:
-                get_object_or_404(User, email=email)
-            except Http404:
-                response_str = "false"  # User doesn't exists
-            else:
-                response_str = "true"  # User already exists
+    """Validador remoto para verificar si existe ya el email de un usuario"""
+    if request.method == 'POST':
+        response_str = 'false'
+        if request.is_ajax():
+            email = request.POST.get('email')
+            if email:
+                try:
+                    get_object_or_404(User, email=email)
+                except Http404:
+                    response_str = 'false'  # User doesn't exists
+                else:
+                    response_str = 'true'  # User already exists
 
-    return HttpResponse("%s" % response_str)
+        return HttpResponse('{}'.format(response_str))
+    else:
+        return HttpResponse(status=405)
 
 
 def confirm_email(request, uidb64, token):
@@ -144,9 +149,7 @@ def confirm_email(request, uidb64, token):
         user.save()
         login(request, user)
         messages.success(request, 'Su correo ha sido confirmado exitosamente')
-        if request.user.is_authenticated:
-            return redirect('planificaciones')
-        return redirect('login')
+        return redirect('planificaciones')
     else:
         messages.error(request, 'Error. El enlace no es válido o ha expirado.')
         return redirect('home')

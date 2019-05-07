@@ -163,10 +163,70 @@ class TestSignupView(SignupTestCase):
             'The view should not create a user'
 
 
+class TestSendConfirmationView(TestCase):
+    """
+    Caso de prueba para probar el correo electrónico enviado al usuario
+    independiente del registro para que este pueda verificar su email.
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+        self.url = reverse('send-confirmation')
+
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.send_confirmation_view(request)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_can_access_only_by_get(self):
+        """Tests the view can't be access by a get method"""
+        request = RequestFactory().head('/')
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.send_confirmation_view(request)
+        assert response.status_code == 405, 'Method should not be allowed'
+
+    def test_user_sent_confirmation_email(self):
+        """
+        Tests user sends a confirmation email
+        """
+        self.client.login(email=self.user.email, password='P455w0rd_testing')
+        response = self.client.get(
+            self.url,
+            follow=True
+        )
+        messages = list(response.context.get('messages'))
+        assert ('Un mensaje ha sido enviado a tu correo para que '
+                'verifiques tu cuenta.') == messages[0].message
+        assert len(mail.outbox) == 1, 'Should send the email'
+
+    def test_user_has_email_already_confirmed(self):
+        """
+        Tests that when a user has already confirmed his email
+        no email is send
+        """
+        self.user.email_confirmed = True
+        self.user.save()
+        self.user.refresh_from_db()
+
+        self.client.login(email=self.user.email, password='P455w0rd_testing')
+        response = self.client.get(
+            self.url,
+            follow=True
+        )
+        messages = list(response.context.get('messages'))
+        assert 'Su cuenta ya está verificada' == messages[0].message
+        assert len(mail.outbox) == 0, 'Should not send the email'
+
+
 class TestConfirmationEmail(SignupTestCase):
     """
     Caso de prueba para probar el correo electrónico enviado al usuario
-    para que este pueda verificar su email.
+    luego del registro para que este pueda verificar su email.
     """
     @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
            autospec=True)
@@ -180,7 +240,7 @@ class TestConfirmationEmail(SignupTestCase):
 
         # Site configuration
         site = Site.objects.get(pk=1)
-        site.domain = 'localhost:8000'
+        site.domain = settings.DOMAIN
         site.save()
 
         response = self.client.post(self.url, self.data)
@@ -277,6 +337,54 @@ class TestEmailConfirmationView(SignupTestCase):
             'The user should not have the email confirmed'
         self.assertContains(
             response, 'Error. El enlace no es válido o ha expirado')
+
+
+class TestExistsEmailValidator(TestCase):
+    """
+    Caso de prueba para probar la vista que comprueba si existe el email
+    de un usuario en la base de datos
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+        self.url = reverse('ajax_unique_email_validator')
+
+    def test_post_access_only(self):
+        """Solo se puede acceder a la vista mediante método post"""
+        request = RequestFactory().get('/')
+        response = views.exists_email_validator(request)
+        assert response.status_code == 405, 'Not Allowed Method'
+
+    def test_false_if_not_requested_through_ajax(self):
+        """Si el request no viene mediante ajax retorna false"""
+        request = RequestFactory().post('/', {'email': 'tester@tester.com'})
+        response = views.exists_email_validator(request)
+        assert response.status_code == 200
+        assert response.content.decode("utf-8") == 'false'
+
+    def test_user_exists(self):
+        """Test cuando un usuario existe"""
+        request = RequestFactory().post(
+            '/',
+            {'email': 'tester@tester.com'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        response = views.exists_email_validator(request)
+        assert response.status_code == 200
+        assert response.content.decode("utf-8") == 'true'
+
+    def test_user_doesnt_exists(self):
+        """Test cuando un usuario no existe"""
+        request = RequestFactory().post(
+            '/',
+            {'email': 'asistente@tester.com'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        response = views.exists_email_validator(request)
+        assert response.status_code == 200
+        assert response.content.decode("utf-8") == 'false'
 
 
 class TestProfileView(TestCase):
