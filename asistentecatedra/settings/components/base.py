@@ -61,7 +61,7 @@ WSGI_APPLICATION = 'asistentecatedra.wsgi.application'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+ALLOWED_UPLOAD_IMAGES = ('gif', 'bmp', 'jpeg', 'jpg', 'png')
 
 MIGRATION_MODULES = {
     'sites': 'asistentecatedra.fixtures.sites_migrations',

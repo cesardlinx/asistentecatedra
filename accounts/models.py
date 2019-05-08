@@ -1,3 +1,6 @@
+from PIL import Image
+from io import BytesIO
+from django.core.files import File
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
@@ -101,7 +104,8 @@ class User(AbstractUser):
         verbose_name='foto',
         blank=True,
         null=True,
-        validators=[FileExtensionValidator(['jpg', 'png', 'svg'])]
+        validators=[FileExtensionValidator(
+            ('gif', 'bmp', 'jpeg', 'jpg', 'png'))]
     )
     email = models.EmailField(_('email'), unique=True)
     institution = models.CharField(max_length=100, null=True)
@@ -110,7 +114,8 @@ class User(AbstractUser):
         verbose_name='logo de la institución',
         blank=True,
         null=True,
-        validators=[FileExtensionValidator(['jpg', 'png', 'svg'])]
+        validators=[FileExtensionValidator(
+            ('gif', 'bmp', 'jpeg', 'jpg', 'png'))]
     )
     allow_notifications = models.BooleanField(default=True)
     email_confirmed = models.BooleanField(default=False)
@@ -130,8 +135,32 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         """Creates the user's slug"""
+        # User slug
         complete_name = '{0} {1}'.format(self.first_name, self.last_name)
         self.slug = slugify(complete_name)
+
+        if self.institution_logo:
+            # Converting imagefield to pil image
+            logo = Image.open(self.institution_logo)
+            maxsize = (150, 150)
+            logo.thumbnail(maxsize, Image.ANTIALIAS)
+
+            # Converting pil image to imagefield
+            # Binary stream
+            blob = BytesIO()
+            try:
+                # Saving file
+                # saves modified file to binary stream
+                logo.save(blob, format=logo.format)
+                # creates the image field from modified image in stream
+                self.institution_logo.save(self.institution_logo.name,
+                                           File(blob), save=False)
+                # Saves in database
+                # super().save(*args, **kwargs)
+            except IOError:
+                pass
+            finally:
+                blob.close()
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

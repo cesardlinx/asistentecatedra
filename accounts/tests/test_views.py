@@ -130,8 +130,9 @@ class TestSignupView(SignupTestCase):
         self.assertRedirects(response, self.url)
         messages = list(get_messages(response.wsgi_request))
         assert len(messages) == 1, 'There should be one message'
-        assert 'reCAPTCHA no válido. Por favor intente de nuevo.'\
-               == messages[0].message, 'Should return error message'
+        assert ('reCAPTCHA no válido. Por favor intente de nuevo recargando '
+                'la página.') == messages[0].message, \
+            'Should return error message'
         assert messages[0].tags == 'alert-danger', \
             'There should be an error message.'
 

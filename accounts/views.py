@@ -39,28 +39,37 @@ class SignupView(AnonymousRequiredMixin, CheckRecaptchaMixin, CreateView):
             user = form.save()
             user.save()
 
-            # Setting username
-            leading_part_of_email = user.email.split('@', 1)[0]
-            derived_username = '{}_{}'.format(leading_part_of_email, user.pk)
-            user.username = derived_username
-            user.save()
+            if user.pk:
+                # Setting username
+                leading_part_of_email = user.email.split('@', 1)[0]
+                derived_username = '{}_{}'.format(leading_part_of_email,
+                                                  user.pk)
+                user.username = derived_username
+                user.save()
 
-            # Email sending
-            domain = get_current_site(self.request).domain
-            send_confirmation_helper(user, domain)
+                # Email sending
+                domain = get_current_site(self.request).domain
+                send_confirmation_helper(user, domain)
 
-            # Authentication and Login
-            login(self.request, user)
-            messages.success(
-                self.request,
-                'Exito!, un mensaje ha sido enviado a tu correo para que '
-                'verifiques tu cuenta.'
-            )
-            return redirect('planificaciones')
+                # Authentication and Login
+                login(self.request, user)
+                messages.success(
+                    self.request,
+                    'Exito!, un mensaje ha sido enviado a tu correo para que '
+                    'verifiques tu cuenta.'
+                )
+                return redirect('planificaciones')
+            else:
+                messages.error(
+                    self.request,
+                    'Error!, un error ha ocurrido al intentar guardar usuario'
+                )
+                return redirect('signup')
         else:
             messages.error(
                 self.request,
-                'reCAPTCHA no válido. Por favor intente de nuevo.'
+                'reCAPTCHA no válido. Por favor intente de nuevo recargando '
+                'la página.'
             )
             # Regresar a la misma página
             return HttpResponseRedirect(self.request.path_info)
