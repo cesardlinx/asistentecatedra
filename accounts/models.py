@@ -184,6 +184,28 @@ class User(AbstractUser):
         """Defines the absolute url for users which is the profile view"""
         return reverse('profile', kwargs={'pk': self.pk, 'slug': self.slug})
 
+    @property
+    def get_logo(self):
+        """
+        Gets the logo url if exists, otherwise takes the default logo
+        """
+        if not self.institution_logo:
+            url = static('img/defaults/default-school-logo.png')
+            return url
+        else:
+            return self.institution_logo.url
+
+    @property
+    def get_photo(self):
+        """
+        Gets the photo url if exists, otherwise takes the default photo
+        """
+        if not self.photo:
+            url = static('img/defaults/user.png')
+            return url
+        else:
+            return self.photo.url
+
 
 class Subscription(models.Model):
     """

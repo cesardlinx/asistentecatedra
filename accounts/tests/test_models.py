@@ -123,6 +123,24 @@ class TestUser(TestCase):
         assert len(os.listdir(photo_path)) == 1, \
             'There should be only one file'
 
+    def test_get_logo_property(self):
+        """Tests the get_logo user property"""
+        assert self.user.get_logo == \
+            '/static/img/defaults/default-school-logo.png', \
+            'Should be equal to the default image without a logo'
+        self.user.institution_logo = self.img
+        self.user.save()
+        assert '/assets/users/user_{}/logo/'.format(self.user.pk) in \
+            self.user.get_logo, 'Should be equal to the new logo'
+
+    def test_get_photo_property(self):
+        """Tests the get_photo user property"""
+        assert self.user.get_photo == \
+            '/static/img/defaults/user.png', \
+            'Should be equal to the default image without a photo'
+        self.user.photo = self.img
+        self.user.save()
+        assert '/assets/users/user_{}/photo/'.format(self.user.pk) in \
             self.user.get_photo, 'Should be equal to the new photo'
 
     def tearDown(self):
