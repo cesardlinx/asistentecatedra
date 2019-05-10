@@ -5,10 +5,12 @@ from asistente.models import Libro
 from planificaciones.models.asignatura import Asignatura
 from django.core.files import File
 from django.db.models.signals import pre_delete
+from accounts.tests.conftest import clean_test_files
+from django.test import TestCase
 pytestmark = pytest.mark.django_db
 
 
-class TestLibro:
+class TestLibro(TestCase):
     def test_model(self):
         libro = mixer.blend('asistente.Libro', archivo='libros/test_book.pdf')
         libro2 = mixer.blend('asistente.Libro')
@@ -47,8 +49,11 @@ class TestLibro:
         assert self.signal_was_called is True, \
             'Should call the pre_delete signal'
 
+    def tearDown(self):
+        clean_test_files()
 
-class TestPregunta:
+
+class TestPregunta(TestCase):
     def test_model(self):
         pregunta = mixer.blend('asistente.Pregunta')
         assert isinstance(pregunta, Pregunta), \
@@ -59,3 +64,6 @@ class TestPregunta:
             'The table should be named "preguntas"'
         assert pregunta._meta.verbose_name_plural == 'preguntas', \
             'The plural name should be "preguntas"'
+
+    def tearDown(self):
+        clean_test_files()

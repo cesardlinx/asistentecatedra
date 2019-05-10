@@ -1,9 +1,11 @@
+from io import BytesIO
+from django.core.files import File
+from PIL import Image
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import (PasswordChangeForm,
-                                       SetPasswordForm,
+from django.contrib.auth.forms import (PasswordChangeForm, SetPasswordForm,
                                        UserCreationForm)
-from django.forms import ModelForm
+from django.core.validators import MinValueValidator
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
@@ -40,7 +42,7 @@ class SignupForm(UserCreationForm):
         self.fields['institution'].label = 'Institución'
 
 
-class ProfileForm(ModelForm):
+class ProfileForm(forms.ModelForm):
     """Profile form used to update users"""
     class Meta:
         model = User
@@ -67,6 +69,100 @@ class ProfileForm(ModelForm):
         cleaned_data = {key: field for key, field in cleaned_data.items()
                         if field is not None}
         return cleaned_data
+
+
+class PhotoForm(forms.ModelForm):
+    """Form for the user to upload a photo"""
+    x = forms.FloatField(
+        widget=forms.HiddenInput(),
+        validators=[MinValueValidator(0)]
+    )
+    y = forms.FloatField(
+        widget=forms.HiddenInput(),
+        validators=[MinValueValidator(0)]
+    )
+    width = forms.FloatField(
+        widget=forms.HiddenInput(),
+        validators=[MinValueValidator(0)]
+    )
+    height = forms.FloatField(
+        widget=forms.HiddenInput(),
+        validators=[MinValueValidator(0)]
+    )
+
+    class Meta:
+        model = User
+        fields = ('photo',)
+
+    def __init__(self, *args, **kwargs):
+        """Sets the fields as required """
+        super().__init__(*args, **kwargs)
+        self.fields['x'].required = True
+        self.fields['y'].required = True
+        self.fields['width'].required = True
+        self.fields['height'].required = True
+        self.fields['photo'].required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        photo = cleaned_data.get('photo')
+        x = cleaned_data.get('x')
+        y = cleaned_data.get('y')
+        width = cleaned_data.get('width')
+        height = cleaned_data.get('height')
+
+        if photo and x and x > photo.image.size[0]:
+            raise forms.ValidationError(
+                'x field cant be bigger than image width.'
+            )
+
+        if photo and y and y > photo.image.size[1]:
+            raise forms.ValidationError(
+                'y field cant be bigger than image height.'
+            )
+
+        if photo and width and width > photo.image.size[0]:
+            raise forms.ValidationError(
+                'width field cant be bigger than image width.'
+            )
+
+        if photo and height and height > photo.image.size[1]:
+            raise forms.ValidationError(
+                'height field cant be bigger than image height.'
+            )
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        super().save(commit=False)
+
+        x = self.cleaned_data.get('x')
+        y = self.cleaned_data.get('y')
+        w = self.cleaned_data.get('width')
+        h = self.cleaned_data.get('height')
+
+        # Cropping and resizing image
+
+        image = Image.open(self.instance.photo)
+        cropped_image = image.crop((x, y, w+x, h+y))
+        resized_image = cropped_image.resize((200, 200), Image.ANTIALIAS)
+
+        stream = BytesIO()
+
+        try:
+            resized_image.save(stream, format=image.format)
+            # Saving image in instance field
+            self.instance.photo.save(self.instance.photo.name,
+                                     File(stream), save=False)
+        except IOError:
+            pass
+        finally:
+            stream.close()
+
+        if commit:
+            self.instance.save()
+
+        return self.instance
 
 
 class CustomSetPasswordForm(SetPasswordForm):

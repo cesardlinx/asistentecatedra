@@ -59,7 +59,7 @@ ROOT_URLCONF = 'asistentecatedra.urls'
 
 WSGI_APPLICATION = 'asistentecatedra.wsgi.application'
 
-MEDIA_URL = '/media/'
+MEDIA_URL = '/assets/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ALLOWED_UPLOAD_IMAGES = ('gif', 'bmp', 'jpeg', 'jpg', 'png')
 

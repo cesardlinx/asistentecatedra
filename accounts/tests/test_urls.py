@@ -26,6 +26,12 @@ class TestAccountsUrls:
         assert view.func.view_class == views.ProfileView, \
             'Should resolve to the Profile View'
 
+    def test_photo_upload(self):
+        path = reverse('photo_upload')
+        view = resolve(path)
+        assert view.func == views.photo_upload_view, \
+            'Should resolve to the PhotoUpload View'
+
     def test_login(self):
         path = reverse('login')
         view = resolve(path)

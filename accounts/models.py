@@ -9,6 +9,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
+from accounts.helpers import get_photo_path, get_logo_path
 
 from .validators import validate_alpha
 
@@ -100,7 +101,7 @@ class User(AbstractUser):
         null=True
     )
     photo = models.ImageField(
-        upload_to='photos/',
+        upload_to=get_photo_path,
         verbose_name='foto',
         blank=True,
         null=True,
@@ -110,7 +111,7 @@ class User(AbstractUser):
     email = models.EmailField(_('email'), unique=True)
     institution = models.CharField(max_length=100, null=True)
     institution_logo = models.ImageField(
-        upload_to='logos/',
+        upload_to=get_logo_path,
         verbose_name='logo de la institución',
         blank=True,
         null=True,
@@ -134,7 +135,10 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def save(self, *args, **kwargs):
-        """Creates the user's slug"""
+        """
+        Creates the user's slug, and alters the institution logo and
+        photo before saving
+        """
         # User slug
         complete_name = '{0} {1}'.format(self.first_name, self.last_name)
         self.slug = slugify(complete_name)
@@ -147,20 +151,19 @@ class User(AbstractUser):
 
             # Converting pil image to imagefield
             # Binary stream
-            blob = BytesIO()
+            stream = BytesIO()
             try:
                 # Saving file
                 # saves modified file to binary stream
-                logo.save(blob, format=logo.format)
+                logo.save(stream, format=logo.format)
                 # creates the image field from modified image in stream
                 self.institution_logo.save(self.institution_logo.name,
-                                           File(blob), save=False)
-                # Saves in database
-                # super().save(*args, **kwargs)
+                                           File(stream), save=False)
             except IOError:
                 pass
             finally:
-                blob.close()
+                stream.close()
+        # Saves in database
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

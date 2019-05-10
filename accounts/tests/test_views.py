@@ -1,6 +1,5 @@
-import os
 from unittest.mock import patch
-
+from accounts.forms import PhotoForm
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -13,15 +12,14 @@ from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.sites.models import Site
 from django.core import mail
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from PIL import Image
-
+from mixer.backend.django import mixer
 from accounts import views
 from accounts.forms import SignupForm
+from .conftest import create_test_image, clean_test_files
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -402,11 +400,6 @@ class TestProfileView(TestCase):
             institution='Colegio Benalcazar'
         )
 
-    def tearDown(self):
-        """Method to make the image removal when necesary"""
-        if os.path.isfile('media/test_image.png'):
-            os.remove('media/test_image.png')
-
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
@@ -422,6 +415,9 @@ class TestProfileView(TestCase):
                                                pk=self.user.pk,
                                                slug=self.user.slug)
         assert response.status_code == 200, 'Authenticated user can access'
+        photo_form = response.context_data.get('view').photo_form()
+        assert isinstance(photo_form, PhotoForm), \
+            'Should return an instance of the form for uploading a user photo'
         # Campos en el template (Template Testing)
         self.assertContains(response, 'name="first_name"')
         self.assertContains(response, 'name="last_name"')
@@ -432,18 +428,7 @@ class TestProfileView(TestCase):
         """Tests that user can update his data"""
 
         # Image creation
-        img = Image.new('RGB', (60, 30), color=(73, 109, 137))
-        img.save('media/test_image.png')
-
-        img = open('media/test_image.png', 'rb')
-        img_content = img.read()
-
-        image = SimpleUploadedFile(
-            name='test_image.png',
-            content=img_content,
-            content_type='image/jpeg'
-        )
-        img.close()
+        image = create_test_image('test_logo.jpg', (300, 400))
 
         # Data sending
         data = {
@@ -457,6 +442,9 @@ class TestProfileView(TestCase):
             'pk': self.user.pk,
             'slug': self.user.slug
         })
+
+        assert self.user.institution_logo.name is None
+
         response = self.client.post(url, data)
 
         assert response.status_code == 302, 'Should redirect to same page'
@@ -471,7 +459,7 @@ class TestProfileView(TestCase):
             'The data untouched must remain the same'
         assert self.user.first_name == 'Bruno', \
             'First name should have changed'
-        assert 'logos/test_image' in str(self.user.institution_logo)
+        assert self.user.institution_logo.name is not None
 
     def test_post_invalid(self):
         request = RequestFactory().post('/', data={'first_name': ''})
@@ -484,6 +472,78 @@ class TestProfileView(TestCase):
         assert response.status_code == 302, 'Should redirect to same page'
         assert self.user.first_name == 'David', \
             "Should not have change user's data"
+
+    def tearDown(self):
+        """Method to make the image removal when necesary"""
+        clean_test_files()
+
+
+class TestPhotoUploadView(TestCase):
+    """Tests for the view for users photo uploading"""
+    def setUp(self):
+        self.img = create_test_image('test_photo.jpg', (300, 400))
+        self.user = mixer.blend(User, email='tester@testing.com')
+
+    def test_anonymous(self):
+        """Tests that an anonymous user cant access"""
+        data = {
+            'x': 0,
+            'y': 0,
+            'width': 50,
+            'height': 60,
+            'photo': self.img
+        }
+        request = RequestFactory().post('/', data=data)
+        request.user = AnonymousUser()
+        response = views.photo_upload_view(request)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_cant_access_by_get(self):
+        """Test view can't be accessed by a get request"""
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.photo_upload_view(request)
+        assert response.status_code == 405, \
+            'should return method not allowed error when accessing through get'
+
+    def test_photo_upload_success(self):
+        """Test when data is valid"""
+        data = {
+            'x': 0,
+            'y': 0,
+            'width': 50,
+            'height': 60,
+            'photo': self.img
+        }
+        request = RequestFactory().post('/', data=data)
+        request.user = self.user
+        assert self.user.photo.name is None
+        response = views.photo_upload_view(request)
+        self.user.refresh_from_db()
+        assert response.status_code == 302, 'Should redirect to same page'
+        assert self.user.email == 'tester@testing.com', \
+            'User data should remain the same'
+        assert self.user.photo.name is not None
+
+    def test_invalid_data(self):
+        """Test when data sent is invalid"""
+        url = reverse('photo_upload')
+        user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+        self.client.login(email=user.email,
+                          password='P455w0rd_testing')
+        response = self.client.post(url, data={}, follow=True)
+        messages = list(response.context.get('messages'))
+        assert response.status_code == 200
+        assert messages[0].message == \
+            'Ha ocurrido un error al intentar subir la foto.', \
+            'An error message should be displayed'
+        assert messages[0].tags == 'alert-danger'
+
+    def tearDown(self):
+        clean_test_files()
 
 
 class AuthTestCase(TestCase):

@@ -1,13 +1,17 @@
 import pytest
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from mixer.backend.django import mixer
 from accounts.models import Plan, Subscription
+from .conftest import create_test_image, clean_test_files
+
 pytestmark = pytest.mark.django_db
 
 User = get_user_model()
 
 
 class TestPlan:
+    """Tests del modelo Plan"""
     def test_model(self):
         plan = mixer.blend('accounts.Plan')
         assert isinstance(plan, Plan), 'Should be an instance of Plan'
@@ -19,7 +23,7 @@ class TestPlan:
             'The plural name should be "planes"'
 
 
-class TestUser:
+class TestUser(TestCase):
     """Tests del modelo de usuario"""
     def test_model(self):
         user = mixer.blend(User, first_name='David', last_name='Padilla')
@@ -31,6 +35,7 @@ class TestUser:
                                           .format(user.pk, slug)
 
     def test_superuser(self):
+        """Tests Superuser creation"""
         user = User.objects.create_superuser(
             email='tester@tester.com',
             password='P455w0rd'
@@ -74,8 +79,22 @@ class TestUser:
                 password='P455w0rd'
             )
 
+    def test_institution_logo_uploading(self):
+        """Test institution logo manipulation before saving"""
+        img = create_test_image('test_logo.jpg', (500, 600))
+        user = mixer.blend(User)
+        user.institution_logo = img
+        user.save()
+        assert user.institution_logo.width == 125, 'width should be changed'
+        assert user.institution_logo.height == 150, 'height should be changed'
+
+    def tearDown(self):
+        """Method to make the image removal when necesary"""
+        clean_test_files()
+
 
 class TestSubscription:
+    """Tests del modelo de Subscription"""
     def test_model(self):
         user = mixer.blend(User)
         subscription = mixer.blend('accounts.Subscription',

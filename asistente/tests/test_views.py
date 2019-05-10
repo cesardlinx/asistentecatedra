@@ -5,6 +5,7 @@ from mixer.backend.django import mixer
 from asistente import views
 from planificaciones.models.curso import Curso
 from planificaciones.models.asignatura import Asignatura
+from accounts.tests.conftest import clean_test_files
 pytestmark = pytest.mark.django_db
 
 
@@ -41,6 +42,9 @@ class TestBibliotecaView(TestCase):
         libro = mixer.blend('asistente.Libro', asignatura=asignatura,
                             curso=curso)
         self.assertContains(self.response, libro.curso)
+
+    def tearDown(self):
+        clean_test_files()
 
 
 class TestAyudaView(TestCase):

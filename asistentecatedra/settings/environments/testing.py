@@ -1,3 +1,7 @@
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__))))
 DEBUG = True
 ALLOWED_HOSTS = ['.localhost', '.asistentedecatedra.com']
 DATABASES = {
@@ -13,3 +17,4 @@ DATABASES = {
 
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 DOMAIN = 'localhost:8000'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'tests_media')

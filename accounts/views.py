@@ -17,9 +17,8 @@ from django.utils.http import urlsafe_base64_decode
 from django.urls import reverse, reverse_lazy
 from django.views.generic import UpdateView
 from django.views.generic.edit import CreateView
-
 from .forms import (CustomPasswordChangeForm, CustomSetPasswordForm,
-                    ProfileForm, SignupForm)
+                    ProfileForm, SignupForm, PhotoForm)
 from .mixins import AnonymousRequiredMixin, CheckRecaptchaMixin
 from .tokens import account_token_generator
 
@@ -182,6 +181,29 @@ class ProfileView(LoginRequiredMixin, UpdateView):
             'slug': self.object.slug
         })
         return redirect(url)
+
+    def photo_form(self):
+        """Adds photo form to view variable in template"""
+        return PhotoForm()
+
+
+@login_required
+def photo_upload_view(request):
+    """Adds a photo to the authenticated user"""
+    if request.method == 'POST':
+        user = get_object_or_404(User, pk=request.user.pk)
+        form = PhotoForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+        else:
+            messages.error(
+                request,
+                'Ha ocurrido un error al intentar subir la foto.'
+            )
+        return redirect('profile',
+                        pk=request.user.pk, slug=request.user.slug)
+    else:
+        return HttpResponse(status=405)
 
 
 class CustomPasswordResetView(PasswordResetView):

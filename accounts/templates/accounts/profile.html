@@ -21,6 +21,13 @@
                                 <img class="image" src="{% static 'img/user.png' %}" alt="Usuario">
                                 <span class="premium-badge">PREMIUM</span>
                             </div>
+                            <form id="photoForm"
+                                  action="{% url 'photo_upload' %}"
+                                  method="POST"
+                                  enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {{ view.photo_form }}
+                            </form>
                             <p>{{ user.first_name }} {{ user.last_name }}</p>
                         </div>
                     </div>
