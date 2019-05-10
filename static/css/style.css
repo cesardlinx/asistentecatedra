@@ -1595,6 +1595,7 @@ footer {
   width: 15em;
   font-weight: bold;
   cursor: pointer;
+  text-align: center;
 }
 
 @media only screen and (min-width: 976px) {
@@ -1605,6 +1606,8 @@ footer {
 
 .comenzar-button:hover {
   background: #1bc4a3;
+  color: #fff;
+  text-decoration: none;
 }
 
 .curriculum {
@@ -2544,6 +2547,40 @@ footer {
   }
 }
 
+.profile-content .school-logo-label {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.profile-content .school-logo-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+}
+
+.profile-content .school-logo-container .school-logo {
+  cursor: pointer;
+  display: block;
+  max-height: 150px;
+  max-width: 150px;
+}
+
+.profile-content .school-logo-container .school-logo-help {
+  margin: 0 0 0 1em;
+  line-height: 150px;
+}
+
 .profile-content form {
   margin-top: 1em;
 }
@@ -2608,14 +2645,14 @@ footer {
   width: 180px;
 }
 
-.user .profile-img .image {
+.user .profile-img .user-image {
   height: 180px;
   border-radius: 50%;
   cursor: pointer;
 }
 
 .user p {
-  margin: .5em 0;
+  margin: 2em 0;
   text-align: center;
 }
 
@@ -2942,5 +2979,17 @@ footer {
   color: #721c24;
   padding: 1em;
   margin-bottom: 3em;
+}
+
+.modal-body .cropper-container {
+  width: 465px !important;
+}
+
+.cropper-line {
+  background-color: #1bc4a3 !important;
+}
+
+.cropper-point {
+  background-color: #1bc4a3 !important;
 }
 /*# sourceMappingURL=style.css.map */

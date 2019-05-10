@@ -60,9 +60,12 @@
   width: 15em;
   font-weight: bold;
   cursor: pointer;
+  text-align: center;
 
   &:hover {
     background: $primary-light;
+    color: $white;
+    text-decoration: none;
   }
 }
 

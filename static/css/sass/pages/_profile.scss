@@ -26,6 +26,33 @@
     border-radius: 6px;
   }
 
+  .school-logo-label {
+    display: flex;
+    align-items: center;
+  }
+
+  .school-logo-container {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: row;
+
+    .school-logo {
+      cursor: pointer;
+      display: block;
+      max-height: 150px;
+      max-width: 150px;
+    }
+
+    .school-logo-help {
+      margin: 0 0 0 1em;
+      line-height: 150px;
+    }
+  }
+
+
+  // .logo-help {
+  //   vertical-align: center;
+  // }
   form {
     @include responsive(extra-large) {
       padding: 0 1em 0 2em;
@@ -70,7 +97,7 @@
     position: relative;
     width: 180px;
 
-    .image {
+    .user-image {
       height: 180px;
       border-radius: 50%;
       cursor: pointer;
@@ -78,7 +105,7 @@
   }
 
   p {
-    margin: .5em 0;
+    margin: 2em 0;
     text-align: center;
   }
 }

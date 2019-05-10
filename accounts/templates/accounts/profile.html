@@ -7,6 +7,10 @@
     Asistente de Cátedra | Perfil de Usuario
 {% endblock titulo %}
 
+{% block head_scripts %}
+    <link rel="stylesheet" href="{% static 'cropperjs/dist/cropper.min.css' %}">
+{% endblock head_scripts %}
+
 {% block content %}
 
     <!-- content starts here -->
@@ -18,10 +22,15 @@
                     <div class="profile-img-container">
                         <div class="user">
                             <div class="profile-img">
-                                <img class="image" src="{% static 'img/user.png' %}" alt="Usuario">
+                                <img id="user-photo"
+                                     class="user-image"
+                                     src="{{ user.get_photo }}"
+                                     alt="Usuario"
+                                     title="Haga click para cambiar de imágen">
                                 <span class="premium-badge">PREMIUM</span>
                             </div>
                             <form id="photoForm"
+                                  class="d-none"
                                   action="{% url 'photo_upload' %}"
                                   method="POST"
                                   enctype="multipart/form-data">
@@ -53,16 +62,25 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            {{ form.institution_logo | add_label_class:"col-sm-2 col-form-label" }}
-                            <div class="col-sm-10">
-                            {{ form.institution_logo }}
+                            <div class="col-sm-2 col-form-label school-logo-label">
+                                {{ form.institution_logo.label_tag }}
+                            </div>
+                            {% comment %} {{ form.institution_logo | add_label_class:"col-sm-2 col-form-label school-logo-label" }} {% endcomment %}
+                            {% render_field form.institution_logo class="d-none" %}
+
+                        {% comment %} </div> {% endcomment %}
+                        {% comment %} <div> {% endcomment %}
+                            <div class="school-logo-container col-sm-10">
+                                <img id="school-logo"
+                                    class="school-logo"
+                                    src="{{ user.get_logo }}"
+                                    alt="logo de la institución"
+                                    title="Haga click para cambiar de imágen">
+                                <p class="school-logo-help text-muted">
+                                    Click en el logo para cargar uno nuevo.
+                                </p>
                             </div>
                         </div>
-                        {% if user.institution_logo %}
-                            <div>
-                                <img src="{{ user.institution_logo.url }}" alt="logo de la institución">
-                            </div>
-                        {% endif %}
 
                         <div class="notifications">
                             <div class="notifications-body">
@@ -99,11 +117,45 @@
     </section>
     <!-- content ends here -->
 
+    <!-- MODAL TO CROP THE IMAGE -->
+    <div class="modal fade" id="modalCrop">
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Recortar foto</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <img src="" id="image" style="max-width: 100%;">
+                </div>
+
+                <div class="modal-footer">
+                    <div class="btn-group pull-left" role="group">
+                        <button type="button" class="btn btn-default js-zoom-in">
+                            <span class="fas fa-search-plus"></span>
+                        </button>
+                        <button type="button" class="btn btn-default js-zoom-out">
+                            <span class="fas fa-search-minus"></span>
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary js-crop-and-upload">Recortar y guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock content %}
 
 {% block scripts %}
     <script src="{% static 'jquery-validation/dist/jquery.validate.min.js' %}"></script>
     <script src="{% static 'jquery-validation/dist/localization/messages_es.min.js' %}"></script>
+    <script src="{% static 'cropperjs/dist/cropper.min.js' %}"></script>
+    <script src="{% static 'jquery-cropper/dist/jquery-cropper.min.js' %}"></script>
     <script src="{% static 'js/helpers/validators.js' %}"></script>
     <script src="{% static 'js/accounts/profile.js' %}"></script>
 {% endblock scripts %}
