@@ -53,6 +53,7 @@ class ProfileForm(forms.ModelForm):
             'institution_logo',
             'allow_notifications'
         )
+        widgets = {'institution_logo': forms.FileInput()}
 
     def __init__(self, *args, **kwargs):
         """Sets the fields as not required """
@@ -145,12 +146,13 @@ class PhotoForm(forms.ModelForm):
 
         image = Image.open(self.instance.photo)
         cropped_image = image.crop((x, y, w+x, h+y))
-        resized_image = cropped_image.resize((200, 200), Image.ANTIALIAS)
+        resized_image = cropped_image.resize((180, 180), Image.ANTIALIAS)
 
         stream = BytesIO()
 
         try:
             resized_image.save(stream, format=image.format)
+
             # Saving image in instance field
             self.instance.photo.save(self.instance.photo.name,
                                      File(stream), save=False)

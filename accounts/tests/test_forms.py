@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.test import TestCase
 from mixer.backend.django import mixer
-
 from accounts.forms import PhotoForm, SignupForm
 
 from .conftest import create_test_image, clean_test_files
@@ -96,8 +95,8 @@ class TestPhotoForm(TestCase):
 
         instance = form.save()
 
-        assert instance.photo.width == 200, 'Image width should be modified'
-        assert instance.photo.height == 200, 'Image height should be modified'
+        assert instance.photo.width == 180, 'Image width should be modified'
+        assert instance.photo.height == 180, 'Image height should be modified'
         assert instance.email == 'tester@tester.com'
 
     def test_data_empty(self):

@@ -1,5 +1,6 @@
 import uuid
 import os
+import shutil
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -46,3 +47,13 @@ def get_logo_path(instance, filename):
     filename = '{0}.{1}'.format(uuid.uuid4(), ext)
     location = 'users/user_{0}/logo/'.format(instance.pk)
     return os.path.join(location, filename)
+
+
+def empty_folder(folder):
+    for the_file in os.listdir(folder):
+        file_path = os.path.join(folder, the_file)
+
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)

@@ -10,6 +10,7 @@ from django.template.defaultfilters import slugify
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from accounts.helpers import get_photo_path, get_logo_path
+from django.templatetags.static import static
 
 from .validators import validate_alpha
 
@@ -136,7 +137,7 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         """
-        Creates the user's slug, and alters the institution logo and
+        Creates the user's slug, and modifies the institution logo and
         photo before saving
         """
         # User slug
@@ -156,13 +157,26 @@ class User(AbstractUser):
                 # Saving file
                 # saves modified file to binary stream
                 logo.save(stream, format=logo.format)
-                # creates the image field from modified image in stream
-                self.institution_logo.save(self.institution_logo.name,
-                                           File(stream), save=False)
+
+                # Deletes previous logo
+                this = User.objects.get(id=self.id)
+                if this.institution_logo != self.institution_logo:
+                    this.institution_logo.delete(save=False)
+
+                    # creates the image field from modified image in stream
+                    self.institution_logo.save(self.institution_logo.name,
+                                               File(stream), save=False)
             except IOError:
                 pass
             finally:
                 stream.close()
+
+        if self.photo:
+            # Deletes previous photo
+            this = User.objects.get(id=self.id)
+            if this.photo != self.photo:
+                this.photo.delete(save=False)
+
         # Saves in database
         super().save(*args, **kwargs)
 
