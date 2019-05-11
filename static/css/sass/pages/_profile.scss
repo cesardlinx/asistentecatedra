@@ -33,6 +33,7 @@
 
   .school-logo-container {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-start;
     flex-direction: row;
 
@@ -44,15 +45,15 @@
     }
 
     .school-logo-help {
+      @include responsive(extra-large) {
+        display: block;
+      }
+      display: none;
       margin: 0 0 0 1em;
       line-height: 150px;
     }
   }
 
-
-  // .logo-help {
-  //   vertical-align: center;
-  // }
   form {
     @include responsive(extra-large) {
       padding: 0 1em 0 2em;

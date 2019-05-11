@@ -2560,6 +2560,8 @@ footer {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
   -webkit-box-pack: start;
       -ms-flex-pack: start;
           justify-content: flex-start;
@@ -2577,8 +2579,15 @@ footer {
 }
 
 .profile-content .school-logo-container .school-logo-help {
+  display: none;
   margin: 0 0 0 1em;
   line-height: 150px;
+}
+
+@media only screen and (min-width: 992px) {
+  .profile-content .school-logo-container .school-logo-help {
+    display: block;
+  }
 }
 
 .profile-content form {

@@ -29,6 +29,7 @@
                                      title="Haga click para cambiar de imágen">
                                 <span class="premium-badge">PREMIUM</span>
                             </div>
+
                             <form id="photoForm"
                                   class="d-none"
                                   action="{% url 'photo_upload' %}"
@@ -37,9 +38,11 @@
                                 {% csrf_token %}
                                 {{ view.photo_form }}
                             </form>
+
                             <p>{{ user.first_name }} {{ user.last_name }}</p>
                         </div>
                     </div>
+
                     <form method="POST" id="profileForm" enctype="multipart/form-data">
                         {% csrf_token %}
 
@@ -65,11 +68,8 @@
                             <div class="col-sm-2 col-form-label school-logo-label">
                                 {{ form.institution_logo.label_tag }}
                             </div>
-                            {% comment %} {{ form.institution_logo | add_label_class:"col-sm-2 col-form-label school-logo-label" }} {% endcomment %}
                             {% render_field form.institution_logo class="d-none" %}
 
-                        {% comment %} </div> {% endcomment %}
-                        {% comment %} <div> {% endcomment %}
                             <div class="school-logo-container col-sm-10">
                                 <img id="school-logo"
                                     class="school-logo"

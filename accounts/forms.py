@@ -21,7 +21,6 @@ class SignupForm(UserCreationForm):
             'Asistente de Cátedra'),
         required=True
     )
-    # institution_logo = forms.ImageField(required=False,)
 
     class Meta:
         model = User
