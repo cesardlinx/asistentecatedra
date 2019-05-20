@@ -7,6 +7,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from mixer.backend.django import mixer
 from accounts import views
+from unittest.mock import patch
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -51,11 +52,15 @@ class TestAccountsUrls:
         assert view.func.view_class == views.CustomPasswordResetView, \
             'Should resolve to the PasswordReset View'
 
-    def test_password_reset_confirm(self):
+    @patch('accounts.models.stripe')
+    def test_password_reset_confirm(self, mock_stripe):
+        mock_stripe.Customer.create.return_value = {'id': '12345'}
+
         user = User.objects.create_user(
             email='tester@tester.com',
             password='P455w0rd_testing'
         )
+
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         path = reverse('password_reset_confirm', kwargs={

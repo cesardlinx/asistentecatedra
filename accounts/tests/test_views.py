@@ -16,7 +16,6 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from mixer.backend.django import mixer
 from accounts import views
 from accounts.forms import SignupForm
 from .conftest import create_test_image, clean_test_files
@@ -45,6 +44,10 @@ class SignupTestCase(TestCase):
     TestCase general con todos los datos de un usuario de prueba
     """
     def setUp(self):
+        self.mock_stripe = patch('accounts.models.stripe')
+        stripe = self.mock_stripe.start()
+        stripe.Customer.create.return_value = {'id': '12345'}
+
         self.data = {
             'first_name': 'David',
             'last_name': 'Padilla',
@@ -55,6 +58,29 @@ class SignupTestCase(TestCase):
             'terms': True
         }
         self.url = reverse('signup')
+
+    def tearDown(self):
+        self.mock_stripe.stop()
+
+
+class AuthTestCase(TestCase):
+    """TestCase general con los dátos básicos para crear un usuario"""
+
+    def setUp(self):
+        self.mock_stripe = patch('accounts.models.stripe')
+        stripe = self.mock_stripe.start()
+        stripe.Customer.create.return_value = {'id': '12345'}
+
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing',
+            first_name='David',
+            last_name='Padilla',
+            institution='Colegio Benalcazar'
+        )
+
+    def tearDown(self):
+        self.mock_stripe.stop()
 
 
 class TestSignupView(SignupTestCase):
@@ -162,16 +188,13 @@ class TestSignupView(SignupTestCase):
             'The view should not create a user'
 
 
-class TestSendConfirmationView(TestCase):
+class TestSendConfirmationView(AuthTestCase):
     """
     Caso de prueba para probar el correo electrónico enviado al usuario
     independiente del registro para que este pueda verificar su email.
     """
     def setUp(self):
-        self.user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing'
-        )
+        super().setUp()
         self.url = reverse('send-confirmation')
 
     def test_anonymous(self):
@@ -338,16 +361,13 @@ class TestEmailConfirmationView(SignupTestCase):
             response, 'Error. El enlace no es válido o ha expirado')
 
 
-class TestExistsEmailValidator(TestCase):
+class TestExistsEmailValidator(AuthTestCase):
     """
     Caso de prueba para probar la vista que comprueba si existe el email
     de un usuario en la base de datos
     """
     def setUp(self):
-        self.user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing'
-        )
+        super().setUp()
         self.url = reverse('ajax_unique_email_validator')
 
     def test_post_access_only(self):
@@ -386,19 +406,12 @@ class TestExistsEmailValidator(TestCase):
         assert response.content.decode("utf-8") == 'false'
 
 
-class TestProfileView(TestCase):
+class TestProfileView(AuthTestCase):
     """Tests para la vista de Perfil de usuario"""
 
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
-        self.user = User.objects.create_user(
-            first_name='David',
-            last_name='Padilla',
-            email='tester@tester.com',
-            password='P455w0rd_testing',
-            institution='Colegio Benalcazar'
-        )
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -478,11 +491,11 @@ class TestProfileView(TestCase):
         clean_test_files()
 
 
-class TestPhotoUploadView(TestCase):
+class TestPhotoUploadView(AuthTestCase):
     """Tests for the view for users photo uploading"""
     def setUp(self):
+        super().setUp()
         self.img = create_test_image('test_photo.jpg', (300, 400))
-        self.user = mixer.blend(User, email='tester@testing.com')
 
     def test_anonymous(self):
         """Tests that an anonymous user cant access"""
@@ -521,18 +534,14 @@ class TestPhotoUploadView(TestCase):
         response = views.photo_upload_view(request)
         self.user.refresh_from_db()
         assert response.status_code == 302, 'Should redirect to same page'
-        assert self.user.email == 'tester@testing.com', \
+        assert self.user.email == 'tester@tester.com', \
             'User data should remain the same'
         assert self.user.photo.name is not None
 
     def test_invalid_data(self):
         """Test when data sent is invalid"""
         url = reverse('photo_upload')
-        user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing'
-        )
-        self.client.login(email=user.email,
+        self.client.login(email=self.user.email,
                           password='P455w0rd_testing')
         response = self.client.post(url, data={}, follow=True)
         messages = list(response.context.get('messages'))
@@ -544,15 +553,6 @@ class TestPhotoUploadView(TestCase):
 
     def tearDown(self):
         clean_test_files()
-
-
-class AuthTestCase(TestCase):
-    """TestCase general con los dátos básicos para crear un usuario"""
-    def setUp(self):
-        self.data = {
-            'email': 'tester@tester.com',
-            'password': 'P455w0rd_testing'
-        }
 
 
 class TestLoginView(AuthTestCase):
@@ -572,13 +572,9 @@ class TestLoginView(AuthTestCase):
 
     def test_post_success(self):
         """Test if login has been successful"""
-        user = User.objects.create_user(
-            email=self.data['email'],
-            password=self.data['password']
-        )
         data = {
-            'username': self.data['email'],
-            'password': self.data['password']
+            'username': self.user.email,
+            'password': 'P455w0rd_testing'
         }
         url = reverse('login')
         response = self.client.post(url, data, follow=True)
@@ -588,7 +584,7 @@ class TestLoginView(AuthTestCase):
         user_session = response.wsgi_request.user
         assert user_session.is_authenticated is True, \
             'User should be authenticated'
-        assert user_session.email == user.email, \
+        assert user_session.email == self.user.email, \
             'The session data should be the same as the database data'
 
     def test_post_invalid(self):
@@ -609,12 +605,8 @@ class TestLoginView(AuthTestCase):
 class TestLogoutView(AuthTestCase):
     def test_get(self):
         """Test para probar que un usuario puede cerrar sesión"""
-        user = User.objects.create_user(
-            email=self.data['email'],
-            password=self.data['password']
-        )
 
-        login_result = self.client.login(username=user.email,
+        login_result = self.client.login(username=self.user.email,
                                          password='P455w0rd_testing')
         assert login_result is True, 'User should be logged'
         response = self.client.get(reverse('logout'))
@@ -624,12 +616,13 @@ class TestLogoutView(AuthTestCase):
 
 
 # PASSWORD RESET TESTS
-class TestPasswordResetView(TestCase):
+class TestPasswordResetView(AuthTestCase):
     """
     Tests the view that resets the user's password when the user has
     forgoten it
     """
     def setUp(self):
+        super().setUp()
         self.url = reverse('password_reset')
 
     def test_get(self):
@@ -643,10 +636,6 @@ class TestPasswordResetView(TestCase):
         """Test cuando el email de un usuario existente es enviado a la
         vista Password Reset
         """
-        User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing'
-        )
         data = {
             'email': 'tester@tester.com',
         }
@@ -686,15 +675,12 @@ class TestPasswordResetView(TestCase):
                                       'Should return an error message'
 
 
-class TestPasswordResetConfirmView(TestCase):
+class TestPasswordResetConfirmView(AuthTestCase):
     """
     Tests para probar la vista de confirmación de reset de contraseña
     """
     def setUp(self):
-        self.user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing'
-        )
+        super().setUp()
         self.uid = urlsafe_base64_encode(force_bytes(self.user.pk))
         self.token = default_token_generator.make_token(self.user)
         self.url = reverse('password_reset_confirm', kwargs={
@@ -796,15 +782,10 @@ class TestPasswordResetConfirmView(TestCase):
         self.assertTrue(form.errors)
 
 
-class TestPasswordResetEmail(TestCase):
+class TestPasswordResetEmail(AuthTestCase):
     def setUp(self):
         """Obtención del email"""
-        self.user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing',
-            first_name='David',
-            last_name='Padilla',
-        )
+        super().setUp()
         data = {
             'email': 'tester@tester.com',
         }
@@ -837,17 +818,11 @@ class TestPasswordResetEmail(TestCase):
 
 
 # PASSWORD CHANGE TESTS
-class TestPasswordChangeView(TestCase):
+class TestPasswordChangeView(AuthTestCase):
     """
     Tests the view that changes the user's password when
     authenticated
     """
-    def setUp(self):
-        self.user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing'
-        )
-
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')

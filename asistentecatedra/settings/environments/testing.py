@@ -18,3 +18,11 @@ DATABASES = {
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 DOMAIN = 'localhost:8000'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'tests_media')
+
+# Stripe
+STRIPE_PRODUCT_ID = 'testing_string'
+STRIPE_FREE_ID = 'testing_string'
+STRIPE_MONTHLY_ID = 'testing_string'
+STRIPE_YEARLY_ID = 'testing_string'
+STRIPE_PUBLIC_KEY = 'testing_string'
+STRIPE_SECRET_KEY = 'testing_string'

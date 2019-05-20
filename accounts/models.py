@@ -1,3 +1,4 @@
+import stripe
 from PIL import Image
 from io import BytesIO
 from django.core.files import File
@@ -11,16 +12,20 @@ from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from accounts.helpers import get_photo_path, get_logo_path
 from django.templatetags.static import static
-
 from .validators import validate_alpha
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class Plan(models.Model):
     """Tipo de plan al que el usuario se subscribe."""
-    PREMIUM = 'PRO'
+    MONTHLY = 'MONTHLY'
+    YEARLY = 'YEARLY'
     FREE = 'FREE'
     PLAN_CHOICES = (
-        (PREMIUM, 'Premium'),
+        (MONTHLY, 'Monthly'),
+        (YEARLY, 'Yearly'),
         (FREE, 'Free'),
     )
     slug = models.SlugField()
@@ -176,6 +181,15 @@ class User(AbstractUser):
             this = User.objects.get(id=self.id)
             if this.photo != self.photo:
                 this.photo.delete(save=False)
+
+        if not self.stripe_customer_id:
+            new_customer_id = stripe.Customer.create(email=self.email)
+            self.stripe_customer_id = new_customer_id.get('id')
+            try:
+                free_plan = Plan.objects.get(plan_type='FREE')
+                self.plan = free_plan
+            except Plan.DoesNotExist:
+                pass
 
         # Saves in database
         super().save(*args, **kwargs)

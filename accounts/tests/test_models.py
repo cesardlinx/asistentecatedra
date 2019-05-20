@@ -6,6 +6,7 @@ from mixer.backend.django import mixer
 from accounts.models import Plan, Subscription
 from .conftest import create_test_image, clean_test_files
 from django.conf import settings
+from unittest.mock import patch
 
 pytestmark = pytest.mark.django_db
 
@@ -40,8 +41,11 @@ class TestUser(TestCase):
         assert user.get_absolute_url() == '/accounts/profile/{0}/{1}/'\
                                           .format(user.pk, slug)
 
-    def test_superuser(self):
+    @patch('accounts.models.stripe')
+    def test_superuser(self, mock_stripe):
         """Tests Superuser creation"""
+        mock_stripe.Customer.create.return_value = {'id': '12345'}
+
         user = User.objects.create_superuser(
             email='tester@tester.com',
             password='P455w0rd'
@@ -146,6 +150,25 @@ class TestUser(TestCase):
     def tearDown(self):
         """Method to make the image removal when necesary"""
         clean_test_files()
+
+
+@patch('accounts.models.stripe')
+def test_user_post_save_signal(mock_stripe):
+
+    mock_stripe.Customer.create.return_value = {'id': '12345'}
+
+    free_plan = Plan.objects.create(
+        plan_type='FREE',
+        price=0.00,
+        stripe_plan_id=settings.STRIPE_FREE_ID
+    )
+    free_plan = Plan.objects.get(plan_type='FREE')
+    user = User.objects.create_user(
+        email='tester2@tester.com',
+        password='P455w0rd'
+    )
+    assert user.plan == free_plan
+    assert user.stripe_customer_id == '12345'
 
 
 class TestSubscription:

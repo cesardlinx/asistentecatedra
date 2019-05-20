@@ -22,6 +22,9 @@ django-js-asset==1.2.2
 # Widget tweaks
 django-widget-tweaks==1.4.3
 
+# Stripe
+stripe==2.27.0
+
 # Requests
 requests==2.21.0
 
