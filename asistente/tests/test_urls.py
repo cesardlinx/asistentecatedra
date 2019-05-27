@@ -1,4 +1,5 @@
-from django.urls import reverse, resolve
+from django.urls import resolve, reverse
+
 from asistente import views
 
 
@@ -26,3 +27,9 @@ class TestAsistenteUrls:
         view = resolve(path)
         assert view.func.view_class == views.PremiumTemplateView, \
             'Should resolve to the view PremiumTemplateView'
+
+    def test_checkout(self):
+        path = reverse('checkout')
+        view = resolve(path)
+        assert view.func.view_class == views.CheckoutView, \
+            'Should resolve to the CheckoutView'

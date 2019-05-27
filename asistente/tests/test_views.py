@@ -1,12 +1,23 @@
+from unittest.mock import patch
+
 import pytest
-from django.test import RequestFactory, TestCase
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.test import RequestFactory, TestCase
 from mixer.backend.django import mixer
-from asistente import views
-from planificaciones.models.curso import Curso
-from planificaciones.models.asignatura import Asignatura
+from stripe.error import CardError
+
+from accounts.models import Subscription
 from accounts.tests.conftest import clean_test_files
+from asistente import views
+from planificaciones.models.asignatura import Asignatura
+from planificaciones.models.curso import Curso
+
+from .conftest import add_middleware_to_request
+
 pytestmark = pytest.mark.django_db
+
+User = get_user_model()
 
 
 class TestHomeView:
@@ -78,3 +89,84 @@ class TestPremiumView:
         assert 'asistente/premium.html' in \
             response.template_name, \
             'Premium template should be rendered in the view'
+
+
+class TestCheckoutView(TestCase):
+    def setUp(self):
+        self.user = mixer.blend(User)
+        self.request = RequestFactory().get('/')
+        self.plan = mixer.blend('accounts.Plan')
+
+        self.mock_stripe = patch('asistente.views.stripe.Subscription')
+        self.stripe_subscription = self.mock_stripe.start()
+        self.stripe_subscription.create.return_value = {'id': '123456'}
+
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        self.request.user = AnonymousUser()
+        response = views.CheckoutView.as_view()(self.request)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_get(self):
+        """Tests that the view can be callable by a user"""
+        self.request.user = self.user
+        response = views.CheckoutView.as_view()(self.request)
+        assert response.status_code == 200, \
+            'Should be callable by the authenticated user'
+
+    def test_post_success(self):
+        """Test when all data are valid for checkout"""
+        request = RequestFactory().post('/', {
+            'stripeToken': 'some-token',
+            'plan_id': self.plan.pk,
+        })
+
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.CheckoutView.as_view()(request)
+        assert response.status_code == 302, 'Should return a redirection'
+        subscription = Subscription.objects.all()[0]
+        assert subscription.user == self.user, \
+            'The user should be related with the subscription'
+        assert subscription.stripe_subscription_id == '123456', \
+            'The subscription should have an id'
+        assert subscription.active is True, \
+            'The subscription should be active'
+        self.user.refresh_from_db()
+        assert self.user.plan.stripe_plan_id == self.plan.stripe_plan_id, \
+            'The user now is subscripted to the plan'
+
+    def test_invalid_plan_id(self):
+        """Test when an invalid plan id is given"""
+        request = RequestFactory().post('/', {
+            'stripeToken': 'some-token',
+            'plan_id': 'invalid-id',
+        })
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.CheckoutView.as_view()(request)
+        assert 'Error. Los datos no son correctos o han sido alterados.' in \
+            str(response.content), 'A message should be displayed'
+
+        assert 'alert-danger' in str(response.content), \
+            'It should display an error message'
+
+    def test_invalid_card(self):
+        """Test when an invalid card is entered (stripe CardError)"""
+        self.stripe_subscription.create.side_effect = CardError('Error', 2, 2)
+
+        request = RequestFactory().post('/', {
+            'stripeToken': 'some-token',
+            'plan_id': self.plan.pk,
+        })
+
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.CheckoutView.as_view()(request)
+
+        assert 'Error. La tarjeta de crédito ingresada no es válida.' in \
+            str(response.content.decode("utf-8")
+                ), 'A message should be displayed'
+
+        assert 'alert-danger' in str(response.content), \
+            'It should display an error message'
