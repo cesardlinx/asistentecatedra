@@ -133,7 +133,7 @@ class TestCheckoutView(TestCase):
         assert subscription.active is True, \
             'The subscription should be active'
         self.user.refresh_from_db()
-        assert self.user.plan.stripe_plan_id == self.plan.stripe_plan_id, \
+        assert self.user.active_plan == self.plan, \
             'The user now is subscripted to the plan'
 
     def test_invalid_plan_id(self):
@@ -170,3 +170,56 @@ class TestCheckoutView(TestCase):
 
         assert 'alert-danger' in str(response.content), \
             'It should display an error message'
+
+    @patch('asistente.views.delete_subscription_from_stripe')
+    def test_change_subscription(self, mock_stripe_delete):
+        """Tests an authenticated user can change his subscription"""
+
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+        yearly_plan = mixer.blend('accounts.Plan', plan_type='YEARLY')
+
+        before_subscription = mixer.blend(
+            'accounts.Subscription',
+            plan=monthly_plan,
+            user=self.user,
+            stripe_subscription_id='456789',
+            active=True
+        )
+
+        request = RequestFactory().post('/', {
+            'stripeToken': 'some-token',
+            'plan_id': yearly_plan.pk,
+        })
+
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.CheckoutView.as_view()(request)
+
+        assert response.status_code == 302, \
+            'Response should send a redirection'
+        assert self.user.subscriptions.filter(active=True).count() == 1
+        active_subscription = self.user.subscriptions.get(active=True)
+        assert active_subscription != before_subscription
+        assert self.user.active_plan == yearly_plan
+        mock_stripe_delete.assert_called_once_with('456789')
+
+    def test_change_subscription_when_no_previous_plan(self):
+        """
+        Tests a subscription change when there is no previous active plan
+        """
+
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+
+        request = RequestFactory().post('/', {
+            'stripeToken': 'some-token',
+            'plan_id': monthly_plan.pk,
+        })
+
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.CheckoutView.as_view()(request)
+
+        assert response.status_code == 302, \
+            'Response should return an ok status'
+        assert self.user.subscriptions.filter(active=True).count() == 1
+        assert self.user.active_plan == monthly_plan

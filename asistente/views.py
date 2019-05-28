@@ -1,15 +1,18 @@
 import stripe
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
-
+from .helpers import delete_subscription_from_stripe
 from accounts.models import Plan, Subscription
 
 from .models import Libro, Pregunta
+
+User = get_user_model()
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -46,6 +49,7 @@ class CheckoutView(LoginRequiredMixin, View):
         return render(request, 'asistente/checkout.html')
 
     def post(self, request, *args, **kwargs):
+        user = User.objects.get(pk=request.user.pk)
         plan_id = request.POST.get('plan_id')
         try:
             plan = get_object_or_404(Plan, pk=plan_id)
@@ -54,18 +58,30 @@ class CheckoutView(LoginRequiredMixin, View):
                 customer=request.user.stripe_customer_id,
                 items=[
                     {
-                        'plan': plan_id
+                        'plan': plan.id
                     }
                 ],
                 source=token
             )
+
+            # Deactivates the current active subscription if any
+            try:
+                active_subscription = Subscription.objects.get(active=True)
+                delete_subscription_from_stripe(
+                    active_subscription.stripe_subscription_id)
+
+                active_subscription.active = False
+                active_subscription.save()
+            except Subscription.DoesNotExist:
+                pass
+
             Subscription.objects.create(
-                user=request.user,
+                user=user,
+                plan=plan,
                 stripe_subscription_id=stripe_subscription.get('id'),
                 active=True
             )
-            request.user.plan = plan
-            request.user.save()
+
         except stripe.error.CardError:
             messages.error(request, 'Error. La tarjeta de crédito ingresada '
                            'no es válida.')
