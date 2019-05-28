@@ -1,19 +1,24 @@
-import stripe
-from PIL import Image
 from io import BytesIO
-from django.core.files import File
+
+import stripe
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
+from django.core.files import File
 from django.core.validators import FileExtensionValidator, MinLengthValidator
 from django.db import models
+from django.dispatch import receiver
 from django.template.defaultfilters import slugify
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-from accounts.helpers import get_photo_path, get_logo_path
-from django.templatetags.static import static
-from .validators import validate_alpha
+from django.db.models.signals import post_save
 
+from PIL import Image
+
+from accounts.helpers import get_logo_path, get_photo_path
+
+from .validators import validate_alpha
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -126,14 +131,9 @@ class User(AbstractUser):
     )
     allow_notifications = models.BooleanField(default=True)
     email_confirmed = models.BooleanField(default=False)
-    plan = models.ForeignKey(
-        Plan,
-        related_name='users',
-        on_delete=models.SET_NULL,
-        null=True
-    )
     stripe_customer_id = models.CharField(max_length=40)
     modified_at = models.DateTimeField(auto_now=True, editable=False)
+    plans = models.ManyToManyField(Plan, through='Subscription')
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -185,11 +185,6 @@ class User(AbstractUser):
         if not self.stripe_customer_id:
             new_customer_id = stripe.Customer.create(email=self.email)
             self.stripe_customer_id = new_customer_id.get('id')
-            try:
-                free_plan = Plan.objects.get(plan_type='FREE')
-                self.plan = free_plan
-            except Plan.DoesNotExist:
-                pass
 
         # Saves in database
         super().save(*args, **kwargs)
@@ -220,6 +215,36 @@ class User(AbstractUser):
         else:
             return self.photo.url
 
+    @property
+    def active_subscription(self):
+        """
+        Gets the user's active subscription
+        """
+        active_subscription = self.subscriptions.get(active=True)
+        return active_subscription
+
+    @property
+    def active_plan(self):
+        """
+        Gets the user's active plan
+        """
+        active_subscription = self.subscriptions.get(active=True)
+        return active_subscription.plan
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def post_save_user_create(sender, instance, created, **kwargs):
+    """Señal que agrega el plan FREE a un usuario recién creado"""
+    try:
+        free_plan = Plan.objects.get(plan_type='FREE')
+        Subscription.objects.create(
+            user=instance,
+            plan=free_plan,
+            active=True
+        )
+    except Plan.DoesNotExist:
+        pass
+
 
 class Subscription(models.Model):
     """
@@ -227,9 +252,18 @@ class Subscription(models.Model):
     por medio de Stripe
 
     """
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    stripe_subscription_id = models.CharField(max_length=40)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='subscriptions',
+        on_delete=models.CASCADE,
+    )
+    plan = models.ForeignKey(
+        Plan,
+        related_name='subscriptions',
+        on_delete=models.CASCADE,
+    )
+    stripe_subscription_id = models.CharField(max_length=40, null=True,
+                                              blank=True)
     active = models.BooleanField(default=True)
 
     class Meta:

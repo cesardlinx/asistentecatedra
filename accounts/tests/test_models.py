@@ -35,8 +35,6 @@ class TestUser(TestCase):
     def test_model(self):
         user = mixer.blend(User, first_name='David', last_name='Padilla')
         assert isinstance(user, User), 'Should be an instance of User'
-        assert isinstance(user.plan, Plan), \
-            'The plan field should be an instance of Plan'
         slug = 'david-padilla'
         assert user.get_absolute_url() == '/accounts/profile/{0}/{1}/'\
                                           .format(user.pk, slug)
@@ -147,6 +145,30 @@ class TestUser(TestCase):
         assert '/assets/users/user_{}/photo/'.format(self.user.pk) in \
             self.user.get_photo, 'Should be equal to the new photo'
 
+    def test_active_subscription_property(self):
+        """Tests the property to get the user's active_subscription"""
+        plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+        user = mixer.blend(User)
+
+        subscription = Subscription.objects.create(
+            user=user,
+            plan=plan,
+            active=True
+        )
+
+        assert user.active_subscription == subscription, \
+            "The user's active plan should be the free plan"
+
+    def test_active_plan_property(self):
+        """Tests the property to get the user's active_plan"""
+        plan = mixer.blend('accounts.Plan')
+
+        # automatically relates the free plan with the user
+        user = mixer.blend(User)
+
+        assert user.active_plan == plan, \
+            "The user's active plan should be the free plan"
+
     def tearDown(self):
         """Method to make the image removal when necesary"""
         clean_test_files()
@@ -167,7 +189,7 @@ def test_user_post_save_signal(mock_stripe):
         email='tester2@tester.com',
         password='P455w0rd'
     )
-    assert user.plan == free_plan
+    assert user.subscriptions.get(active=True).plan == free_plan
     assert user.stripe_customer_id == '12345'
 
 

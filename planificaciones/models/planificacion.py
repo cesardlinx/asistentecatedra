@@ -11,17 +11,17 @@ class Planificacion(models.Model):
     fecha = models.DateField()
     asignatura = models.ForeignKey(
         Asignatura,
-        related_name='planes_clase',
+        related_name='planificaciones',
         on_delete=models.SET_NULL,
         null=True
     )
     cursos = models.ManyToManyField(
         Curso,
-        related_name='planes_clase',
+        related_name='planificaciones',
     )
     elaborado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        related_name='planes_clase',
+        related_name='planificaciones',
         on_delete=models.CASCADE
     )
     aprobado_por = models.CharField(max_length=50, blank=True, null=True)
