@@ -33,3 +33,9 @@ class TestAsistenteUrls:
         view = resolve(path)
         assert view.func.view_class == views.CheckoutView, \
             'Should resolve to the CheckoutView'
+
+    def test_cancel_subscription(self):
+        path = reverse('cancel_subscription')
+        view = resolve(path)
+        assert view.func == views.cancel_subscription_view, \
+            'Should resolve to the CancelSubscriptionView'

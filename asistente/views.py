@@ -2,14 +2,16 @@ import stripe
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
-from .helpers import delete_subscription_from_stripe
+
 from accounts.models import Plan, Subscription
 
+from .helpers import delete_subscription_from_stripe
 from .models import Libro, Pregunta
 
 User = get_user_model()
@@ -90,4 +92,37 @@ class CheckoutView(LoginRequiredMixin, View):
             messages.error(request, 'Error. Los datos no son correctos o han '
                            'sido alterados.')
             return render(request, 'asistente/checkout.html')
-        return redirect('profile', pk=request.user.pk, slug=request.user.slug)
+
+        messages.success(request, 'Su transacción ha sido realizada con éxito')
+        return redirect(request.user.get_absolute_url())
+
+
+@login_required
+def cancel_subscription_view(request):
+    if request.method == 'POST':
+        try:
+            previous_subscription = Subscription.objects.get(
+                pk=request.user.active_subscription.pk
+            )
+            delete_subscription_from_stripe(
+                previous_subscription.stripe_subscription_id)
+            previous_subscription.active = False
+            previous_subscription.save()
+        except Subscription.DoesNotExist:
+            pass
+
+        try:
+            free_plan = Plan.objects.get(plan_type='FREE')
+            Subscription.objects.create(
+                plan=free_plan,
+                user=request.user,
+                active=True
+            )
+        except Plan.DoesNotExist:
+            pass
+
+        messages.success(request,
+                         'Su subscripción ha sido cancelada con éxito')
+        return redirect(request.user.get_absolute_url())
+    else:
+        return redirect(request.user.get_absolute_url())

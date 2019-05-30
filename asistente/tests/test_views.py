@@ -4,6 +4,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 from mixer.backend.django import mixer
 from stripe.error import CardError
 
@@ -95,7 +96,6 @@ class TestCheckoutView(TestCase):
     def setUp(self):
         self.user = mixer.blend(User)
         self.request = RequestFactory().get('/')
-        self.plan = mixer.blend('accounts.Plan')
 
         self.mock_stripe = patch('asistente.views.stripe.Subscription')
         self.stripe_subscription = self.mock_stripe.start()
@@ -114,27 +114,47 @@ class TestCheckoutView(TestCase):
         assert response.status_code == 200, \
             'Should be callable by the authenticated user'
 
-    def test_post_success(self):
+    @patch('accounts.models.stripe')
+    def test_post_success(self, mock_stripe):
         """Test when all data are valid for checkout"""
-        request = RequestFactory().post('/', {
-            'stripeToken': 'some-token',
-            'plan_id': self.plan.pk,
-        })
+        mock_stripe.Customer.create.return_value = {'id': '12345'}
 
-        request.user = self.user
-        request = add_middleware_to_request(request)
-        response = views.CheckoutView.as_view()(request)
-        assert response.status_code == 302, 'Should return a redirection'
-        subscription = Subscription.objects.all()[0]
-        assert subscription.user == self.user, \
+        user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+
+        plan = mixer.blend('accounts.Plan', plan_type="MONTHLY")
+
+        self.client.login(
+            email=user.email,
+            password='P455w0rd_testing'
+        )
+
+        url = reverse('checkout')
+        response = self.client.post(url, {
+            'stripeToken': 'some-token',
+            'plan_id': plan.pk,
+        }, follow=True)
+
+        assert response.status_code == 200, 'Should be callable'
+        subscription = Subscription.objects.first()
+        assert subscription.user == user, \
             'The user should be related with the subscription'
         assert subscription.stripe_subscription_id == '123456', \
             'The subscription should have an id'
         assert subscription.active is True, \
             'The subscription should be active'
-        self.user.refresh_from_db()
-        assert self.user.active_plan == self.plan, \
+        user.refresh_from_db()
+        assert user.active_plan == plan, \
             'The user now is subscripted to the plan'
+
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be a message'
+        assert 'Su transacción ha sido realizada con éxito' \
+            == messages[0].message
+        assert 'alert-success' == messages[0].tags, \
+            'There should be a success message'
 
     def test_invalid_plan_id(self):
         """Test when an invalid plan id is given"""
@@ -153,11 +173,13 @@ class TestCheckoutView(TestCase):
 
     def test_invalid_card(self):
         """Test when an invalid card is entered (stripe CardError)"""
+        plan = mixer.blend('accounts.Plan')  # Free Plan
+
         self.stripe_subscription.create.side_effect = CardError('Error', 2, 2)
 
         request = RequestFactory().post('/', {
             'stripeToken': 'some-token',
-            'plan_id': self.plan.pk,
+            'plan_id': plan.pk,
         })
 
         request.user = self.user
@@ -178,7 +200,7 @@ class TestCheckoutView(TestCase):
         monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
         yearly_plan = mixer.blend('accounts.Plan', plan_type='YEARLY')
 
-        before_subscription = mixer.blend(
+        previous_subscription = mixer.blend(
             'accounts.Subscription',
             plan=monthly_plan,
             user=self.user,
@@ -199,7 +221,7 @@ class TestCheckoutView(TestCase):
             'Response should send a redirection'
         assert self.user.subscriptions.filter(active=True).count() == 1
         active_subscription = self.user.subscriptions.get(active=True)
-        assert active_subscription != before_subscription
+        assert active_subscription != previous_subscription
         assert self.user.active_plan == yearly_plan
         mock_stripe_delete.assert_called_once_with('456789')
 
@@ -223,3 +245,128 @@ class TestCheckoutView(TestCase):
             'Response should return an ok status'
         assert self.user.subscriptions.filter(active=True).count() == 1
         assert self.user.active_plan == monthly_plan
+
+
+class TestDeleteSubscription(TestCase):
+
+    @patch('accounts.models.stripe')
+    def setUp(self, mock_stripe):
+        mock_stripe.Customer.create.return_value = {'id': '12345'}
+
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+
+    def test_anonymous(self):
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.cancel_subscription_view(request)
+
+        assert response.status_code == 302, 'Should redirect to login'
+        assert 'login' in response.url, \
+            'An anonymous user should not access'
+
+    def test_cant_access_through_get(self):
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.cancel_subscription_view(request)
+
+        assert response.status_code == 302, 'Should return a redirect'
+        assert 'profile' in response.url, \
+            'Should redirect to profile'
+
+    @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
+    def test_cancel_subscription_success(self, mock_delete):
+
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+
+        previous_subscription = mixer.blend(
+            'accounts.Subscription',
+            plan=monthly_plan,
+            user=self.user,
+            stripe_subscription_id='456789',
+            active=True
+        )
+
+        url = reverse('cancel_subscription')
+
+        self.client.login(
+            username=self.user.email,
+            password='P455w0rd_testing'
+        )
+
+        free_plan = mixer.blend('accounts.Plan', plan_type='FREE')
+
+        response = self.client.post(url, {}, follow=True)
+
+        self.user.refresh_from_db()
+
+        assert response.status_code == 200, 'Should be callable'
+        # Should redirect to the user's profile
+        self.assertRedirects(response, self.user.get_absolute_url())
+        assert self.user.active_plan == free_plan, \
+            "User's active plan should return to free plan"
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be a message'
+        assert 'Su subscripción ha sido cancelada con éxito' \
+            == messages[0].message
+        assert 'alert-success' == messages[0].tags, \
+            'There should be a success message'
+        # Should delete from stripe
+        mock_delete.assert_called_once_with(
+            previous_subscription.stripe_subscription_id)
+
+    @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
+    def test_cancel_success_when_no_active_subscription(self, mock_delete):
+        url = reverse('cancel_subscription')
+
+        self.client.login(
+            username=self.user.email,
+            password='P455w0rd_testing'
+        )
+
+        free_plan = mixer.blend('accounts.Plan', plan_type='FREE')
+
+        response = self.client.post(url, {}, follow=True)
+
+        self.user.refresh_from_db()
+
+        assert response.status_code == 200, 'Should be callable'
+        # Should redirect to the user's profile
+        self.assertRedirects(response, self.user.get_absolute_url())
+        assert self.user.active_plan == free_plan, \
+            "User's active plan should return to free plan"
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be a message'
+        assert 'Su subscripción ha sido cancelada con éxito' \
+            == messages[0].message
+        assert 'alert-success' == messages[0].tags, \
+            'There should be a success message'
+        assert mock_delete.called is False, \
+            'Should not call delete function from'
+
+    @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
+    def test_cancel_success_if_no_free_plan(self, mock_delete):
+        url = reverse('cancel_subscription')
+
+        self.client.login(
+            username=self.user.email,
+            password='P455w0rd_testing'
+        )
+
+        response = self.client.post(url, {}, follow=True)
+
+        self.user.refresh_from_db()
+
+        assert response.status_code == 200, 'Should be callable'
+        # Should redirect to the user's profile
+        self.assertRedirects(response, self.user.get_absolute_url())
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be a message'
+        assert 'Su subscripción ha sido cancelada con éxito' \
+            == messages[0].message
+        assert 'alert-success' == messages[0].tags, \
+            'There should be a success message'
+        assert mock_delete.called is False, \
+            'Should not call delete function from'
