@@ -54,6 +54,17 @@ class CheckoutView(LoginRequiredMixin, View):
         user = User.objects.get(pk=request.user.pk)
         plan_id = request.POST.get('plan_id')
         try:
+            # Deactivates the current active subscription if any
+            try:
+                active_subscription = Subscription.objects.get(active=True)
+                delete_subscription_from_stripe(
+                    active_subscription.stripe_subscription_id)
+
+                active_subscription.active = False
+                active_subscription.save()
+            except Subscription.DoesNotExist:
+                pass
+
             plan = get_object_or_404(Plan, pk=plan_id)
             token = request.POST.get('stripeToken')
             stripe_subscription = stripe.Subscription.create(
@@ -66,17 +77,6 @@ class CheckoutView(LoginRequiredMixin, View):
                 source=token
             )
 
-            # Deactivates the current active subscription if any
-            try:
-                active_subscription = Subscription.objects.get(active=True)
-                delete_subscription_from_stripe(
-                    active_subscription.stripe_subscription_id)
-
-                active_subscription.active = False
-                active_subscription.save()
-            except Subscription.DoesNotExist:
-                pass
-
             Subscription.objects.create(
                 user=user,
                 plan=plan,
@@ -84,13 +84,28 @@ class CheckoutView(LoginRequiredMixin, View):
                 active=True
             )
 
+        except ValueError:
+            messages.error(request, 'Error. Los datos no son correctos o han '
+                           'sido alterados.')
+            return render(request, 'asistente/checkout.html')
         except stripe.error.CardError:
             messages.error(request, 'Error. La tarjeta de crédito ingresada '
                            'no es válida.')
             return render(request, 'asistente/checkout.html')
-        except ValueError:
-            messages.error(request, 'Error. Los datos no son correctos o han '
-                           'sido alterados.')
+        except stripe.error.InvalidRequestError:
+            # Invalid parameters were supplied to Stripe's API
+            messages.error(request, 'Error!. Parámetros inválidos.')
+            return render(request, 'asistente/checkout.html')
+        except stripe.error.APIConnectionError:
+            # Network communication with Stripe failed
+            messages.error(request, 'Ha ocurrido un error de comunicación. '
+                           'Verifique su conexión.')
+            return render(request, 'asistente/checkout.html')
+        except Exception:
+            # Display a very generic error to the user, and maybe send
+            # yourself an email
+            messages.error(request, 'Ha ocurrido un error con la peticion '
+                           'realizada.')
             return render(request, 'asistente/checkout.html')
 
         messages.success(request, 'Su transacción ha sido realizada con éxito')
@@ -110,6 +125,21 @@ def cancel_subscription_view(request):
             previous_subscription.save()
         except Subscription.DoesNotExist:
             pass
+        except stripe.error.InvalidRequestError:
+            # Invalid parameters were supplied to Stripe's API
+            messages.error(request, 'Error!. Parámetros inválidos.')
+            return redirect(request.user.get_absolute_url())
+        except stripe.error.APIConnectionError:
+            # Network communication with Stripe failed
+            messages.error(request, 'Ha ocurrido un error de comunicaciones. '
+                           'Verifique su conexión.')
+            return redirect(request.user.get_absolute_url())
+        except Exception:
+            # Display a very generic error to the user, and maybe send
+            # yourself an email
+            messages.error(request, 'Ha ocurrido un error con la peticion '
+                           'realizada.')
+            return redirect(request.user.get_absolute_url())
 
         try:
             free_plan = Plan.objects.get(plan_type='FREE')

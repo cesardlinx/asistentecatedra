@@ -6,7 +6,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from mixer.backend.django import mixer
-from stripe.error import CardError
+from stripe import error
 
 from accounts.models import Subscription
 from accounts.tests.conftest import clean_test_files
@@ -175,7 +175,8 @@ class TestCheckoutView(TestCase):
         """Test when an invalid card is entered (stripe CardError)"""
         plan = mixer.blend('accounts.Plan')  # Free Plan
 
-        self.stripe_subscription.create.side_effect = CardError('Error', 2, 2)
+        self.stripe_subscription.create.side_effect = \
+            error.CardError('Error', 2, 2)
 
         request = RequestFactory().post('/', {
             'stripeToken': 'some-token',
@@ -189,6 +190,74 @@ class TestCheckoutView(TestCase):
         assert 'Error. La tarjeta de crédito ingresada no es válida.' in \
             str(response.content.decode("utf-8")
                 ), 'A message should be displayed'
+
+        assert 'alert-danger' in str(response.content), \
+            'It should display an error message'
+
+    def test_invalid_request_error(self):
+        """Test when Invalid parameters were supplied to Stripe's API"""
+        plan = mixer.blend('accounts.Plan')  # Free Plan
+
+        self.stripe_subscription.create.side_effect = \
+            error.InvalidRequestError('error', 2)
+
+        request = RequestFactory().post('/', {
+            'stripeToken': 'some-token',
+            'plan_id': plan.pk,
+        })
+
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.CheckoutView.as_view()(request)
+
+        assert 'Error!. Parámetros inválidos.' in \
+            str(response.content.decode("utf-8")
+                ), 'A message should be displayed'
+
+        assert 'alert-danger' in str(response.content), \
+            'It should display an error message'
+
+    def test_api_connection_error(self):
+        """Test when Invalid parameters were supplied to Stripe's API"""
+        plan = mixer.blend('accounts.Plan')  # Free Plan
+
+        self.stripe_subscription.create.side_effect = \
+            error.APIConnectionError('error')
+
+        request = RequestFactory().post('/', {
+            'stripeToken': 'some-token',
+            'plan_id': plan.pk,
+        })
+
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.CheckoutView.as_view()(request)
+
+        assert 'Ha ocurrido un error de comunicación. Verifique su conexión.' \
+            in str(response.content.decode("utf-8")
+                   ), 'A message should be displayed'
+
+        assert 'alert-danger' in str(response.content), \
+            'It should display an error message'
+
+    def test_generic_error(self):
+        """Test when Invalid parameters were supplied to Stripe's API"""
+        plan = mixer.blend('accounts.Plan')  # Free Plan
+
+        self.stripe_subscription.create.side_effect = Exception('error')
+
+        request = RequestFactory().post('/', {
+            'stripeToken': 'some-token',
+            'plan_id': plan.pk,
+        })
+
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.CheckoutView.as_view()(request)
+
+        assert 'Ha ocurrido un error con la peticion realizada.' \
+            in str(response.content.decode("utf-8")
+                   ), 'A message should be displayed'
 
         assert 'alert-danger' in str(response.content), \
             'It should display an error message'
@@ -247,7 +316,7 @@ class TestCheckoutView(TestCase):
         assert self.user.active_plan == monthly_plan
 
 
-class TestDeleteSubscription(TestCase):
+class TestCancelSubscriptionView(TestCase):
 
     @patch('accounts.models.stripe')
     def setUp(self, mock_stripe):
@@ -257,6 +326,13 @@ class TestDeleteSubscription(TestCase):
             email='tester@tester.com',
             password='P455w0rd_testing'
         )
+
+        self.client.login(
+            username=self.user.email,
+            password='P455w0rd_testing'
+        )
+
+        self.url = reverse('cancel_subscription')
 
     def test_anonymous(self):
         request = RequestFactory().get('/')
@@ -289,16 +365,9 @@ class TestDeleteSubscription(TestCase):
             active=True
         )
 
-        url = reverse('cancel_subscription')
-
-        self.client.login(
-            username=self.user.email,
-            password='P455w0rd_testing'
-        )
-
         free_plan = mixer.blend('accounts.Plan', plan_type='FREE')
 
-        response = self.client.post(url, {}, follow=True)
+        response = self.client.post(self.url, {}, follow=True)
 
         self.user.refresh_from_db()
 
@@ -319,16 +388,9 @@ class TestDeleteSubscription(TestCase):
 
     @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
     def test_cancel_success_when_no_active_subscription(self, mock_delete):
-        url = reverse('cancel_subscription')
-
-        self.client.login(
-            username=self.user.email,
-            password='P455w0rd_testing'
-        )
-
         free_plan = mixer.blend('accounts.Plan', plan_type='FREE')
 
-        response = self.client.post(url, {}, follow=True)
+        response = self.client.post(self.url, {}, follow=True)
 
         self.user.refresh_from_db()
 
@@ -348,14 +410,7 @@ class TestDeleteSubscription(TestCase):
 
     @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
     def test_cancel_success_if_no_free_plan(self, mock_delete):
-        url = reverse('cancel_subscription')
-
-        self.client.login(
-            username=self.user.email,
-            password='P455w0rd_testing'
-        )
-
-        response = self.client.post(url, {}, follow=True)
+        response = self.client.post(self.url, {}, follow=True)
 
         self.user.refresh_from_db()
 
@@ -370,3 +425,93 @@ class TestDeleteSubscription(TestCase):
             'There should be a success message'
         assert mock_delete.called is False, \
             'Should not call delete function from'
+
+    @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
+    def test_invalid_request_error(self, mock_delete):
+        mock_delete.side_effect = error.InvalidRequestError('error', 2)
+
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+
+        previous_subscription = mixer.blend(
+            'accounts.Subscription',
+            plan=monthly_plan,
+            user=self.user,
+            stripe_subscription_id='456789',
+            active=True
+        )
+        mixer.blend('accounts.Subscription')
+
+        response = self.client.post(self.url, {}, follow=True)
+
+        assert response.status_code == 200, 'Should be callable'
+        # Should redirect to the user's profile
+        self.assertRedirects(response, self.user.get_absolute_url())
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be a message'
+        assert 'Error!. Parámetros inválidos.' \
+            == messages[0].message
+        assert 'alert-danger' == messages[0].tags, \
+            'There should be a error message'
+        # Should attempt to delete from stripe
+        mock_delete.assert_called_once_with(
+            previous_subscription.stripe_subscription_id)
+
+    @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
+    def test_api_connection_error(self, mock_delete):
+        mock_delete.side_effect = error.APIConnectionError('error')
+
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+
+        previous_subscription = mixer.blend(
+            'accounts.Subscription',
+            plan=monthly_plan,
+            user=self.user,
+            stripe_subscription_id='456789',
+            active=True
+        )
+        mixer.blend('accounts.Subscription')
+
+        response = self.client.post(self.url, {}, follow=True)
+
+        assert response.status_code == 200, 'Should be callable'
+        # Should redirect to the user's profile
+        self.assertRedirects(response, self.user.get_absolute_url())
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be a message'
+        assert 'Ha ocurrido un error de comunicaciones. Verifique su '\
+            'conexión.' == messages[0].message
+        assert 'alert-danger' == messages[0].tags, \
+            'There should be a error message'
+        # Should attempt to delete from stripe
+        mock_delete.assert_called_once_with(
+            previous_subscription.stripe_subscription_id)
+
+    @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
+    def test_generic_error(self, mock_delete):
+        mock_delete.side_effect = Exception('error')
+
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+
+        previous_subscription = mixer.blend(
+            'accounts.Subscription',
+            plan=monthly_plan,
+            user=self.user,
+            stripe_subscription_id='456789',
+            active=True
+        )
+        mixer.blend('accounts.Subscription')
+
+        response = self.client.post(self.url, {}, follow=True)
+
+        assert response.status_code == 200, 'Should be callable'
+        # Should redirect to the user's profile
+        self.assertRedirects(response, self.user.get_absolute_url())
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be a message'
+        assert 'Ha ocurrido un error con la peticion realizada.' \
+            == messages[0].message
+        assert 'alert-danger' == messages[0].tags, \
+            'There should be a error message'
+        # Should attempt to delete from stripe
+        mock_delete.assert_called_once_with(
+            previous_subscription.stripe_subscription_id)
