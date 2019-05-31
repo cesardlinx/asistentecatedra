@@ -34,6 +34,8 @@ class TestUser(TestCase):
 
     def test_model(self):
         user = mixer.blend(User, first_name='David', last_name='Padilla')
+        assert user.is_premium is False, \
+            'Normal user should not be premium by default'
         assert isinstance(user, User), 'Should be an instance of User'
         slug = 'david-padilla'
         assert user.get_absolute_url() == '/accounts/profile/{0}/{1}/'\
@@ -50,6 +52,7 @@ class TestUser(TestCase):
         )
         assert user.is_superuser is True, 'User should be superuser'
         assert user.is_staff is True, 'Superuser should be staff'
+        assert user.is_premium is True, 'Superuser should be premium'
 
     def test_superuser_invalid_staff(self):
         """
@@ -75,6 +78,19 @@ class TestUser(TestCase):
                 email='tester@tester.com',
                 password='P455w0rd',
                 is_superuser=False,
+            )
+
+    def test_superuser_invalid_premium(self):
+        """
+        Tests error exception when trying to create superuser with the
+        is_premium attribute equals to false
+        """
+        with pytest.raises(ValueError,
+                           match="Superuser must have is_premium=True."):
+            User.objects.create_superuser(
+                email='tester@tester.com',
+                password='P455w0rd',
+                is_premium=False,
             )
 
     def test_create_user_without_email(self):
@@ -159,6 +175,16 @@ class TestUser(TestCase):
         assert user.active_subscription == subscription, \
             "The user's active plan should be the free plan"
 
+    def test_active_subscription_property_when_no_active_subscription(self):
+        """
+        Tests the property to get the user's active_subscription
+        when there is no active subscription
+        """
+        user = mixer.blend(User)
+
+        assert user.active_subscription is False, \
+            "Should return False if there is no active subscription"
+
     def test_active_plan_property(self):
         """Tests the property to get the user's active_plan"""
         plan = mixer.blend('accounts.Plan')
@@ -168,6 +194,16 @@ class TestUser(TestCase):
 
         assert user.active_plan == plan, \
             "The user's active plan should be the free plan"
+
+    def test_active_plan_property_when_no_active_subscription(self):
+        """
+        Tests the property to get the user's active_plan
+        when there is no active subscription
+        """
+        user = mixer.blend(User)
+
+        assert user.active_plan is False, \
+            "Should return False if there is no active plan"
 
     def tearDown(self):
         """Method to make the image removal when necesary"""

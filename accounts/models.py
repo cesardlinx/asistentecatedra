@@ -25,12 +25,14 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class Plan(models.Model):
     """Tipo de plan al que el usuario se subscribe."""
+    FREE = 'FREE'
     MONTHLY = 'MONTHLY'
     YEARLY = 'YEARLY'
-    FREE = 'FREE'
+    PERPETUAL = 'PERPETUAL'
     PLAN_CHOICES = (
-        (MONTHLY, 'Monthly'),
+        (PERPETUAL, 'Perpetual'),
         (YEARLY, 'Yearly'),
+        (MONTHLY, 'Monthly'),
         (FREE, 'Free'),
     )
     slug = models.SlugField()
@@ -87,11 +89,14 @@ class UserManager(BaseUserManager):
         """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_premium', True)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
+        if extra_fields.get('is_premium') is not True:
+            raise ValueError('Superuser must have is_premium=True.')
 
         return self._create_user(email, password, **extra_fields)
 
@@ -134,6 +139,7 @@ class User(AbstractUser):
     stripe_customer_id = models.CharField(max_length=40)
     modified_at = models.DateTimeField(auto_now=True, editable=False)
     plans = models.ManyToManyField(Plan, through='Subscription')
+    is_premium = models.BooleanField(default=False)
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -220,29 +226,42 @@ class User(AbstractUser):
         """
         Gets the user's active subscription
         """
-        active_subscription = self.subscriptions.get(active=True)
-        return active_subscription
+        try:
+            active_subscription = self.subscriptions.get(active=True)
+            return active_subscription
+        except Subscription.DoesNotExist:
+            return False
+        except Exception:
+            return False
 
     @property
     def active_plan(self):
         """
         Gets the user's active plan
         """
-        active_subscription = self.subscriptions.get(active=True)
-        return active_subscription.plan
+        try:
+            active_subscription = self.subscriptions.get(active=True)
+            return active_subscription.plan
+        except Subscription.DoesNotExist:
+            return False
+        except Exception:
+            return False
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def post_save_user_create(sender, instance, created, **kwargs):
     """Señal que agrega el plan FREE a un usuario recién creado"""
     try:
-        free_plan = Plan.objects.get(plan_type='FREE')
-        Subscription.objects.create(
-            user=instance,
-            plan=free_plan,
-            active=True
-        )
+        if not instance.active_plan:
+            free_plan = Plan.objects.get(plan_type='FREE')
+            Subscription.objects.create(
+                user=instance,
+                plan=free_plan,
+                active=True
+            )
     except Plan.DoesNotExist:
+        pass
+    except Exception:
         pass
 
 
@@ -264,6 +283,8 @@ class Subscription(models.Model):
     )
     stripe_subscription_id = models.CharField(max_length=40, null=True,
                                               blank=True)
+    stripe_charge_id = models.CharField(max_length=40, null=True,
+                                        blank=True)
     active = models.BooleanField(default=True)
 
     class Meta:
