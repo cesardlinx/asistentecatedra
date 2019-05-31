@@ -1,12 +1,16 @@
 import os
+from unittest.mock import patch
+
 import pytest
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls import reverse
 from mixer.backend.django import mixer
+
 from accounts.models import Plan, Subscription
-from .conftest import create_test_image, clean_test_files
-from django.conf import settings
-from unittest.mock import patch
+
+from .conftest import clean_test_files, create_test_image
 
 pytestmark = pytest.mark.django_db
 
@@ -24,6 +28,15 @@ class TestPlan:
             'The table should be named "planes"'
         assert plan._meta.verbose_name_plural == 'planes', \
             'The plural name should be "planes"'
+
+    def test_get_absoulte_url(self):
+        plan = mixer.blend('accounts.Plan')
+        assert plan.get_absolute_url() is None
+        plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+        assert plan.get_absolute_url() == \
+            reverse('checkout',
+                    kwargs={'plan_id': plan.pk, 'plan_slug': plan.slug}), \
+            'Should return an url to checkout'
 
 
 class TestUser(TestCase):

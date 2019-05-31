@@ -77,6 +77,10 @@ class TestCancelSubscriptionView(TestCase):
             stripe_subscription_id='456789',
             active=True
         )
+        self.user.is_premium = True
+        self.user.save()
+
+        assert self.user.is_premium is True, 'User should be premium'
 
         free_plan = mixer.blend('accounts.Plan', plan_type='FREE')
 
@@ -85,6 +89,8 @@ class TestCancelSubscriptionView(TestCase):
         self.user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
+        assert self.user.is_premium is False, \
+            'User should no longer be premium'
         # Should redirect to the user's profile
         self.assertRedirects(response, self.user.get_absolute_url())
         assert self.user.active_plan == free_plan, \
@@ -132,15 +138,18 @@ class TestCancelSubscriptionView(TestCase):
 
         free_plan = mixer.blend('accounts.Plan', plan_type='FREE')
 
+        assert self.user.is_premium is False, 'User should not be premium'
+
         response = self.client.post(self.url, {}, follow=True)
 
         self.user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
+        assert self.user.is_premium is False, 'User should not be premium'
         # Should redirect to the user's profile
         self.assertRedirects(response, self.user.get_absolute_url())
         assert self.user.active_plan == free_plan, \
-            "User's active plan should return to free plan"
+            "User's active plan should return the free plan"
         messages = list(response.context.get('messages'))
         assert len(messages) == 1, 'There should be a message'
         assert 'Su subscripción ha sido cancelada con éxito' \
@@ -153,11 +162,14 @@ class TestCancelSubscriptionView(TestCase):
     @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
     def test_cancel_success_if_no_free_plan(self, mock_delete):
         """Test when previously there is no free plan"""
+        assert self.user.is_premium is False, 'User should not be premium'
+
         response = self.client.post(self.url, {}, follow=True)
 
         self.user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
+        assert self.user.is_premium is False, 'User should not be premium'
         # Should redirect to the user's profile
         self.assertRedirects(response, self.user.get_absolute_url())
         messages = list(response.context.get('messages'))
@@ -176,6 +188,7 @@ class TestCancelSubscriptionView(TestCase):
 
         self.make_error_tests(
             'Error!. Parámetros inválidos.', 1, mock_delete)
+        assert self.user.is_premium is True, 'User should still be premium'
 
     @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
     def test_api_connection_error(self, mock_delete):
@@ -185,6 +198,17 @@ class TestCancelSubscriptionView(TestCase):
         self.make_error_tests(
             'Ha ocurrido un error de comunicaciones. Verifique su conexión.',
             1, mock_delete)
+        assert self.user.is_premium is True, 'User should still be premium'
+
+    @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
+    def test_stripe_error(self, mock_delete):
+        """Test when a generic stripe error occurs"""
+        mock_delete.side_effect = error.StripeError('error')
+
+        self.make_error_tests(
+            'Ha ocurrido un error al tratar de cancelar la subscripción.',
+            1, mock_delete)
+        assert self.user.is_premium is True, 'User should still be premium'
 
     @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
     @patch('asistente.views.send_subscription_emails', autospec=True)
@@ -195,6 +219,7 @@ class TestCancelSubscriptionView(TestCase):
         self.make_error_tests(
             'Ha ocurrido un error al tratar de enviar el correo.',
             2, mock_delete)
+        assert self.user.is_premium is False, 'User should not be premium'
 
     @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
     @patch('asistente.views.send_subscription_emails', autospec=True)
@@ -205,6 +230,7 @@ class TestCancelSubscriptionView(TestCase):
         self.make_error_tests(
             'Ha ocurrido un error al tratar de enviar el correo.',
             2, mock_delete)
+        assert self.user.is_premium is False, 'User should not be premium'
 
     @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
     @patch('asistente.views.send_subscription_emails', autospec=True)
@@ -215,6 +241,7 @@ class TestCancelSubscriptionView(TestCase):
         self.make_error_tests(
             'Ha ocurrido un error al tratar de enviar el correo.',
             2, mock_delete)
+        assert self.user.is_premium is False, 'User should not be premium'
 
     @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
     def test_generic_error(self, mock_delete):
@@ -228,6 +255,9 @@ class TestCancelSubscriptionView(TestCase):
                          mock_delete):
         monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
 
+        self.user.is_premium = True
+        self.user.save()
+
         previous_subscription = mixer.blend(
             'accounts.Subscription',
             plan=monthly_plan,
@@ -238,6 +268,8 @@ class TestCancelSubscriptionView(TestCase):
         mixer.blend('accounts.Subscription')
 
         response = self.client.post(self.url, {}, follow=True)
+
+        self.user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
         # Should redirect to the user's profile
@@ -251,4 +283,3 @@ class TestCancelSubscriptionView(TestCase):
         # Should attempt to delete from stripe
         mock_delete.assert_called_once_with(
             previous_subscription.stripe_subscription_id)
-

@@ -59,6 +59,12 @@ class Plan(models.Model):
         self.slug = slugify(self.plan_type)
         super().save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        """Defines the absolute url for plans, which is the checkout view"""
+        if self.plan_type != 'FREE':
+            return reverse('checkout',
+                           kwargs={'plan_id': self.pk, 'plan_slug': self.slug})
+
 
 class UserManager(BaseUserManager):
     """Define a model manager for User model with no username field."""

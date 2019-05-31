@@ -32,7 +32,8 @@ class TestAsistenteUrls:
 
     def test_checkout(self):
         plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
-        path = reverse('checkout', kwargs={'plan_id': plan.pk})
+        path = reverse('checkout',
+                       kwargs={'plan_id': plan.pk, 'plan_slug': plan.slug})
         view = resolve(path)
         assert view.func.view_class == views.CheckoutView, \
             'Should resolve to the CheckoutView'

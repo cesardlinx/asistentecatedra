@@ -31,25 +31,31 @@ class TestCheckoutView(TestCase):
         self.stripe_subscription = self.mock_stripe.start()
         self.stripe_subscription.create.return_value = {'id': '123456'}
 
-        self.url = reverse('checkout', kwargs={'plan_id': self.plan.pk})
+        self.url = reverse('checkout',
+                           kwargs={
+                               'plan_id': self.plan.pk,
+                               'plan_slug': self.plan.slug
+                            })
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         self.request.user = AnonymousUser()
         response = views.CheckoutView.as_view()(self.request,
-                                                plan_id=self.plan.pk)
+                                                plan_id=self.plan.pk,
+                                                plan_slug=self.plan.slug)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get(self):
         """Tests that the view can be callable by a user"""
         self.request.user = self.user
         response = views.CheckoutView.as_view()(self.request,
-                                                plan_id=self.plan.pk)
+                                                plan_id=self.plan.pk,
+                                                plan_slug=self.plan.slug)
         assert response.status_code == 200, \
             'Should be callable by the authenticated user'
 
     @patch('accounts.models.stripe', autospec=True)
-    def test_post_success(self, mock_stripe):
+    def test_success_subscription(self, mock_stripe):
         """Test when all data are valid for checkout"""
         mock_stripe.Customer.create.return_value = {'id': '12345'}
 
@@ -71,20 +77,112 @@ class TestCheckoutView(TestCase):
             password='P455w0rd_testing'
         )
 
+        assert user.is_premium is False, 'User should not be premium'
+
         response = self.client.post(self.url, {
             'stripeToken': 'some-token',
         }, follow=True)
 
+        user.refresh_from_db()
+
         assert response.status_code == 200, 'Should be callable'
-        subscription = Subscription.objects.first()
+        assert user.is_premium is True, 'User should be premium'
+        subscription = Subscription.objects.get(plan__plan_type="YEARLY")
         assert subscription.user == user, \
             'The user should be related with the subscription'
         assert subscription.stripe_subscription_id == '123456', \
             'The subscription should have an id'
         assert subscription.active is True, \
             'The subscription should be active'
+        assert self.stripe_subscription.create.called is True, \
+            'Stripe create subscription function called'
         user.refresh_from_db()
         assert user.active_plan == self.plan, \
+            'The user now is subscripted to the plan'
+
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be a message'
+        assert 'Su transacción ha sido realizada con éxito' \
+            == messages[0].message
+        assert 'alert-success' == messages[0].tags, \
+            'There should be a success message'
+        assert len(mail.outbox) == 2, 'Should send 2 mails'
+
+        user_email = mail.outbox[0]
+        admin_email = mail.outbox[1]
+
+        assert user.first_name in user_email.body, \
+            "Email body should contain user's first name"
+        assert 'cancelada' not in user_email.body, \
+            'Should not be a cancellation email'
+        assert "Asistente de Cátedra | SUBSCRIPCIÓN" \
+            in user_email.subject
+        assert subscription.plan.plan_type in user_email.body, \
+            "Plan type should be in email body"
+        assert user.email in user_email.to, \
+            "The user's email should be in email's field TO "
+
+        assert user.email in admin_email.body, \
+            "Email body should contain user's first name"
+        assert 'cancelado' not in admin_email.body, \
+            'Should not be a cancellation email'
+        assert "Asistente de Cátedra | SUBSCRIPCIÓN AÑADIDA" \
+            in admin_email.subject
+        assert subscription.plan.plan_type in admin_email.body, \
+            "Plan type should be in email body"
+        assert superuser.email in admin_email.to, \
+            "The admin email should be in email's field TO "
+
+    @patch('accounts.models.stripe', autospec=True)
+    @patch('asistente.views.stripe.Charge.create', autospec=True)
+    def test_perpetual_subscription(self, mock_charge, mock_stripe):
+        """Tests when a user decides to subscribe to the perpetual plan"""
+        mock_stripe.Customer.create.return_value = {'id': '12345'}
+        mock_charge.return_value = {'id': '1234567'}
+
+        user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing',
+            first_name='Juan',
+            last_name='Pérez',
+        )
+
+        superuser = User.objects.create_superuser(
+            username='david@webmaster.com',
+            email='david@webmaster.com',
+            password='P455w0rd_testing'
+        )
+
+        self.client.login(
+            email=user.email,
+            password='P455w0rd_testing'
+        )
+
+        plan = mixer.blend('accounts.Plan', plan_type='PERPETUAL')
+
+        url = reverse('checkout',
+                      kwargs={'plan_id': plan.pk, 'plan_slug': plan.slug})
+
+        assert user.is_premium is False, 'User should not be premium'
+
+        response = self.client.post(url, {
+            'stripeToken': 'some-token',
+        }, follow=True)
+
+        user.refresh_from_db()
+
+        assert response.status_code == 200, 'Should be callable'
+        assert user.is_premium is True, 'User should be premium'
+        subscription = Subscription.objects.get(plan__plan_type="PERPETUAL")
+        assert subscription.user == user, \
+            'The user should be related with the subscription'
+        assert subscription.stripe_charge_id == '1234567', \
+            'The subscription should have an id'
+        assert subscription.active is True, \
+            'The subscription should be active'
+        assert mock_charge.called is True, \
+            'Stripe create charge function called'
+        assert user.active_plan == plan, \
             'The user now is subscripted to the plan'
 
         messages = list(response.context.get('messages'))
@@ -134,7 +232,12 @@ class TestCheckoutView(TestCase):
         request.user = self.user
         request = add_middleware_to_request(request)
         response = views.CheckoutView.as_view()(request,
-                                                plan_id=self.plan.pk)
+                                                plan_id=self.plan.pk,
+                                                plan_slug=self.plan.slug)
+
+        self.user.refresh_from_db()
+
+        assert self.user.is_premium is False, 'User should not be premium'
 
         assert 'Error. La tarjeta de crédito ingresada no es válida.' in \
             str(response.content.decode("utf-8")
@@ -157,17 +260,24 @@ class TestCheckoutView(TestCase):
             active=True
         )
 
+        self.user.is_premium = True
+        self.user.save()
+
         request = RequestFactory().post('/', {
             'stripeToken': 'some-token',
         })
 
         request.user = self.user
         request = add_middleware_to_request(request)
+        assert self.user.is_premium is True, 'User should be premium'
         response = views.CheckoutView.as_view()(request,
-                                                plan_id=self.plan.pk)
+                                                plan_id=self.plan.pk,
+                                                plan_slug=self.plan.slug)
+        self.user.refresh_from_db()
 
         assert response.status_code == 302, \
             'Response should send a redirection'
+        assert self.user.is_premium is True, 'User should still being premium'
         assert self.user.subscriptions.filter(active=True).count() == 1
         active_subscription = self.user.subscriptions.get(active=True)
         assert active_subscription != previous_subscription
@@ -185,11 +295,15 @@ class TestCheckoutView(TestCase):
 
         request.user = self.user
         request = add_middleware_to_request(request)
+        assert self.user.is_premium is False, 'User should not be premium'
         response = views.CheckoutView.as_view()(request,
-                                                plan_id=self.plan.pk)
+                                                plan_id=self.plan.pk,
+                                                plan_slug=self.plan.slug)
+        self.user.refresh_from_db()
 
         assert response.status_code == 302, \
             'Response should return an ok status'
+        assert self.user.is_premium is True, 'User should be premium'
         assert self.user.subscriptions.filter(active=True).count() == 1
         assert self.user.active_plan == self.plan
 
@@ -209,6 +323,14 @@ class TestCheckoutView(TestCase):
         self.make_error_tests(
             'Ha ocurrido un error de comunicación. Verifique su conexión.')
 
+    def test_stripe_error(self):
+        """Test when a generic stripe error occurs"""
+        self.stripe_subscription.create.side_effect = \
+            error.StripeError('error')
+
+        self.make_error_tests(
+            'Ha ocurrido un error en el pago.')
+
     def test_generic_error(self):
         """Tests when a not handled exception  is raised"""
 
@@ -227,7 +349,11 @@ class TestCheckoutView(TestCase):
         request.user = self.user
         request = add_middleware_to_request(request)
         response = views.CheckoutView.as_view()(request,
-                                                plan_id=self.plan.pk)
+                                                plan_id=self.plan.pk,
+                                                plan_slug=self.plan.slug)
+        self.user.refresh_from_db()
+
+        assert self.user.is_premium is False, 'User should not be premium'
 
         assert error_message\
             in str(response.content.decode("utf-8")
@@ -288,8 +414,10 @@ class TestCheckoutView(TestCase):
         response = self.client.post(self.url, {
             'stripeToken': 'some-token',
         }, follow=True)
+        user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
+        assert user.is_premium is True, 'User should be premium'
         # Should redirect to the user's profile
         self.assertRedirects(response, user.get_absolute_url())
         messages = list(response.context.get('messages'))

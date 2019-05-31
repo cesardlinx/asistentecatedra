@@ -1,4 +1,5 @@
 import smtplib
+
 import stripe
 from django.conf import settings
 from django.contrib import messages
@@ -6,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import BadHeaderError
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic.base import TemplateView
@@ -70,25 +72,55 @@ class CheckoutView(LoginRequiredMixin, View):
                 active_subscription.save()
             except Subscription.DoesNotExist:
                 pass
+            except Exception:
+                pass
 
             token = request.POST.get('stripeToken')
-            # Stripe subscription creation
-            stripe_subscription = stripe.Subscription.create(
-                customer=request.user.stripe_customer_id,
-                items=[
-                    {
-                        'plan': plan_id
-                    }
-                ],
-                source=token
-            )
-            # Database subscription creation
-            Subscription.objects.create(
-                user=user,
-                plan=plan,
-                stripe_subscription_id=stripe_subscription.get('id'),
-                active=True
-            )
+
+            if plan.plan_type == 'PERPETUAL':
+                # Stripe payment
+                stripe_charge = stripe.Charge.create(
+                    amount=plan.price,
+                    currency='usd',
+                    source=token,
+                    description='Plan PERPETUAL | Asistente de Cátedra',
+                )
+                if stripe_charge:
+                    with transaction.atomic():
+                        # Database subscription creation
+                        Subscription.objects.create(
+                            user=user,
+                            plan=plan,
+                            stripe_charge_id=stripe_charge.get('id'),
+                            active=True
+                        )
+                        # User is premium now
+                        user.is_premium = True
+                        user.save()
+            else:
+                # Stripe subscription creation
+                stripe_subscription = stripe.Subscription.create(
+                    customer=request.user.stripe_customer_id,
+                    items=[
+                        {
+                            'plan': plan_id
+                        }
+                    ],
+                    source=token
+                )
+                if stripe_subscription:
+                    with transaction.atomic():
+                        # Database subscription creation
+                        Subscription.objects.create(
+                            user=user,
+                            plan=plan,
+                            stripe_subscription_id=stripe_subscription.get(
+                                'id'),
+                            active=True
+                        )
+                        # User is premium now
+                        user.is_premium = True
+                        user.save()
 
             # email sending
 
@@ -119,6 +151,10 @@ class CheckoutView(LoginRequiredMixin, View):
             messages.error(request, 'Ha ocurrido un error de comunicación. '
                            'Verifique su conexión.')
             return render(request, 'asistente/checkout.html')
+        except stripe.error.StripeError:
+            # Stripe generic error
+            messages.error(request, 'Ha ocurrido un error en el pago.')
+            return render(request, 'asistente/checkout.html')
         except smtplib.SMTPException:
             messages.error(request,
                            'Ha ocurrido un error al tratar de enviar el '
@@ -136,42 +172,55 @@ class CheckoutView(LoginRequiredMixin, View):
 @login_required
 def cancel_subscription_view(request):
     if request.method == 'POST':
+        user = User.objects.get(pk=request.user.pk)
         # Delete previous subscription
         try:
-            previous_subscription = Subscription.objects.get(
-                pk=request.user.active_subscription.pk
-            )
-            delete_subscription_from_stripe(
-                previous_subscription.stripe_subscription_id)
-            previous_subscription.active = False
-            previous_subscription.save()
+            if user.active_subscription:
+                previous_subscription = Subscription.objects.get(
+                    pk=user.active_subscription.pk
+                )
+                delete_subscription_from_stripe(
+                    previous_subscription.stripe_subscription_id)
+                previous_subscription.active = False
+                previous_subscription.save()
         except Subscription.DoesNotExist:
             pass
         except stripe.error.InvalidRequestError:
             # Invalid parameters were supplied to Stripe's API
             messages.error(request, 'Error!. Parámetros inválidos.')
-            return redirect(request.user.get_absolute_url())
+            return redirect(user.get_absolute_url())
         except stripe.error.APIConnectionError:
             # Network communication with Stripe failed
             messages.error(request, 'Ha ocurrido un error de comunicaciones. '
                            'Verifique su conexión.')
-            return redirect(request.user.get_absolute_url())
+            return redirect(user.get_absolute_url())
+        except stripe.error.StripeError:
+            # General Stripe Error
+            messages.error(request, 'Ha ocurrido un error al tratar de '
+                           'cancelar la subscripción.')
+            return redirect(user.get_absolute_url())
         except Exception:
             # Display a very generic error to the user, and maybe send
             # yourself an email
             messages.error(request, 'Ha ocurrido un error con la peticion '
                            'realizada.')
-            return redirect(request.user.get_absolute_url())
+            return redirect(user.get_absolute_url())
 
         # Subscribes to free plan
         try:
             free_plan = Plan.objects.get(plan_type='FREE')
-            Subscription.objects.create(
-                plan=free_plan,
-                user=request.user,
-                active=True
-            )
+            with transaction.atomic():
+                Subscription.objects.create(
+                    plan=free_plan,
+                    user=user,
+                    active=True
+                )
+                # User is no longer premium
+                user.is_premium = False
+                user.save()
         except Plan.DoesNotExist:
+            pass
+        except Exception:
             pass
 
         # email sending
@@ -185,12 +234,14 @@ def cancel_subscription_view(request):
             plan = previous_subscription.plan
         except UnboundLocalError:
             plan = False
+        except Exception:
+            plan = False
 
         try:
             send_subscription_emails(
                 user_mail_subject,
                 admin_mail_subject,
-                request.user,
+                user,
                 plan,
                 cancel=True
             )
@@ -210,6 +261,6 @@ def cancel_subscription_view(request):
 
         messages.success(request,
                          'Su subscripción ha sido cancelada con éxito')
-        return redirect(request.user.get_absolute_url())
+        return redirect(user.get_absolute_url())
     else:
         return redirect(request.user.get_absolute_url())
