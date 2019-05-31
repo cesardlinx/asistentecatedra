@@ -20,7 +20,7 @@ User = get_user_model()
 
 class TestCancelSubscriptionView(TestCase):
 
-    @patch('accounts.models.stripe')
+    @patch('accounts.models.stripe', autospec=True)
     def setUp(self, mock_stripe):
         mock_stripe.Customer.create.return_value = {'id': '12345'}
 

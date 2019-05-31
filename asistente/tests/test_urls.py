@@ -1,6 +1,8 @@
+import pytest
 from django.urls import resolve, reverse
-
+from mixer.backend.django import mixer
 from asistente import views
+pytestmark = pytest.mark.django_db
 
 
 class TestAsistenteUrls:
@@ -29,7 +31,8 @@ class TestAsistenteUrls:
             'Should resolve to the view PremiumTemplateView'
 
     def test_checkout(self):
-        path = reverse('checkout')
+        plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+        path = reverse('checkout', kwargs={'plan_id': plan.pk})
         view = resolve(path)
         assert view.func.view_class == views.CheckoutView, \
             'Should resolve to the CheckoutView'
@@ -38,4 +41,4 @@ class TestAsistenteUrls:
         path = reverse('cancel_subscription')
         view = resolve(path)
         assert view.func == views.cancel_subscription_view, \
-            'Should resolve to the CancelSubscriptionView'
+            'Should resolve to the cancel_subscription_view'

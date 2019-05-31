@@ -24,25 +24,31 @@ class TestCheckoutView(TestCase):
     def setUp(self):
         self.user = mixer.blend(User)
         self.request = RequestFactory().get('/')
+        self.plan = mixer.blend('accounts.Plan', plan_type='YEARLY')
 
-        self.mock_stripe = patch('asistente.views.stripe.Subscription')
+        self.mock_stripe = patch(
+            'asistente.views.stripe.Subscription')
         self.stripe_subscription = self.mock_stripe.start()
         self.stripe_subscription.create.return_value = {'id': '123456'}
+
+        self.url = reverse('checkout', kwargs={'plan_id': self.plan.pk})
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         self.request.user = AnonymousUser()
-        response = views.CheckoutView.as_view()(self.request)
+        response = views.CheckoutView.as_view()(self.request,
+                                                plan_id=self.plan.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get(self):
         """Tests that the view can be callable by a user"""
         self.request.user = self.user
-        response = views.CheckoutView.as_view()(self.request)
+        response = views.CheckoutView.as_view()(self.request,
+                                                plan_id=self.plan.pk)
         assert response.status_code == 200, \
             'Should be callable by the authenticated user'
 
-    @patch('accounts.models.stripe')
+    @patch('accounts.models.stripe', autospec=True)
     def test_post_success(self, mock_stripe):
         """Test when all data are valid for checkout"""
         mock_stripe.Customer.create.return_value = {'id': '12345'}
@@ -60,17 +66,13 @@ class TestCheckoutView(TestCase):
             password='P455w0rd_testing'
         )
 
-        plan = mixer.blend('accounts.Plan', plan_type="MONTHLY")
-
         self.client.login(
             email=user.email,
             password='P455w0rd_testing'
         )
 
-        url = reverse('checkout')
-        response = self.client.post(url, {
+        response = self.client.post(self.url, {
             'stripeToken': 'some-token',
-            'plan_id': plan.pk,
         }, follow=True)
 
         assert response.status_code == 200, 'Should be callable'
@@ -82,7 +84,7 @@ class TestCheckoutView(TestCase):
         assert subscription.active is True, \
             'The subscription should be active'
         user.refresh_from_db()
-        assert user.active_plan == plan, \
+        assert user.active_plan == self.plan, \
             'The user now is subscripted to the plan'
 
         messages = list(response.context.get('messages'))
@@ -118,36 +120,21 @@ class TestCheckoutView(TestCase):
         assert superuser.email in admin_email.to, \
             "The admin email should be in email's field TO "
 
-    def test_invalid_plan_id(self):
-        """Test when an invalid plan id is given"""
-        request = RequestFactory().post('/', {
-            'stripeToken': 'some-token',
-            'plan_id': 'invalid-id',
-        })
-        request.user = self.user
-        request = add_middleware_to_request(request)
-        response = views.CheckoutView.as_view()(request)
-        assert 'Error. Los datos no son correctos o han sido alterados.' in \
-            str(response.content), 'A message should be displayed'
-
-        assert 'alert-danger' in str(response.content), \
-            'It should display an error message'
-
     def test_invalid_card(self):
         """Test when an invalid card is entered (stripe CardError)"""
-        plan = mixer.blend('accounts.Plan')  # Free Plan
+        mixer.blend('accounts.Plan')  # Free Plan
 
         self.stripe_subscription.create.side_effect = \
             error.CardError('Error', 2, 2)
 
         request = RequestFactory().post('/', {
             'stripeToken': 'some-token',
-            'plan_id': plan.pk,
         })
 
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.CheckoutView.as_view()(request)
+        response = views.CheckoutView.as_view()(request,
+                                                plan_id=self.plan.pk)
 
         assert 'Error. La tarjeta de crédito ingresada no es válida.' in \
             str(response.content.decode("utf-8")
@@ -156,12 +143,11 @@ class TestCheckoutView(TestCase):
         assert 'alert-danger' in str(response.content), \
             'It should display an error message'
 
-    @patch('asistente.views.delete_subscription_from_stripe')
+    @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
     def test_change_subscription(self, mock_stripe_delete):
         """Tests an authenticated user can change his subscription"""
 
         monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
-        yearly_plan = mixer.blend('accounts.Plan', plan_type='YEARLY')
 
         previous_subscription = mixer.blend(
             'accounts.Subscription',
@@ -173,41 +159,39 @@ class TestCheckoutView(TestCase):
 
         request = RequestFactory().post('/', {
             'stripeToken': 'some-token',
-            'plan_id': yearly_plan.pk,
         })
 
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.CheckoutView.as_view()(request)
+        response = views.CheckoutView.as_view()(request,
+                                                plan_id=self.plan.pk)
 
         assert response.status_code == 302, \
             'Response should send a redirection'
         assert self.user.subscriptions.filter(active=True).count() == 1
         active_subscription = self.user.subscriptions.get(active=True)
         assert active_subscription != previous_subscription
-        assert self.user.active_plan == yearly_plan
-        mock_stripe_delete.assert_called_once_with('456789')
+        assert self.user.active_plan == self.plan
+        mock_stripe_delete.assert_called_once_with(
+            previous_subscription.stripe_subscription_id)
 
     def test_change_subscription_when_no_previous_plan(self):
         """
         Tests a subscription change when there is no previous active plan
         """
-
-        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
-
         request = RequestFactory().post('/', {
             'stripeToken': 'some-token',
-            'plan_id': monthly_plan.pk,
         })
 
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.CheckoutView.as_view()(request)
+        response = views.CheckoutView.as_view()(request,
+                                                plan_id=self.plan.pk)
 
         assert response.status_code == 302, \
             'Response should return an ok status'
         assert self.user.subscriptions.filter(active=True).count() == 1
-        assert self.user.active_plan == monthly_plan
+        assert self.user.active_plan == self.plan
 
     def test_invalid_request_error(self):
         """Test when Invalid parameters were supplied to Stripe's API"""
@@ -234,16 +218,16 @@ class TestCheckoutView(TestCase):
             'Ha ocurrido un error con la peticion realizada.')
 
     def make_error_tests(self, error_message):
-        plan = mixer.blend('accounts.Plan')  # Free Plan
+        mixer.blend('accounts.Plan')  # Free Plan
 
         request = RequestFactory().post('/', {
             'stripeToken': 'some-token',
-            'plan_id': plan.pk,
         })
 
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.CheckoutView.as_view()(request)
+        response = views.CheckoutView.as_view()(request,
+                                                plan_id=self.plan.pk)
 
         assert error_message\
             in str(response.content.decode("utf-8")
@@ -253,7 +237,7 @@ class TestCheckoutView(TestCase):
             'It should display an error message'
 
     @patch('asistente.views.send_subscription_emails', autospec=True)
-    @patch('accounts.models.stripe')
+    @patch('accounts.models.stripe', autospec=True)
     def test_smtp_error(self, mock_stripe, mock_emails):
         """Tests when a smtp error is raised when sending the emails"""
 
@@ -274,7 +258,7 @@ class TestCheckoutView(TestCase):
         )
 
     @patch('asistente.views.send_subscription_emails', autospec=True)
-    @patch('accounts.models.stripe')
+    @patch('accounts.models.stripe', autospec=True)
     def test_badheader_error(self, mock_stripe, mock_emails):
         """Tests when a badheader error is raised when sending the emails"""
 
@@ -295,17 +279,14 @@ class TestCheckoutView(TestCase):
         )
 
     def make_email_error_tests(self, error_message, user, mock_emails):
-        plan = mixer.blend('accounts.Plan', plan_type="MONTHLY")
 
         self.client.login(
             email=user.email,
             password='P455w0rd_testing'
         )
 
-        url = reverse('checkout')
-        response = self.client.post(url, {
+        response = self.client.post(self.url, {
             'stripeToken': 'some-token',
-            'plan_id': plan.pk,
         }, follow=True)
 
         assert response.status_code == 200, 'Should be callable'

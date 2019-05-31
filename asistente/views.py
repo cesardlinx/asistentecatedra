@@ -54,7 +54,11 @@ class CheckoutView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         user = User.objects.get(pk=request.user.pk)
-        plan_id = request.POST.get('plan_id')
+        plan_pk = kwargs['plan_id']
+        plan = get_object_or_404(Plan, pk=plan_pk)
+
+        plan_id = plan.stripe_plan_id
+
         try:
             # Deactivates the current active subscription if any
             try:
@@ -67,14 +71,13 @@ class CheckoutView(LoginRequiredMixin, View):
             except Subscription.DoesNotExist:
                 pass
 
-            plan = get_object_or_404(Plan, pk=plan_id)
             token = request.POST.get('stripeToken')
             # Stripe subscription creation
             stripe_subscription = stripe.Subscription.create(
                 customer=request.user.stripe_customer_id,
                 items=[
                     {
-                        'plan': plan.id
+                        'plan': plan_id
                     }
                 ],
                 source=token
@@ -103,10 +106,6 @@ class CheckoutView(LoginRequiredMixin, View):
             messages.error(request,
                            'Ha ocurrido un error al tratar de enviar el '
                            'correo.')
-        except ValueError:
-            messages.error(request, 'Error. Los datos no son correctos o han '
-                           'sido alterados.')
-            return render(request, 'asistente/checkout.html')
         except stripe.error.CardError:
             messages.error(request, 'Error. La tarjeta de crédito ingresada '
                            'no es válida.')

@@ -11,7 +11,7 @@
             <h5>Subscripción Premium: 4.99 USD</h5>
         </div>
 
-        <form action="{% url 'checkout' %}" method="post" id="payment-form">
+        <form method="post" id="payment-form">
             {% csrf_token %}
             <div class="payment-form">
                 <label class="payment-label" for="card-element">
