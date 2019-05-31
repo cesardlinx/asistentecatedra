@@ -30,7 +30,7 @@ def send_confirmation_helper(user, domain):
     email = EmailMultiAlternatives(
         mail_subject, text_email_body, to=[to_email])
     email.attach_alternative(html_email_body, "text/html")
-    email.send()
+    email.send(fail_silently=True)
 
 
 def get_photo_path(instance, filename):

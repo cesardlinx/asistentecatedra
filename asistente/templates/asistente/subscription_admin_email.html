@@ -1,0 +1,15 @@
+Saludos Webmaster!,
+<br>
+<br>
+{% if cancel %}
+Se ha cancelado la subscripción al plan {{ plan.plan_type }}
+ por parte del usuario {{ user.first_name }} {{ user.last_name }} con correo
+ {{ user.email }}
+{% else %}
+Una nueva subscripción al plan {{ plan.plan_type }} ha sido realizada con éxito
+ por parte del usuario {{ user.first_name }} {{ user.last_name }} con correo
+ {{ user.email }}
+{% endif %}
+<br>
+<br>
+

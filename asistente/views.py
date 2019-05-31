@@ -1,9 +1,11 @@
+import smtplib
 import stripe
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.mail import BadHeaderError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic.base import TemplateView
@@ -11,7 +13,7 @@ from django.views.generic.list import ListView
 
 from accounts.models import Plan, Subscription
 
-from .helpers import delete_subscription_from_stripe
+from .helpers import delete_subscription_from_stripe, send_subscription_emails
 from .models import Libro, Pregunta
 
 User = get_user_model()
@@ -67,6 +69,7 @@ class CheckoutView(LoginRequiredMixin, View):
 
             plan = get_object_or_404(Plan, pk=plan_id)
             token = request.POST.get('stripeToken')
+            # Stripe subscription creation
             stripe_subscription = stripe.Subscription.create(
                 customer=request.user.stripe_customer_id,
                 items=[
@@ -76,7 +79,7 @@ class CheckoutView(LoginRequiredMixin, View):
                 ],
                 source=token
             )
-
+            # Database subscription creation
             Subscription.objects.create(
                 user=user,
                 plan=plan,
@@ -84,6 +87,22 @@ class CheckoutView(LoginRequiredMixin, View):
                 active=True
             )
 
+            # email sending
+
+            user_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN'
+            admin_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN AÑADIDA'
+
+            send_subscription_emails(
+                user_mail_subject,
+                admin_mail_subject,
+                user,
+                plan
+            )
+
+        except BadHeaderError:
+            messages.error(request,
+                           'Ha ocurrido un error al tratar de enviar el '
+                           'correo.')
         except ValueError:
             messages.error(request, 'Error. Los datos no son correctos o han '
                            'sido alterados.')
@@ -101,9 +120,12 @@ class CheckoutView(LoginRequiredMixin, View):
             messages.error(request, 'Ha ocurrido un error de comunicación. '
                            'Verifique su conexión.')
             return render(request, 'asistente/checkout.html')
+        except smtplib.SMTPException:
+            messages.error(request,
+                           'Ha ocurrido un error al tratar de enviar el '
+                           'correo.')
         except Exception:
-            # Display a very generic error to the user, and maybe send
-            # yourself an email
+            # Displays a very generic error to the user
             messages.error(request, 'Ha ocurrido un error con la peticion '
                            'realizada.')
             return render(request, 'asistente/checkout.html')
@@ -115,6 +137,7 @@ class CheckoutView(LoginRequiredMixin, View):
 @login_required
 def cancel_subscription_view(request):
     if request.method == 'POST':
+        # Delete previous subscription
         try:
             previous_subscription = Subscription.objects.get(
                 pk=request.user.active_subscription.pk
@@ -141,6 +164,7 @@ def cancel_subscription_view(request):
                            'realizada.')
             return redirect(request.user.get_absolute_url())
 
+        # Subscribes to free plan
         try:
             free_plan = Plan.objects.get(plan_type='FREE')
             Subscription.objects.create(
@@ -150,6 +174,40 @@ def cancel_subscription_view(request):
             )
         except Plan.DoesNotExist:
             pass
+
+        # email sending
+
+        user_mail_subject = 'Asistente de Cátedra | CANCELACIÓN DE '\
+                            'SUBSCRIPCIÓN'
+        admin_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN CANCELADA'
+
+        try:
+            # Checks if there is a previous subscription
+            plan = previous_subscription.plan
+        except UnboundLocalError:
+            plan = False
+
+        try:
+            send_subscription_emails(
+                user_mail_subject,
+                admin_mail_subject,
+                request.user,
+                plan,
+                cancel=True
+            )
+        except smtplib.SMTPException:
+            messages.error(request,
+                           'Ha ocurrido un error al tratar de enviar el '
+                           'correo.')
+        except BadHeaderError:
+            messages.error(request,
+                           'Ha ocurrido un error al tratar de enviar el '
+                           'correo.')
+        except Exception:
+
+            messages.error(request,
+                           'Ha ocurrido un error al tratar de enviar el '
+                           'correo.')
 
         messages.success(request,
                          'Su subscripción ha sido cancelada con éxito')
