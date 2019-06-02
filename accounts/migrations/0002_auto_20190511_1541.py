@@ -6,19 +6,22 @@ def create_pĺans(apps, schema_editor):
     Plan = apps.get_model('accounts', 'Plan')
     Plan.objects.bulk_create([
         Plan(
-            plan_type='FREE',
+            plan_type='GRATIS',
             price=0.00,
-            stripe_plan_id=settings.STRIPE_FREE_ID
         ),
         Plan(
-            plan_type='MONTHLY',
+            plan_type='MENSUAL',
             price=4.99,
             stripe_plan_id=settings.STRIPE_MONTHLY_ID
         ),
         Plan(
-            plan_type='YEARLY',
+            plan_type='ANUAL',
             price=69.99,
             stripe_plan_id=settings.STRIPE_YEARLY_ID
+        ),
+        Plan(
+            plan_type='PAGO ÚNICO',
+            price=199.99,
         ),
     ])
 

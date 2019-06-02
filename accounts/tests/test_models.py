@@ -32,7 +32,7 @@ class TestPlan:
     def test_get_absoulte_url(self):
         plan = mixer.blend('accounts.Plan')
         assert plan.get_absolute_url() is None
-        plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+        plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
         assert plan.get_absolute_url() == \
             reverse('checkout',
                     kwargs={'plan_id': plan.pk, 'plan_slug': plan.slug}), \
@@ -176,7 +176,7 @@ class TestUser(TestCase):
 
     def test_active_subscription_property(self):
         """Tests the property to get the user's active_subscription"""
-        plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+        plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
         user = mixer.blend(User)
 
         subscription = Subscription.objects.create(
@@ -229,11 +229,11 @@ def test_user_post_save_signal(mock_stripe):
     mock_stripe.Customer.create.return_value = {'id': '12345'}
 
     free_plan = Plan.objects.create(
-        plan_type='FREE',
+        plan_type='GRATIS',
         price=0.00,
         stripe_plan_id=settings.STRIPE_FREE_ID
     )
-    free_plan = Plan.objects.get(plan_type='FREE')
+    free_plan = Plan.objects.get(plan_type='GRATIS')
     user = User.objects.create_user(
         email='tester2@tester.com',
         password='P455w0rd'

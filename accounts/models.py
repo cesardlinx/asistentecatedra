@@ -25,10 +25,10 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class Plan(models.Model):
     """Tipo de plan al que el usuario se subscribe."""
-    FREE = 'FREE'
-    MONTHLY = 'MONTHLY'
-    YEARLY = 'YEARLY'
-    PERPETUAL = 'PERPETUAL'
+    FREE = 'GRATIS'
+    MONTHLY = 'MENSUAL'
+    YEARLY = 'ANUAL'
+    PERPETUAL = 'PAGO ÚNICO'
     PLAN_CHOICES = (
         (PERPETUAL, 'Perpetual'),
         (YEARLY, 'Yearly'),
@@ -61,7 +61,7 @@ class Plan(models.Model):
 
     def get_absolute_url(self):
         """Defines the absolute url for plans, which is the checkout view"""
-        if self.plan_type != 'FREE':
+        if self.plan_type != 'GRATIS':
             return reverse('checkout',
                            kwargs={'plan_id': self.pk, 'plan_slug': self.slug})
 
@@ -259,7 +259,7 @@ def post_save_user_create(sender, instance, created, **kwargs):
     """Señal que agrega el plan FREE a un usuario recién creado"""
     try:
         if not instance.active_plan:
-            free_plan = Plan.objects.get(plan_type='FREE')
+            free_plan = Plan.objects.get(plan_type='GRATIS')
             Subscription.objects.create(
                 user=instance,
                 plan=free_plan,

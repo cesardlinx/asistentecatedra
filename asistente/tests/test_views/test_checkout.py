@@ -24,7 +24,7 @@ class TestCheckoutView(TestCase):
     def setUp(self):
         self.user = mixer.blend(User)
         self.request = RequestFactory().get('/')
-        self.plan = mixer.blend('accounts.Plan', plan_type='YEARLY')
+        self.plan = mixer.blend('accounts.Plan', plan_type='ANUAL')
 
         self.mock_stripe = patch(
             'asistente.views.stripe.Subscription')
@@ -87,7 +87,7 @@ class TestCheckoutView(TestCase):
 
         assert response.status_code == 200, 'Should be callable'
         assert user.is_premium is True, 'User should be premium'
-        subscription = Subscription.objects.get(plan__plan_type="YEARLY")
+        subscription = Subscription.objects.get(plan__plan_type='ANUAL')
         assert subscription.user == user, \
             'The user should be related with the subscription'
         assert subscription.stripe_subscription_id == '123456', \
@@ -158,7 +158,7 @@ class TestCheckoutView(TestCase):
             password='P455w0rd_testing'
         )
 
-        plan = mixer.blend('accounts.Plan', plan_type='PERPETUAL')
+        plan = mixer.blend('accounts.Plan', plan_type='PAGO ÚNICO')
 
         url = reverse('checkout',
                       kwargs={'plan_id': plan.pk, 'plan_slug': plan.slug})
@@ -173,7 +173,7 @@ class TestCheckoutView(TestCase):
 
         assert response.status_code == 200, 'Should be callable'
         assert user.is_premium is True, 'User should be premium'
-        subscription = Subscription.objects.get(plan__plan_type="PERPETUAL")
+        subscription = Subscription.objects.get(plan__plan_type='PAGO ÚNICO')
         assert subscription.user == user, \
             'The user should be related with the subscription'
         assert subscription.stripe_charge_id == '1234567', \
@@ -250,7 +250,7 @@ class TestCheckoutView(TestCase):
     def test_change_subscription(self, mock_stripe_delete):
         """Tests an authenticated user can change his subscription"""
 
-        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
 
         previous_subscription = mixer.blend(
             'accounts.Subscription',

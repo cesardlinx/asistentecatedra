@@ -77,7 +77,7 @@ class CheckoutView(LoginRequiredMixin, View):
 
             token = request.POST.get('stripeToken')
 
-            if plan.plan_type == 'PERPETUAL':
+            if plan.plan_type == 'PAGO ÚNICO':
                 # Stripe payment
                 stripe_charge = stripe.Charge.create(
                     amount=plan.price,
@@ -208,7 +208,7 @@ def cancel_subscription_view(request):
 
         # Subscribes to free plan
         try:
-            free_plan = Plan.objects.get(plan_type='FREE')
+            free_plan = Plan.objects.get(plan_type='GRATIS')
             with transaction.atomic():
                 Subscription.objects.create(
                     plan=free_plan,

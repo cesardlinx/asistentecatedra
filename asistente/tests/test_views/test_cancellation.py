@@ -68,7 +68,7 @@ class TestCancelSubscriptionView(TestCase):
     def test_cancel_subscription_success(self, mock_delete):
         """Test when a user cancels his/her subscription successfully"""
 
-        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
 
         previous_subscription = mixer.blend(
             'accounts.Subscription',
@@ -82,7 +82,7 @@ class TestCancelSubscriptionView(TestCase):
 
         assert self.user.is_premium is True, 'User should be premium'
 
-        free_plan = mixer.blend('accounts.Plan', plan_type='FREE')
+        free_plan = mixer.blend('accounts.Plan', plan_type='GRATIS')
 
         response = self.client.post(self.url, {}, follow=True)
 
@@ -136,7 +136,7 @@ class TestCancelSubscriptionView(TestCase):
     def test_cancel_success_when_no_active_subscription(self, mock_delete):
         """Test when for some reason a user has no active subscription"""
 
-        free_plan = mixer.blend('accounts.Plan', plan_type='FREE')
+        free_plan = mixer.blend('accounts.Plan', plan_type='GRATIS')
 
         assert self.user.is_premium is False, 'User should not be premium'
 
@@ -253,7 +253,7 @@ class TestCancelSubscriptionView(TestCase):
 
     def make_error_tests(self, error_message, number_of_messages,
                          mock_delete):
-        monthly_plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
 
         self.user.is_premium = True
         self.user.save()
