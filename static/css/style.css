@@ -2524,26 +2524,53 @@ footer {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
-    -ms-flex-pack: distribute;
-        justify-content: space-around;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-flow: row wrap;
+            flex-flow: row wrap;
   }
-}
-
-.profile-content .profile-img-container {
-  border: 1px solid #ccc;
-  border-radius: 6px;
 }
 
 @media only screen and (min-width: 992px) {
-  .profile-content .profile-img-container {
-    min-width: 230px;
-    height: 300px;
+  .profile-content .profile-info {
+    max-width: 232px;
   }
 }
 
-@media only screen and (min-width: 1200px) {
-  .profile-content .profile-img-container {
-    min-width: 400px;
+.profile-content .profile-info .profile-container {
+  margin: 1em 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 1em;
+}
+
+.profile-content .user-info-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: row wrap;
+          flex-flow: row wrap;
+  -webkit-box-pack: space-evenly;
+      -ms-flex-pack: space-evenly;
+          justify-content: space-evenly;
+}
+
+.profile-content .user-info-wrapper .info-item {
+  width: 100%;
+  font-size: 0.8em;
+}
+
+@media only screen and (min-width: 576px) {
+  .profile-content .user-info-wrapper .info-item {
+    width: 40%;
+  }
+}
+
+@media only screen and (min-width: 992px) {
+  .profile-content .user-info-wrapper .info-item {
+    width: 100%;
   }
 }
 
@@ -2590,13 +2617,14 @@ footer {
   }
 }
 
-.profile-content form {
+.profile-content .profile-form {
   margin-top: 1em;
 }
 
 @media only screen and (min-width: 992px) {
-  .profile-content form {
+  .profile-content .profile-form {
     padding: 0 1em 0 2em;
+    max-width: 75%;
   }
 }
 
@@ -2660,9 +2688,21 @@ footer {
   cursor: pointer;
 }
 
-.user p {
-  margin: 2em 0;
+.user .fullname {
+  margin: 1em 0 .5em;
   text-align: center;
+  font-size: 1.1rem;
+}
+
+h4.subscription-card-title {
+  text-align: center;
+  margin-bottom: 1em;
+}
+
+.sub-btn {
+  display: block;
+  width: 100%;
+  margin: 1em 0;
 }
 
 .action-buttons {
