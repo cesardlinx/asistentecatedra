@@ -1,11 +1,15 @@
 import pytest
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
-from asistente import views
 from mixer.backend.django import mixer
+
+from accounts.tests.conftest import clean_test_files
+from asistente import views
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.curso import Curso
-from accounts.tests.conftest import clean_test_files
+
+User = get_user_model()
 
 pytestmark = pytest.mark.django_db
 
@@ -79,3 +83,24 @@ class TestPremiumView:
         assert 'asistente/premium.html' in \
             response.template_name, \
             'Premium template should be rendered in the view'
+
+
+class TestChangePlanView:
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.ChangePlanListView.as_view()(request)
+        assert response.status_code == 302, 'User should be redirected'
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_get(self):
+        """Tests that an authenticated user can access the view"""
+        user = mixer.blend(User)
+        request = RequestFactory().get('/')
+        request.user = user
+        response = views.ChangePlanListView.as_view()(request)
+        assert response.status_code == 200, 'User should access the view'
+        assert 'asistente/change_plan.html' in \
+            response.template_name, \
+            'Change Plan template should be rendered in the view'

@@ -38,6 +38,11 @@ class TestPlan:
                     kwargs={'plan_id': plan.pk, 'plan_slug': plan.slug}), \
             'Should return an url to checkout'
 
+    def test_slug_creation(self):
+        plan = mixer.blend('accounts.Plan', plan_type='PAGO ÚNICO')
+        assert plan.slug == 'pago-unico', \
+            'The slug should be formed by the plan type'
+
 
 class TestUser(TestCase):
     """Tests del modelo de usuario"""

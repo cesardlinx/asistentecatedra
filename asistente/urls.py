@@ -10,4 +10,6 @@ urlpatterns = [
          views.CheckoutView.as_view(), name="checkout"),
     path('cancel_subscription/', views.cancel_subscription_view,
          name="cancel_subscription"),
+    path('cambiar_plan/', views.ChangePlanListView.as_view(),
+         name="change_plan"),
 ]

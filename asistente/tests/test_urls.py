@@ -43,3 +43,9 @@ class TestAsistenteUrls:
         view = resolve(path)
         assert view.func == views.cancel_subscription_view, \
             'Should resolve to the cancel_subscription_view'
+
+    def test_change_plan(self):
+        path = reverse('change_plan')
+        view = resolve(path)
+        assert view.func.view_class == views.ChangePlanListView, \
+            'Should resolve to the view ChangePlanListView'

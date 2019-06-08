@@ -49,6 +49,16 @@ class PremiumTemplateView(TemplateView):
     template_name = 'asistente/premium.html'
 
 
+class ChangePlanListView(LoginRequiredMixin, ListView):
+    """
+    Vista que muestra los planes para que el usuario pueda cambiar de
+    plan
+    """
+    model = Plan
+    context_object_name = 'plans'
+    template_name = 'asistente/change_plan.html'
+
+
 class CheckoutView(LoginRequiredMixin, View):
     """Vista para la pantalla de pago"""
     def get(self, request, *args, **kwargs):

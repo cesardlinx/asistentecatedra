@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import migrations
+from django.template.defaultfilters import slugify
 
 
 def create_pĺans(apps, schema_editor):
@@ -24,6 +25,11 @@ def create_pĺans(apps, schema_editor):
             price=199.99,
         ),
     ])
+
+    plans = Plan.objects.all()
+    for plan in plans:
+        plan.slug = slugify(plan.plan_type)
+        plan.save()
 
 
 class Migration(migrations.Migration):
