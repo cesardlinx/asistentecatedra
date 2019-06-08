@@ -41,8 +41,16 @@
                                 <a class="dropdown-item" href="{{ user.get_absolute_url }}">Perfil</a>
                                 <a class="dropdown-item" href="{% url 'password_change' %}">Cambiar Contraseña</a>
                                 <a class="dropdown-item" href="{% url 'logout'  %}">Cerrar Sesión</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'premium' %}"><span class="fas fa-crown"></span> Obtener Premium</a>
+
+                                {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' %}
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="{% url 'change_plan' %}"><span class="fas fa-crown"></span> Cambiar de Plan</a>
+                                {% elif user.is_premium and user.active_plan.plan_type == 'PAGO ÚNICO' %}
+                                {% else %}
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="{% url 'premium' %}"><span class="fas fa-crown"></span>Obtener Premium</a>
+                                {% endif %}
+
                             </div>
                         </div>
 
@@ -73,9 +81,13 @@
                     <li class="navbar-item">
                         <a href="{% url 'ayuda' %}" class="navbar-link">Ayuda</a>
                     </li>
-                    <li class="navbar-item">
-                        <a href="{% url 'premium' %}" class="navbar-link">Premium</a>
-                    </li>
+
+                    {% if not user.is_premium %}
+                        <li class="navbar-item">
+                            <a href="{% url 'premium' %}" class="navbar-link">Premium</a>
+                        </li>
+                    {% endif %}
+
                     {% if user.is_authenticated %}
 
                         <li class="navbar-item session-link">

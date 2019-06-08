@@ -45,6 +45,31 @@ class TestCheckoutView(TestCase):
                                                 plan_slug=self.plan.slug)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
+    def test_perpetual_user_cant_access(self):
+        """
+        Tests that an authenticated premium user cant access the view
+        if has a perpetual plan
+        """
+        plan = mixer.blend('accounts.Plan', plan_type='PAGO ÚNICO')
+        user = mixer.blend(User, is_premium=True)
+
+        mixer.blend(
+            'accounts.Subscription',
+            plan=plan,
+            user=user,
+            stripe_subscription_id='456789',
+            active=True
+        )
+
+        request = RequestFactory().get('/')
+        request.user = user
+        response = views.CheckoutView.as_view()(request,
+                                                plan_id=self.plan.pk,
+                                                plan_slug=self.plan.slug)
+        assert response.status_code == 302, 'User should be redirected'
+        assert '/' == response.url, \
+            'Should not be callable by a not perpetual premium user'
+
     def test_get(self):
         """Tests that the view can be callable by a user"""
         self.request.user = self.user

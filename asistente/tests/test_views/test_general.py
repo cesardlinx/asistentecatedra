@@ -84,6 +84,15 @@ class TestPremiumView:
             response.template_name, \
             'Premium template should be rendered in the view'
 
+    def test_premium_user_cant_access(self):
+        """Tests that a premium user can't access"""
+        user = mixer.blend(User, is_premium=True)
+        request = RequestFactory().get('/')
+        request.user = user
+        response = views.PremiumTemplateView.as_view()(request)
+        assert response.status_code == 302, 'User should be redirected'
+        assert '/' == response.url, 'Should not be callable by premium user'
+
 
 class TestChangePlanView:
     def test_anonymous(self):
@@ -94,9 +103,42 @@ class TestChangePlanView:
         assert response.status_code == 302, 'User should be redirected'
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
-    def test_get(self):
-        """Tests that an authenticated user can access the view"""
+    def test_not_premium_user_access(self):
+        """Tests that a not premium user can't access"""
         user = mixer.blend(User)
+        request = RequestFactory().get('/')
+        request.user = user
+        response = views.ChangePlanListView.as_view()(request)
+        assert response.status_code == 302, 'User should be redirected'
+        assert 'premium' in response.url, \
+            'Should not be callable by a not premium user'
+
+    def test_perpetual_user_cant_access(self):
+        """
+        Tests that an authenticated premium user cant access the view
+        if has a perpetual plan
+        """
+        plan = mixer.blend('accounts.Plan', plan_type='PAGO ÚNICO')
+        user = mixer.blend(User, is_premium=True)
+
+        mixer.blend(
+            'accounts.Subscription',
+            plan=plan,
+            user=user,
+            stripe_subscription_id='456789',
+            active=True
+        )
+
+        request = RequestFactory().get('/')
+        request.user = user
+        response = views.ChangePlanListView.as_view()(request)
+        assert response.status_code == 302, 'User should be redirected'
+        assert '/' == response.url, \
+            'Should not be callable by a not perpetual premium user'
+
+    def test_premium_user_access(self):
+        """Tests that an authenticated premium user can access the view"""
+        user = mixer.blend(User, is_premium=True)
         request = RequestFactory().get('/')
         request.user = user
         response = views.ChangePlanListView.as_view()(request)
@@ -104,3 +146,4 @@ class TestChangePlanView:
         assert 'asistente/change_plan.html' in \
             response.template_name, \
             'Change Plan template should be rendered in the view'
+

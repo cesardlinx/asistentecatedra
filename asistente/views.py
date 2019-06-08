@@ -5,14 +5,15 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import BadHeaderError
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
-
+from accounts.mixins import (NotPremiumUserRequiredMixin,
+                             NotPerpetualPremiumUserRequiredMixin,
+                             NotPerpetualNotPremiumUserRequiredMixin)
 from accounts.models import Plan, Subscription
 
 from .helpers import delete_subscription_from_stripe, send_subscription_emails
@@ -44,12 +45,13 @@ class AyudaListView(ListView):
     context_object_name = 'preguntas'
 
 
-class PremiumTemplateView(TemplateView):
+class PremiumTemplateView(NotPremiumUserRequiredMixin, TemplateView):
     """Vista de la pantalla para subscripción Premium"""
     template_name = 'asistente/premium.html'
 
 
-class ChangePlanListView(LoginRequiredMixin, ListView):
+class ChangePlanListView(NotPerpetualNotPremiumUserRequiredMixin,
+                         ListView):
     """
     Vista que muestra los planes para que el usuario pueda cambiar de
     plan
@@ -59,7 +61,7 @@ class ChangePlanListView(LoginRequiredMixin, ListView):
     template_name = 'asistente/change_plan.html'
 
 
-class CheckoutView(LoginRequiredMixin, View):
+class CheckoutView(NotPerpetualPremiumUserRequiredMixin, View):
     """Vista para la pantalla de pago"""
     def get(self, request, *args, **kwargs):
         return render(request, 'asistente/checkout.html')
