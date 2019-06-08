@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block titulo %}
+    Asistente de Cátedra | Cambiar Plan
+{% endblock titulo %}
+
+{% block content %}
+    <section class="change-plan">
+        <section class="container">
+            <h3 class="main-title">Cambiar Plan</h3>
+
+            <div class="plans">
+                {% for plan in plans %}
+                    {% if plan.plan_type != 'GRATIS' %}
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Subscripción Premium {{ plan.plan_type.title }}</h5>
+                                <div class="price">
+                                    <h3>{{ plan.price }} USD</h3>
+                                    {% if plan.plan_type == 'MENSUAL' %}
+                                        <small>al mes</small>
+                                    {% elif plan.plan_type == 'ANUAL' %}
+                                        <small>al año</small>
+                                    {% else %}
+                                        <small>una sola vez</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                            {% if user.active_plan == plan %}
+                                <p class="current-plan">Plan actual</p>
+                            {% else %}
+                                <a href="{{ plan.get_absolute_url }}" class="plan-btn primary-button">Obtener Plan</a>
+                            {% endif %}
+                            </div>
+                        </div>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+        </section>
+    </section>
+{% endblock content %}

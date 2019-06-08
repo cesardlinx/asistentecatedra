@@ -1,0 +1,25 @@
+//** Change Plan Page
+
+.change-plan {
+    margin: 2em 1em;
+
+    h5 {
+        font-weight: bold;
+    }
+
+    .plans {
+        @include responsive(medium) {
+          flex-direction: row;
+        }
+
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        margin-top: 2em;
+
+        .current-plan {
+            text-align: center;
+            margin-bottom: 0;
+        }
+    }
+}

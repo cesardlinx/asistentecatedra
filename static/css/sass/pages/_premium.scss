@@ -78,18 +78,19 @@
     margin: 2em 0;
     font-weight: bold;
   }
-
-  .subscription {
-    @include responsive(large) {
-      flex-direction: row;
-    }
-    display: flex;
-    justify-content: space-around;
-    flex-direction: column;
-  }
 }
 
-.subscription-card {
+.plans {
+  @include responsive(large) {
+    flex-direction: row;
+  }
+
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+}
+
+.plan-card {
   margin: 0 auto 3em;
   border: 1px solid $gray;
   max-width: 344px;
@@ -115,7 +116,7 @@
     }
   }
 
-  .sub-content {
+  .plan-content {
     padding: 2em;
 
     ul {
@@ -125,10 +126,10 @@
         color: $gray;
       }
     }
-
-    .sub-button {
-      width: 100%;
-      text-transform: uppercase;
-    }
   }
+}
+
+.plan-btn {
+  width: 100%;
+  text-transform: uppercase;
 }

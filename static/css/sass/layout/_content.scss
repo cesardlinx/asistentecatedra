@@ -9,6 +9,25 @@
   .container {
     margin: 2em auto;
   }
+
+  // Change card styles
+  .card-header {
+    background: $secondary-color;
+
+    h5 {
+      color: $white;
+    }
+
+    button {
+      color: $white;
+      font-size: 1.2rem;
+      font-weight: bold;
+
+      &:hover {
+        color: $white;
+      }
+    }
+  }
 }
 
 .flat-content {

@@ -27,6 +27,8 @@ body {
 }
 
 .primary-button {
+  display: block;
+  text-align: center;
   font-size: .9rem;
   color: #fff;
   padding: .1em .75em;
@@ -47,6 +49,8 @@ body {
 }
 
 .secondary-button {
+  display: block;
+  text-align: center;
   font-size: .9rem;
   color: #16a085;
   padding: .1em .75em;
@@ -1261,6 +1265,24 @@ header {
   margin: 2em auto;
 }
 
+.recursos-profesor .card-header {
+  background: #2c3e50;
+}
+
+.recursos-profesor .card-header h5 {
+  color: #fff;
+}
+
+.recursos-profesor .card-header button {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.recursos-profesor .card-header button:hover {
+  color: #fff;
+}
+
 .flat-content {
   margin-top: 2em;
 }
@@ -2450,7 +2472,7 @@ footer {
   font-weight: bold;
 }
 
-.comparison .subscription {
+.plans {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -2463,7 +2485,7 @@ footer {
 }
 
 @media only screen and (min-width: 976px) {
-  .comparison .subscription {
+  .plans {
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
         -ms-flex-direction: row;
@@ -2471,46 +2493,46 @@ footer {
   }
 }
 
-.subscription-card {
+.plan-card {
   margin: 0 auto 3em;
   border: 1px solid #ccc;
   max-width: 344px;
 }
 
-.subscription-card .sub-header {
+.plan-card .sub-header {
   border-bottom: 1px solid #ccc;
   padding: 1em 2.5em;
 }
 
-.subscription-card .sub-header h5 {
+.plan-card .sub-header h5 {
   font-weight: bold;
   text-align: center;
 }
 
-.subscription-card .sub-header .price {
+.plan-card .sub-header .price {
   margin: 0 auto;
   width: 164px;
 }
 
-.subscription-card .sub-header .price h3,
-.subscription-card .sub-header .price small {
+.plan-card .sub-header .price h3,
+.plan-card .sub-header .price small {
   display: inline-block;
   font-weight: bold;
 }
 
-.subscription-card .sub-content {
+.plan-card .plan-content {
   padding: 2em;
 }
 
-.subscription-card .sub-content ul {
+.plan-card .plan-content ul {
   margin: 0 0 1em 1em;
 }
 
-.subscription-card .sub-content ul .inactive-feature {
+.plan-card .plan-content ul .inactive-feature {
   color: #ccc;
 }
 
-.subscription-card .sub-content .sub-button {
+.plan-btn {
   width: 100%;
   text-transform: uppercase;
 }
@@ -2932,22 +2954,40 @@ h4.subscription-card-title {
   font-weight: lighter;
 }
 
-.card-header {
-  background: #2c3e50;
+.change-plan {
+  margin: 2em 1em;
 }
 
-.card-header h5 {
-  color: #fff;
-}
-
-.card-header button {
-  color: #fff;
-  font-size: 1.2rem;
+.change-plan h5 {
   font-weight: bold;
 }
 
-.card-header button:hover {
-  color: #fff;
+.change-plan .plans {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  margin-top: 2em;
+}
+
+@media only screen and (min-width: 768px) {
+  .change-plan .plans {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+  }
+}
+
+.change-plan .plans .current-plan {
+  text-align: center;
+  margin-bottom: 0;
 }
 
 .form-text {

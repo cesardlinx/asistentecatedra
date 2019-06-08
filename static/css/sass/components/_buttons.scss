@@ -1,6 +1,8 @@
 //** Botones
 
 .primary-button {
+  display: block;
+  text-align: center;
   font-size: .9rem;
   color: $white;
   padding: .1em .75em;
@@ -20,6 +22,8 @@
 }
 
 .secondary-button {
+  display: block;
+  text-align: center;
   font-size: .9rem;
   color: $primary-color;
   padding: .1em .75em;
