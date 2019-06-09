@@ -365,6 +365,7 @@ class TestCheckoutView(TestCase):
             'Ha ocurrido un error con la peticion realizada.')
 
     def make_error_tests(self, error_message):
+        """Method to make error tests"""
         mixer.blend('accounts.Plan')  # Free Plan
 
         request = RequestFactory().post('/', {
@@ -430,7 +431,7 @@ class TestCheckoutView(TestCase):
         )
 
     def make_email_error_tests(self, error_message, user, mock_emails):
-
+        """Method to make email error tests"""
         self.client.login(
             email=user.email,
             password='P455w0rd_testing'

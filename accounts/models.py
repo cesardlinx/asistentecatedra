@@ -1,6 +1,7 @@
 from io import BytesIO
 
 import stripe
+from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
@@ -302,3 +303,19 @@ class Subscription(models.Model):
     def __str__(self):
         """Unicode representation of Subscription."""
         return self.user.username
+
+    @property
+    def created(self):
+        if self.user.is_premium:
+            subscription = stripe.Subscription.retrieve(
+                self.stripe_subscription_id)
+            return datetime.fromtimestamp(subscription.created)
+        return self.user.date_joined
+
+    @property
+    def next_billing_date(self):
+        if self.user.is_premium:
+            subscription = stripe.Subscription.retrieve(
+                self.stripe_subscription_id)
+            return datetime.fromtimestamp(subscription.current_period_end)
+        return False

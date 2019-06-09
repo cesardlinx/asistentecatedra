@@ -249,16 +249,25 @@ def test_user_post_save_signal(mock_stripe):
 
 class TestSubscription:
     """Tests del modelo de Subscription"""
-    def test_model(self):
+    def setUp(self):
         user = mixer.blend(User)
-        subscription = mixer.blend('accounts.Subscription',
-                                   user=user)
-        assert isinstance(subscription, Subscription), \
+        self.subscription = mixer.blend('accounts.Subscription', user=user)
+
+    def test_model(self):
+        assert isinstance(self.subscription, Subscription), \
             'Should be an instance of Subscription'
-        assert isinstance(subscription.user, User)
-        assert str(subscription) == subscription.user.username, \
+        assert isinstance(self.subscription.user, User)
+        assert str(self.subscription) == self.subscription.user.username, \
             "The string representation should be the plan's type"
-        assert subscription._meta.db_table == 'subscripciones', \
+        assert self.subscription._meta.db_table == 'subscripciones', \
             'The table should be named "subscripciones"'
-        assert subscription._meta.verbose_name_plural == 'subscripciones', \
-            'The plural name should be "subscripciones"'
+        assert self.subscription._meta.verbose_name_plural == \
+            'subscripciones', 'The plural name should be "subscripciones"'
+
+    def test_created_parameter(self):
+        # TODO: Compĺete tests for created parameter
+        pass
+
+    def test_next_billing_date_parameter(self):
+        # TODO: Compĺete tests for next_billing_date parameter
+        pass

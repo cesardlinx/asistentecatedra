@@ -54,14 +54,18 @@
                                     <strong>Tipo de Plan:</strong> {{ user.active_plan }}
                                 </p>
                                 <p class="info-item">
-                                    <strong>Miembro desde:</strong> 10/02/2019
+                                    <strong>Miembro desde:</strong> {{ user.date_joined }}
                                 </p>
-                                <p class="info-item">
-                                    <strong>Premium desde:</strong> 10/02/2019
-                                </p>
-                                <p class="info-item">
-                                    <strong>Siguiente pago:</strong> 10/02/2019
-                                </p>
+
+                                {% if user.is_premium %}
+                                    <p class="info-item">
+                                        <strong>Premium desde:</strong> {{ user.active_subscription.created }}
+                                    </p>
+                                    <p class="info-item">
+                                        <strong>Siguiente pago:</strong> {{ user.active_subscription.current_period_end }}
+                                    </p>
+                                {% endif %}
+
                             </div>
                         </div>
 
