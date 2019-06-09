@@ -44,11 +44,11 @@
 
                                 {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' %}
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{% url 'change_plan' %}"><span class="fas fa-crown"></span> Cambiar de Plan</a>
+                                    <a class="dropdown-item" href="{% url 'change_plan' %}">Cambiar de Plan</a>
                                 {% elif user.is_premium and user.active_plan.plan_type == 'PAGO ÚNICO' %}
                                 {% else %}
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{% url 'premium' %}"><span class="fas fa-crown"></span>Obtener Premium</a>
+                                    <a class="dropdown-item" href="{% url 'premium' %}"><span class="fas fa-crown"></span> Obtener Premium</a>
                                 {% endif %}
 
                             </div>

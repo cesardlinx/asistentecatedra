@@ -81,19 +81,15 @@
 }
 
 .plans {
-  @include responsive(large) {
-    flex-direction: row;
-  }
-
   display: flex;
   justify-content: space-around;
-  flex-direction: column;
+  flex-flow: row wrap;
 }
 
 .plan-card {
-  margin: 0 auto 3em;
+  margin: 1em 1em;
   border: 1px solid $gray;
-  max-width: 344px;
+  width: 344px;
 
   .sub-header {
     border-bottom: 1px solid $gray;

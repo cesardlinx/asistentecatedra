@@ -2478,25 +2478,16 @@ footer {
   display: flex;
   -ms-flex-pack: distribute;
       justify-content: space-around;
-  -webkit-box-orient: vertical;
+  -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-}
-
-@media only screen and (min-width: 976px) {
-  .plans {
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: row;
-            flex-direction: row;
-  }
+      -ms-flex-flow: row wrap;
+          flex-flow: row wrap;
 }
 
 .plan-card {
-  margin: 0 auto 3em;
+  margin: 1em 1em;
   border: 1px solid #ccc;
-  max-width: 344px;
+  width: 344px;
 }
 
 .plan-card .sub-header {
@@ -2971,8 +2962,8 @@ h4.subscription-card-title {
           justify-content: space-between;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
   margin-top: 2em;
 }
 
@@ -2980,8 +2971,8 @@ h4.subscription-card-title {
   .change-plan .plans {
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
-        -ms-flex-direction: row;
-            flex-direction: row;
+        -ms-flex-flow: row nowrap;
+            flex-flow: row nowrap;
   }
 }
 

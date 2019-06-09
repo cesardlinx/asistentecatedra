@@ -45,8 +45,10 @@ class AyudaListView(ListView):
     context_object_name = 'preguntas'
 
 
-class PremiumTemplateView(NotPremiumUserRequiredMixin, TemplateView):
+class PremiumListView(NotPremiumUserRequiredMixin, ListView):
     """Vista de la pantalla para subscripción Premium"""
+    model = Plan
+    context_object_name = 'plans'
     template_name = 'asistente/premium.html'
 
 

@@ -31,80 +31,57 @@
                 suscribirte a uno de nuestros Plan Premium.
             </h4>
             <div class="plans">
-                <div class="plan-card sub-gratuita">
-                    <div class="sub-header">
-                        <h5>Subscripción Gratuita</h5>
-                        <div class="price">
-                            <h3>0.00 USD</h3><small>al mes</small>
+
+
+                {% for plan in plans %}
+                    <div class="plan-card {% if plan.plan_type == 'GRATIS' %}sub-gratuita{% else %}sub-premium{% endif %}">
+                        <div class="sub-header">
+                            <h5>Subscripción {{ plan.plan_type.title }}</h5>
+                            <div class="price">
+                                <h3>{{ plan.price }} USD</h3>
+                                    {% if plan.plan_type == 'MENSUAL' %}
+                                        <small>al mes</small>
+                                    {% elif plan.plan_type == 'ANUAL' %}
+                                        <small>al año</small>
+                                    {% elif plan.plan_type == 'PAGO ÚNICO' %}
+                                        <small>un solo pago!</small>
+                                    {% else %}
+                                    {% endif %}
+                            </div>
+                        </div>
+                        <div class="plan-content">
+                            <p>Puedes crear y almacenar tus:</p>
+                            <ul>
+                                <li>Planes de Clase</li>
+                                <li class="{% if plan.plan_type == 'GRATIS' %}inactive-feature{% endif %}">
+                                    Planificaciones de Unidad Didáctica
+                                </li>
+                                <li class="{% if plan.plan_type == 'GRATIS' %}inactive-feature{% endif %}">
+                                    Planificación de Destrezas
+                                </li>
+                                <li class="{% if plan.plan_type == 'GRATIS' %}inactive-feature{% endif %}">
+                                    Planificación Curricular Anual
+                                </li>
+                            </ul>
+
+                            {% if plan.plan_type == 'GRATIS' %}
+                                {% if user.is_authenticated %}
+                                    <p class="text-center mt-5">Plan Actual</p>
+                                {% else %}
+                                    <a href="{% url 'signup' %}" class="plan-btn secondary-button">
+                                        Usar Gratis
+                                    </a>
+                                {% endif %}
+
+                            {% else %}
+                                <a href="{{ plan.get_absolute_url }}" class="plan-btn primary-button">
+                                    Obtener Premium
+                                </a>
+                            {% endif %}
+
                         </div>
                     </div>
-                    <div class="plan-content">
-                        <p>Puedes crear y almacenar tus:</p>
-                        <ul>
-                            <li>Planes de Clase</li>
-                            <li class="inactive-feature">Planificaciones de Unidad Didáctica</li>
-                            <li class="inactive-feature">Planificación de Destrezas</li>
-                            <li class="inactive-feature">Planificación Curricular Anual</li>
-                        </ul>
-                        <button class="plan-btn secondary-button">Usar Gratis</button>
-                    </div>
-                </div>
-                <div class="plan-card sub-premium">
-                    <div class="sub-header">
-                        <h5>Subscripción Premium Mensual</h5>
-                        <div class="price">
-                            <h3>4.99 USD</h3><small>al mes</small>
-                        </div>
-                    </div>
-                    <div class="plan-content">
-                        <p>Puedes crear y almacenar tus:</p>
-                        <ul>
-                            <li>Planes de Clase</li>
-                            <li>Planificaciones de Unidad Didáctica</li>
-                            <li>Planificación de Destrezas</li>
-                            <li>Planificación Curricular Anual</li>
-                        </ul>
-                        <button class="plan-btn primary-button">Obtener Premium</button>
-                    </div>
-                </div>
-            </div>
-            <div class="plans">
-                <div class="plan-card sub-premium">
-                    <div class="sub-header">
-                        <h5>Subscripción Premium Anual</h5>
-                        <div class="price">
-                            <h3>69.99 USD</h3><small>al año</small>
-                        </div>
-                    </div>
-                    <div class="plan-content">
-                        <p>Puedes crear y almacenar tus:</p>
-                        <ul>
-                            <li>Planes de Clase</li>
-                            <li>Planificaciones de Unidad Didáctica</li>
-                            <li>Planificación de Destrezas</li>
-                            <li>Planificación Curricular Anual</li>
-                        </ul>
-                        <button class="plan-btn primary-button">Obtener Premium</button>
-                    </div>
-                </div>
-                <div class="plan-card sub-premium">
-                    <div class="sub-header">
-                        <h5>Subscripción Premium Perpetua</h5>
-                        <div class="price">
-                            <h3>149.99 USD</h3><small>un solo pago!</small>
-                        </div>
-                    </div>
-                    <div class="plan-content">
-                        <p>Puedes crear y almacenar tus:</p>
-                        <ul>
-                            <li>Planes de Clase</li>
-                            <li>Planificaciones de Unidad Didáctica</li>
-                            <li>Planificación de Destrezas</li>
-                            <li>Planificación Curricular Anual</li>
-                        </ul>
-                        <button class="plan-btn primary-button">Obtener Premium</button>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </section>

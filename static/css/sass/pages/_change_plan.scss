@@ -9,12 +9,12 @@
 
     .plans {
         @include responsive(medium) {
-          flex-direction: row;
+          flex-flow: row nowrap;
         }
 
         display: flex;
         justify-content: space-between;
-        flex-direction: column;
+        flex-flow: column nowrap;
         margin-top: 2em;
 
         .current-plan {
