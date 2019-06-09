@@ -2235,42 +2235,42 @@ footer {
   color: #168973;
 }
 
-#payment-modal .modal-contenido {
-  width: 70%;
-  max-width: 600px;
+.checkout {
+  margin: 2em 0 5em;
 }
 
-.payment-submit {
-  text-align: right;
-}
-
-.payment-submit button {
-  font-size: 1rem;
-}
-
-.payment-submit .subscribe-btn {
+.payment-summary {
   margin-top: 1em;
-}
-
-.payment-header {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-flow: row wrap;
-          flex-flow: row wrap;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
 }
 
-.payment-header h5 {
-  font-weight: lighter;
+.payment-summary .payment-detail {
+  border-top: 1px solid #ccc;
+  padding: 1em 1em 0;
+  font-size: 1.1rem;
+  width: 300px;
+  margin-right: 2em;
+}
+
+.payment-summary .payment-detail p {
+  margin-bottom: 1em;
 }
 
 .payment-form {
-  margin-bottom: 1em;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+}
+
+.payment-submit .secondary-button {
+  margin: 1em 0 0;
+}
+
+.payment-submit .subscribe-btn {
+  margin-top: 2em;
+  width: 100%;
 }
 
 .planificaciones {

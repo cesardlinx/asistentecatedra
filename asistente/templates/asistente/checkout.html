@@ -3,33 +3,40 @@
 {% load static %}
 
 {% block content %}
-    <section class="modal-contenido">
-        <script src="https://js.stripe.com/v3/"></script>
-        <div class="payment-header">
+    <section class="checkout">
+        <section class="container">
+            <script src="https://js.stripe.com/v3/"></script>
+            <h3 class="main-title">Detalle de Pago</h3>
 
-            <h4>Detalle de Pago</h4>
-            <h5>Subscripción Premium: 4.99 USD</h5>
-        </div>
+            <div class="payment-summary">
 
-        <form method="post" id="payment-form">
-            {% csrf_token %}
-            <div class="payment-form">
-                <label class="payment-label" for="card-element">
-                Tarjeta de Crédito
-                </label>
-                <div id="card-element">
-                <!-- A Stripe Element will be inserted here. -->
+                <div class="payment-detail">
+                    <p>Tipo de Plan: <strong>{{ plan.plan_type.title }}</strong></p>
+                    <p>Valor: <strong>{{ plan.price }} USD</strong></p>
                 </div>
 
-                <!-- Used to display form errors. -->
-                <div id="card-errors" role="alert"></div>
-            </div>
+                <form method="post" class="payment-form" id="payment-form">
+                    {% csrf_token %}
+                    <div class="payment-form">
+                        <label class="payment-label" for="card-element">
+                        Tarjeta de Crédito:
+                        </label>
+                        <div id="card-element">
+                        <!-- A Stripe Element will be inserted here. -->
+                        </div>
 
-            <div class="payment-submit">
-                <button type="button" class="secondary-button modal-dismiss">Cancelar</button>
-                <button type="submit" class="primary-button subscribe-btn"><span class="fas fa-crown"></span> Obtener Premium</button>
+                        <!-- Used to display form errors. -->
+                        <div id="card-errors" role="alert"></div>
+                    </div>
+
+                    <div class="payment-submit">
+                        <button type="submit" class="primary-button subscribe-btn"><span class="fas fa-crown"></span> Obtener Premium</button>
+                        <a href="" class="secondary-button">Cancelar</a>
+                    </div>
+                </form>
+
             </div>
-        </form>
+        </section>
     </section>
 {% endblock content %}
 

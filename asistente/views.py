@@ -66,12 +66,16 @@ class ChangePlanListView(NotPerpetualNotPremiumUserRequiredMixin,
 class CheckoutView(NotPerpetualPremiumUserRequiredMixin, View):
     """Vista para la pantalla de pago"""
     def get(self, request, *args, **kwargs):
-        return render(request, 'asistente/checkout.html')
+        plan_pk = kwargs['plan_id']
+        plan_slug = kwargs['plan_slug']
+        plan = get_object_or_404(Plan, pk=plan_pk, slug=plan_slug)
+        return render(request, 'asistente/checkout.html', {'plan': plan})
 
     def post(self, request, *args, **kwargs):
         user = User.objects.get(pk=request.user.pk)
         plan_pk = kwargs['plan_id']
-        plan = get_object_or_404(Plan, pk=plan_pk)
+        plan_slug = kwargs['plan_slug']
+        plan = get_object_or_404(Plan, pk=plan_pk, slug=plan_slug)
 
         plan_id = plan.stripe_plan_id
 

@@ -1,0 +1,39 @@
+//** Página de pago
+
+.checkout {
+  margin: 2em 0 5em;
+}
+
+.payment-summary {
+  margin-top: 1em;
+  display: flex;
+
+  .payment-detail {
+    border-top: 1px solid #ccc;
+    padding: 1em 1em 0;
+    font-size: 1.1rem;
+    width: 300px;
+    margin-right: 2em;
+
+    p {
+      margin-bottom: 1em;
+    }
+  }
+}
+
+.payment-form {
+  flex-grow: 1;
+  // margin: 0;
+}
+
+.payment-submit {
+
+  .secondary-button {
+    margin: 1em 0 0;
+  }
+
+  .subscribe-btn {
+    margin-top: 2em;
+    width: 100%;
+  }
+}
