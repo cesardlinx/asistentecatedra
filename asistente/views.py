@@ -7,21 +7,25 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.mail import BadHeaderError
 from django.db import transaction
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
-from accounts.mixins import (NotPremiumUserRequiredMixin,
+
+from accounts.mixins import (NotPerpetualNotPremiumUserRequiredMixin,
                              NotPerpetualPremiumUserRequiredMixin,
-                             NotPerpetualNotPremiumUserRequiredMixin)
+                             NotPremiumUserRequiredMixin)
 from accounts.models import Plan, Subscription
 
-from .helpers import delete_subscription_from_stripe, send_subscription_emails
+from .helpers import send_subscription_emails
 from .models import Libro, Pregunta
 
 User = get_user_model()
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+endpoint_secret = settings.STRIPE_WEBHOOKS_SECRET
 
 
 class HomeTemplateView(TemplateView):
@@ -77,70 +81,16 @@ class CheckoutView(NotPerpetualPremiumUserRequiredMixin, View):
         plan_slug = kwargs['plan_slug']
         plan = get_object_or_404(Plan, pk=plan_pk, slug=plan_slug)
 
-        plan_id = plan.stripe_plan_id
-
+        token = request.POST.get('stripeToken')
         try:
-            # Deactivates the current active subscription if any
-            try:
-                active_subscription = Subscription.objects.get(active=True)
-                delete_subscription_from_stripe(
-                    active_subscription.stripe_subscription_id)
-
-                active_subscription.active = False
-                active_subscription.save()
-            except Subscription.DoesNotExist:
-                pass
-            except Exception:
-                pass
-
-            token = request.POST.get('stripeToken')
-
-            if plan.plan_type == 'PAGO ÚNICO':
-                # Stripe payment
-                stripe_charge = stripe.Charge.create(
-                    amount=plan.price,
-                    currency='usd',
-                    source=token,
-                    description='Plan PERPETUAL | Asistente de Cátedra',
+            with transaction.atomic():
+                Subscription.objects.create_subscription(
+                    user,
+                    plan,
+                    token
                 )
-                if stripe_charge:
-                    with transaction.atomic():
-                        # Database subscription creation
-                        Subscription.objects.create(
-                            user=user,
-                            plan=plan,
-                            stripe_charge_id=stripe_charge.get('id'),
-                            active=True
-                        )
-                        # User is premium now
-                        user.is_premium = True
-                        user.save()
-            else:
-                # Stripe subscription creation
-                stripe_subscription = stripe.Subscription.create(
-                    customer=request.user.stripe_customer_id,
-                    items=[
-                        {
-                            'plan': plan_id
-                        }
-                    ],
-                    source=token
-                )
-                if stripe_subscription:
-                    with transaction.atomic():
-                        # Database subscription creation
-                        Subscription.objects.create(
-                            user=user,
-                            plan=plan,
-                            stripe_subscription_id=stripe_subscription.get(
-                                'id'),
-                            active=True
-                        )
-                        # User is premium now
-                        user.is_premium = True
-                        user.save()
-
-            # email sending
+                user.is_premium = True
+                user.save()
 
             user_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN'
             admin_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN AÑADIDA'
@@ -159,20 +109,20 @@ class CheckoutView(NotPerpetualPremiumUserRequiredMixin, View):
         except stripe.error.CardError:
             messages.error(request, 'Error. La tarjeta de crédito ingresada '
                            'no es válida.')
-            return render(request, 'asistente/checkout.html')
+            return render(request, 'asistente/checkout.html', {'plan': plan})
         except stripe.error.InvalidRequestError:
             # Invalid parameters were supplied to Stripe's API
             messages.error(request, 'Error!. Parámetros inválidos.')
-            return render(request, 'asistente/checkout.html')
+            return render(request, 'asistente/checkout.html', {'plan': plan})
         except stripe.error.APIConnectionError:
             # Network communication with Stripe failed
             messages.error(request, 'Ha ocurrido un error de comunicación. '
                            'Verifique su conexión.')
-            return render(request, 'asistente/checkout.html')
+            return render(request, 'asistente/checkout.html', {'plan': plan})
         except stripe.error.StripeError:
             # Stripe generic error
             messages.error(request, 'Ha ocurrido un error en el pago.')
-            return render(request, 'asistente/checkout.html')
+            return render(request, 'asistente/checkout.html', {'plan': plan})
         except smtplib.SMTPException:
             messages.error(request,
                            'Ha ocurrido un error al tratar de enviar el '
@@ -181,7 +131,7 @@ class CheckoutView(NotPerpetualPremiumUserRequiredMixin, View):
             # Displays a very generic error to the user
             messages.error(request, 'Ha ocurrido un error con la peticion '
                            'realizada.')
-            return render(request, 'asistente/checkout.html')
+            return render(request, 'asistente/checkout.html', {'plan': plan})
 
         messages.success(request, 'Su transacción ha sido realizada con éxito')
         return redirect(request.user.get_absolute_url())
@@ -191,18 +141,14 @@ class CheckoutView(NotPerpetualPremiumUserRequiredMixin, View):
 def cancel_subscription_view(request):
     if request.method == 'POST':
         user = User.objects.get(pk=request.user.pk)
-        # Delete previous subscription
+        previous_plan = user.active_plan
         try:
-            if user.active_subscription:
-                previous_subscription = Subscription.objects.get(
-                    pk=user.active_subscription.pk
-                )
-                delete_subscription_from_stripe(
-                    previous_subscription.stripe_subscription_id)
-                previous_subscription.active = False
-                previous_subscription.save()
-        except Subscription.DoesNotExist:
-            pass
+            with transaction.atomic():
+                user.cancel_active_subscription()
+                # User is no longer premium
+                user.is_premium = False
+                user.save()
+
         except stripe.error.InvalidRequestError:
             # Invalid parameters were supplied to Stripe's API
             messages.error(request, 'Error!. Parámetros inválidos.')
@@ -224,23 +170,6 @@ def cancel_subscription_view(request):
                            'realizada.')
             return redirect(user.get_absolute_url())
 
-        # Subscribes to free plan
-        try:
-            free_plan = Plan.objects.get(plan_type='GRATIS')
-            with transaction.atomic():
-                Subscription.objects.create(
-                    plan=free_plan,
-                    user=user,
-                    active=True
-                )
-                # User is no longer premium
-                user.is_premium = False
-                user.save()
-        except Plan.DoesNotExist:
-            pass
-        except Exception:
-            pass
-
         # email sending
 
         user_mail_subject = 'Asistente de Cátedra | CANCELACIÓN DE '\
@@ -248,19 +177,11 @@ def cancel_subscription_view(request):
         admin_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN CANCELADA'
 
         try:
-            # Checks if there is a previous subscription
-            plan = previous_subscription.plan
-        except UnboundLocalError:
-            plan = False
-        except Exception:
-            plan = False
-
-        try:
             send_subscription_emails(
                 user_mail_subject,
                 admin_mail_subject,
                 user,
-                plan,
+                previous_plan,
                 cancel=True
             )
         except smtplib.SMTPException:

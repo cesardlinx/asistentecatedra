@@ -10,12 +10,6 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 User = get_user_model()
 
 
-def delete_subscription_from_stripe(subscription_id):
-    """Deletes subscriptions from stripe"""
-    subscription = stripe.Subscription.retrieve(subscription_id)
-    subscription.delete()
-
-
 def send_subscription_emails(user_mail_subject, admin_mail_subject,
                              user, plan, cancel=False):
     """
