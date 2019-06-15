@@ -3,12 +3,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
 from mixer.backend.django import mixer
-
+from unittest.mock import patch, MagicMock
 from accounts.tests.conftest import clean_test_files
 from asistente import views
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.curso import Curso
-
+from accounts.models import Subscription
 User = get_user_model()
 
 pytestmark = pytest.mark.django_db
@@ -78,7 +78,7 @@ class TestPremiumView:
         """Tests that an anonymous user can access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PremiumTemplateView.as_view()(request)
+        response = views.PremiumListView.as_view()(request)
         assert response.status_code == 200, 'Should be callable by anonymous'
         assert 'asistente/premium.html' in \
             response.template_name, \
@@ -89,7 +89,7 @@ class TestPremiumView:
         user = mixer.blend(User, is_premium=True)
         request = RequestFactory().get('/')
         request.user = user
-        response = views.PremiumTemplateView.as_view()(request)
+        response = views.PremiumListView.as_view()(request)
         assert response.status_code == 302, 'User should be redirected'
         assert '/' == response.url, 'Should not be callable by premium user'
 
@@ -113,22 +113,30 @@ class TestChangePlanView:
         assert 'premium' in response.url, \
             'Should not be callable by a not premium user'
 
-    def test_perpetual_user_cant_access(self):
+    @patch('accounts.models.stripe.Charge.create')
+    @patch('accounts.models.stripe.Customer.modify')
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_perpetual_user_cant_access(self,
+                                        subscription_retrieve,
+                                        customer_modify,
+                                        charge_create):
         """
         Tests that an authenticated premium user cant access the view
         if has a perpetual plan
         """
+        mock = MagicMock(id='123456')
+        mock.delete = MagicMock()
+        subscription_retrieve.return_value = mock
+        charge_create.return_value = mock
+
         plan = mixer.blend('accounts.Plan', plan_type='PAGO ÚNICO')
         user = mixer.blend(User, is_premium=True)
 
-        mixer.blend(
-            'accounts.Subscription',
-            plan=plan,
-            user=user,
-            stripe_subscription_id='456789',
-            active=True
+        Subscription.objects.create_subscription(
+            user,
+            plan,
+            '456789',
         )
-
         request = RequestFactory().get('/')
         request.user = user
         response = views.ChangePlanListView.as_view()(request)

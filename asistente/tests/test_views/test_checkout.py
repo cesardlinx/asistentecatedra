@@ -1,5 +1,5 @@
 import smtplib
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -21,15 +21,31 @@ User = get_user_model()
 
 
 class TestCheckoutView(TestCase):
-    def setUp(self):
-        self.user = mixer.blend(User)
+    @patch('accounts.models.stripe.Customer.create', autospec=True)
+    def setUp(self, customer_create):
+        customer_create.return_value = {'id': '123456'}
+
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing',
+            first_name='Juan',
+            last_name='Pérez',
+        )
+
+        self.superuser = User.objects.create_superuser(
+            username='david@webmaster.com',
+            email='david@webmaster.com',
+            password='P455w0rd_testing'
+        )
+
         self.request = RequestFactory().get('/')
         self.plan = mixer.blend('accounts.Plan', plan_type='ANUAL')
 
         self.mock_stripe = patch(
-            'asistente.views.stripe.Subscription')
-        self.stripe_subscription = self.mock_stripe.start()
-        self.stripe_subscription.create.return_value = {'id': '123456'}
+            'accounts.models.stripe.Subscription.create')
+        self.subscription_create = self.mock_stripe.start()
+        mock = MagicMock(id='123456')
+        self.subscription_create.return_value = mock
 
         self.url = reverse('checkout',
                            kwargs={
@@ -45,20 +61,29 @@ class TestCheckoutView(TestCase):
                                                 plan_slug=self.plan.slug)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
-    def test_perpetual_user_cant_access(self):
+    @patch('accounts.models.stripe.Charge.create', autospec=True)
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    @patch('accounts.models.stripe.Subscription.retrieve', autospec=True)
+    def test_perpetual_user_cant_access(self,
+                                        subscription_retrieve,
+                                        customer_modify,
+                                        charge_create):
         """
         Tests that an authenticated premium user cant access the view
         if has a perpetual plan
         """
+        mock = MagicMock(id='123456')
+        mock.delete = MagicMock()
+        subscription_retrieve.return_value = mock
+        charge_create.return_value = mock
+
         plan = mixer.blend('accounts.Plan', plan_type='PAGO ÚNICO')
         user = mixer.blend(User, is_premium=True)
 
-        mixer.blend(
-            'accounts.Subscription',
-            plan=plan,
-            user=user,
-            stripe_subscription_id='456789',
-            active=True
+        Subscription.objects.create_subscription(
+            user,
+            plan,
+            '456789',
         )
 
         request = RequestFactory().get('/')
@@ -79,50 +104,41 @@ class TestCheckoutView(TestCase):
         assert response.status_code == 200, \
             'Should be callable by the authenticated user'
 
-    @patch('accounts.models.stripe', autospec=True)
-    def test_success_subscription(self, mock_stripe):
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    @patch('accounts.models.stripe.Subscription.retrieve', autospec=True)
+    def test_success_subscription(self,
+                                  subscription_retrieve,
+                                  customer_modify):
         """Test when all data are valid for checkout"""
-        mock_stripe.Customer.create.return_value = {'id': '12345'}
-
-        user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing',
-            first_name='Juan',
-            last_name='Pérez',
-        )
-
-        superuser = User.objects.create_superuser(
-            username='david@webmaster.com',
-            email='david@webmaster.com',
-            password='P455w0rd_testing'
-        )
+        subscription_mock = MagicMock(id='123456')
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
 
         self.client.login(
-            email=user.email,
+            email=self.user.email,
             password='P455w0rd_testing'
         )
 
-        assert user.is_premium is False, 'User should not be premium'
+        assert self.user.is_premium is False, 'User should not be premium'
 
         response = self.client.post(self.url, {
             'stripeToken': 'some-token',
         }, follow=True)
 
-        user.refresh_from_db()
+        self.user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
-        assert user.is_premium is True, 'User should be premium'
+        assert self.user.is_premium is True, 'User should be premium'
         subscription = Subscription.objects.get(plan__plan_type='ANUAL')
-        assert subscription.user == user, \
+        assert subscription.user == self.user, \
             'The user should be related with the subscription'
         assert subscription.stripe_subscription_id == '123456', \
             'The subscription should have an id'
         assert subscription.active is True, \
             'The subscription should be active'
-        assert self.stripe_subscription.create.called is True, \
+        assert self.subscription_create.called is True, \
             'Stripe create subscription function called'
-        user.refresh_from_db()
-        assert user.active_plan == self.plan, \
+        assert self.user.active_plan == self.plan, \
             'The user now is subscripted to the plan'
 
         messages = list(response.context.get('messages'))
@@ -136,7 +152,7 @@ class TestCheckoutView(TestCase):
         user_email = mail.outbox[0]
         admin_email = mail.outbox[1]
 
-        assert user.first_name in user_email.body, \
+        assert self.user.first_name in user_email.body, \
             "Email body should contain user's first name"
         assert 'cancelada' not in user_email.body, \
             'Should not be a cancellation email'
@@ -144,10 +160,10 @@ class TestCheckoutView(TestCase):
             in user_email.subject
         assert subscription.plan.plan_type in user_email.body, \
             "Plan type should be in email body"
-        assert user.email in user_email.to, \
+        assert self.user.email in user_email.to, \
             "The user's email should be in email's field TO "
 
-        assert user.email in admin_email.body, \
+        assert self.user.email in admin_email.body, \
             "Email body should contain user's first name"
         assert 'cancelado' not in admin_email.body, \
             'Should not be a cancellation email'
@@ -155,31 +171,22 @@ class TestCheckoutView(TestCase):
             in admin_email.subject
         assert subscription.plan.plan_type in admin_email.body, \
             "Plan type should be in email body"
-        assert superuser.email in admin_email.to, \
+        assert self.superuser.email in admin_email.to, \
             "The admin email should be in email's field TO "
 
-    @patch('accounts.models.stripe', autospec=True)
-    @patch('asistente.views.stripe.Charge.create', autospec=True)
-    def test_perpetual_subscription(self, mock_charge, mock_stripe):
+    @patch('accounts.models.stripe.Charge.create', autospec=True)
+    @patch('accounts.models.stripe.Subscription.retrieve', autospec=True)
+    def test_perpetual_subscription(self,
+                                    subscription_retrieve,
+                                    charge_create):
         """Tests when a user decides to subscribe to the perpetual plan"""
-        mock_stripe.Customer.create.return_value = {'id': '12345'}
-        mock_charge.return_value = {'id': '1234567'}
-
-        user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing',
-            first_name='Juan',
-            last_name='Pérez',
-        )
-
-        superuser = User.objects.create_superuser(
-            username='david@webmaster.com',
-            email='david@webmaster.com',
-            password='P455w0rd_testing'
-        )
+        mock = MagicMock(id='1234567')
+        mock.delete = MagicMock()
+        subscription_retrieve.return_value = mock
+        charge_create.return_value = mock
 
         self.client.login(
-            email=user.email,
+            email=self.user.email,
             password='P455w0rd_testing'
         )
 
@@ -188,26 +195,26 @@ class TestCheckoutView(TestCase):
         url = reverse('checkout',
                       kwargs={'plan_id': plan.pk, 'plan_slug': plan.slug})
 
-        assert user.is_premium is False, 'User should not be premium'
+        assert self.user.is_premium is False, 'User should not be premium'
 
         response = self.client.post(url, {
             'stripeToken': 'some-token',
         }, follow=True)
 
-        user.refresh_from_db()
+        self.user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
-        assert user.is_premium is True, 'User should be premium'
+        assert self.user.is_premium is True, 'User should be premium'
         subscription = Subscription.objects.get(plan__plan_type='PAGO ÚNICO')
-        assert subscription.user == user, \
+        assert subscription.user == self.user, \
             'The user should be related with the subscription'
         assert subscription.stripe_charge_id == '1234567', \
             'The subscription should have an id'
         assert subscription.active is True, \
             'The subscription should be active'
-        assert mock_charge.called is True, \
+        assert charge_create.called is True, \
             'Stripe create charge function called'
-        assert user.active_plan == plan, \
+        assert self.user.active_plan == plan, \
             'The user now is subscripted to the plan'
 
         messages = list(response.context.get('messages'))
@@ -221,7 +228,7 @@ class TestCheckoutView(TestCase):
         user_email = mail.outbox[0]
         admin_email = mail.outbox[1]
 
-        assert user.first_name in user_email.body, \
+        assert self.user.first_name in user_email.body, \
             "Email body should contain user's first name"
         assert 'cancelada' not in user_email.body, \
             'Should not be a cancellation email'
@@ -229,10 +236,10 @@ class TestCheckoutView(TestCase):
             in user_email.subject
         assert subscription.plan.plan_type in user_email.body, \
             "Plan type should be in email body"
-        assert user.email in user_email.to, \
+        assert self.user.email in user_email.to, \
             "The user's email should be in email's field TO "
 
-        assert user.email in admin_email.body, \
+        assert self.user.email in admin_email.body, \
             "Email body should contain user's first name"
         assert 'cancelado' not in admin_email.body, \
             'Should not be a cancellation email'
@@ -240,15 +247,13 @@ class TestCheckoutView(TestCase):
             in admin_email.subject
         assert subscription.plan.plan_type in admin_email.body, \
             "Plan type should be in email body"
-        assert superuser.email in admin_email.to, \
+        assert self.superuser.email in admin_email.to, \
             "The admin email should be in email's field TO "
 
-    def test_invalid_card(self):
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    def test_invalid_card(self, customer_modify):
         """Test when an invalid card is entered (stripe CardError)"""
-        mixer.blend('accounts.Plan')  # Free Plan
-
-        self.stripe_subscription.create.side_effect = \
-            error.CardError('Error', 2, 2)
+        self.subscription_create.side_effect = error.CardError('Error', 2, 2)
 
         request = RequestFactory().post('/', {
             'stripeToken': 'some-token',
@@ -271,18 +276,22 @@ class TestCheckoutView(TestCase):
         assert 'alert-danger' in str(response.content), \
             'It should display an error message'
 
-    @patch('asistente.views.delete_subscription_from_stripe', autospec=True)
-    def test_change_subscription(self, mock_stripe_delete):
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    @patch('accounts.models.stripe.Subscription.retrieve', autospec=True)
+    def test_change_subscription(self,
+                                 subscription_retrieve,
+                                 customer_modify):
         """Tests an authenticated user can change his subscription"""
+        subscription_mock = MagicMock(id='123456')
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
 
         monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
 
-        previous_subscription = mixer.blend(
-            'accounts.Subscription',
-            plan=monthly_plan,
-            user=self.user,
-            stripe_subscription_id='456789',
-            active=True
+        previous_subscription = Subscription.objects.create_subscription(
+            self.user,
+            monthly_plan,
+            '456789',
         )
 
         self.user.is_premium = True
@@ -307,59 +316,40 @@ class TestCheckoutView(TestCase):
         active_subscription = self.user.subscriptions.get(active=True)
         assert active_subscription != previous_subscription
         assert self.user.active_plan == self.plan
-        mock_stripe_delete.assert_called_once_with(
-            previous_subscription.stripe_subscription_id)
+        subscription_mock.delete.assert_called_once_with()
 
-    def test_change_subscription_when_no_previous_plan(self):
-        """
-        Tests a subscription change when there is no previous active plan
-        """
-        request = RequestFactory().post('/', {
-            'stripeToken': 'some-token',
-        })
-
-        request.user = self.user
-        request = add_middleware_to_request(request)
-        assert self.user.is_premium is False, 'User should not be premium'
-        response = views.CheckoutView.as_view()(request,
-                                                plan_id=self.plan.pk,
-                                                plan_slug=self.plan.slug)
-        self.user.refresh_from_db()
-
-        assert response.status_code == 302, \
-            'Response should return an ok status'
-        assert self.user.is_premium is True, 'User should be premium'
-        assert self.user.subscriptions.filter(active=True).count() == 1
-        assert self.user.active_plan == self.plan
-
-    def test_invalid_request_error(self):
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    def test_invalid_request_error(self, customer_modify):
         """Test when Invalid parameters were supplied to Stripe's API"""
-        self.stripe_subscription.create.side_effect = \
+        self.subscription_create.side_effect = \
             error.InvalidRequestError('error', 2)
 
         self.make_error_tests(
             'Error!. Parámetros inválidos.')
 
-    def test_api_connection_error(self):
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    def test_api_connection_error(self, customer_modify):
         """Test when Network communication with Stripe failed"""
-        self.stripe_subscription.create.side_effect = \
+        self.subscription_create.side_effect = \
             error.APIConnectionError('error')
 
         self.make_error_tests(
             'Ha ocurrido un error de comunicación. Verifique su conexión.')
 
-    def test_stripe_error(self):
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    def test_stripe_error(self, customer_modify):
         """Test when a generic stripe error occurs"""
-        self.stripe_subscription.create.side_effect = \
+        self.subscription_create.side_effect = \
             error.StripeError('error')
 
         self.make_error_tests(
             'Ha ocurrido un error en el pago.')
 
-    def test_generic_error(self):
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    def test_generic_error(self, customer_modify):
         """Tests when a not handled exception  is raised"""
 
-        self.stripe_subscription.create.side_effect = Exception('error')
+        self.subscription_create.side_effect = Exception('error')
 
         self.make_error_tests(
             'Ha ocurrido un error con la peticion realizada.')
@@ -388,64 +378,62 @@ class TestCheckoutView(TestCase):
         assert 'alert-danger' in str(response.content), \
             'It should display an error message'
 
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    @patch('accounts.models.stripe.Subscription.retrieve', autospec=True)
     @patch('asistente.views.send_subscription_emails', autospec=True)
-    @patch('accounts.models.stripe', autospec=True)
-    def test_smtp_error(self, mock_stripe, mock_emails):
+    def test_smtp_error(self,
+                        mock_emails,
+                        subscription_retrieve,
+                        customer_modify):
         """Tests when a smtp error is raised when sending the emails"""
+        subscription_mock = MagicMock(id='123456')
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
 
-        mock_stripe.Customer.create.return_value = {'id': '12345'}
+    # def test_smtp_error(self, mock_emails):
+
         mock_emails.side_effect = smtplib.SMTPException()
 
-        user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing',
-            first_name='Juan',
-            last_name='Pérez',
-        )
-
         self.make_email_error_tests(
             'Ha ocurrido un error al tratar de enviar el correo.',
-            user,
             mock_emails
         )
 
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
+    @patch('accounts.models.stripe.Subscription.retrieve', autospec=True)
     @patch('asistente.views.send_subscription_emails', autospec=True)
-    @patch('accounts.models.stripe', autospec=True)
-    def test_badheader_error(self, mock_stripe, mock_emails):
+    def test_badheader_error(self,
+                             mock_emails,
+                             subscription_retrieve,
+                             customer_modify):
         """Tests when a badheader error is raised when sending the emails"""
+        subscription_mock = MagicMock(id='123456')
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
 
-        mock_stripe.Customer.create.return_value = {'id': '12345'}
         mock_emails.side_effect = BadHeaderError()
 
-        user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing',
-            first_name='Juan',
-            last_name='Pérez',
-        )
-
         self.make_email_error_tests(
             'Ha ocurrido un error al tratar de enviar el correo.',
-            user,
             mock_emails
         )
 
-    def make_email_error_tests(self, error_message, user, mock_emails):
+    def make_email_error_tests(self, error_message, mock_emails):
         """Method to make email error tests"""
         self.client.login(
-            email=user.email,
+            email=self.user.email,
             password='P455w0rd_testing'
         )
 
         response = self.client.post(self.url, {
             'stripeToken': 'some-token',
         }, follow=True)
-        user.refresh_from_db()
+        self.user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
-        assert user.is_premium is True, 'User should be premium'
+        assert self.user.is_premium is True, 'User should be premium'
         # Should redirect to the user's profile
-        self.assertRedirects(response, user.get_absolute_url())
+        self.assertRedirects(response, self.user.get_absolute_url())
         messages = list(response.context.get('messages'))
         assert len(messages) == 2, \
             'There should be two messages'

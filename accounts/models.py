@@ -1,20 +1,20 @@
+from datetime import datetime
 from io import BytesIO
 
 import stripe
-from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.core.files import File
-from django.core.validators import FileExtensionValidator, MinLengthValidator
-from django.db import models
+from django.core.validators import (FileExtensionValidator, MaxValueValidator,
+                                    MinLengthValidator)
+from django.db import models, transaction
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-from django.db.models.signals import post_save
-
 from PIL import Image
 
 from accounts.helpers import get_logo_path, get_photo_path
@@ -42,7 +42,8 @@ class Plan(models.Model):
         default=FREE,
         max_length=30
     )
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.PositiveIntegerField(validators=[
+                                        MaxValueValidator(100000)])
     stripe_plan_id = models.CharField(max_length=40)
 
     class Meta:
@@ -206,6 +207,36 @@ class User(AbstractUser):
         """Defines the absolute url for users which is the profile view"""
         return reverse('profile', kwargs={'pk': self.pk, 'slug': self.slug})
 
+    def cancel_active_subscription(self):
+        # deactivates current active subscription if exists
+        active_subscription = self.active_subscription
+        if active_subscription:
+            active_subscription.cancel_subscription()
+
+        try:
+            # Gets the subscription to free plan if exists
+            free_subscription = Subscription.objects.get(
+                plan__plan_type='GRATIS', user=self)
+
+            if free_subscription:
+                # activates previous free subscription
+                free_subscription.active = True
+                free_subscription.save()
+
+        except Subscription.DoesNotExist:
+            try:
+                # gets the free plan if exists
+                free_plan = Plan.objects.get(plan_type="GRATIS")
+            except Plan.DoesNotExist:
+                # if free plan does not exist, creates a new one
+                free_plan = Plan.objects.create(plan_type="GRATIS", price=0.00)
+
+            # user subscribes to free plan
+            Subscription.objects.create_subscription(
+                self,
+                free_plan,
+            )
+
     @property
     def get_logo(self):
         """
@@ -257,19 +288,99 @@ class User(AbstractUser):
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def post_save_user_create(sender, instance, created, **kwargs):
-    """Señal que agrega el plan FREE a un usuario recién creado"""
+    """Señal que agrega el plan GRATIS a un usuario recién creado"""
     try:
-        if not instance.active_plan:
-            free_plan = Plan.objects.get(plan_type='GRATIS')
-            Subscription.objects.create(
-                user=instance,
-                plan=free_plan,
-                active=True
+        if not instance.active_subscription:
+            free_plan = None
+            try:
+                free_plan = Plan.objects.get(plan_type='GRATIS')
+            except Plan.DoesNotExist:
+                # if free plan does not exist, creates a new one
+                free_plan = Plan.objects.create(plan_type="GRATIS", price=0.00)
+
+            Subscription.objects.create_subscription(
+                instance,
+                free_plan,
             )
     except Plan.DoesNotExist:
         pass
     except Exception:
         pass
+
+
+class SubscriptionManager(models.Manager):
+    def create_subscription(self, user, plan, token='', *args, **kwargs):
+        """
+        Creates a user subscriprion depending on the token existance
+        and the plan type
+        """
+        active_subscription = user.active_subscription
+
+        if token:
+            if plan.plan_type == 'PAGO ÚNICO':
+                # Stripe subscription creation
+                stripe.Customer.modify(
+                    user.stripe_customer_id,
+                    source=token
+                )
+
+                # Stripe payment
+                stripe_charge = stripe.Charge.create(
+                    customer=user.stripe_customer_id,
+                    amount=plan.price,
+                    currency='usd',
+                    description='Plan {} | Asistente de Cátedra'
+                    .format(plan.plan_type),
+                )
+
+                if stripe_charge:
+                    # Database subscription creation
+                    with transaction.atomic():
+                        # Cancel previous subscriptions if any
+                        if active_subscription:
+                            active_subscription.cancel_subscription()
+                        subscription = Subscription.objects.create(
+                            user=user,
+                            plan=plan,
+                            stripe_charge_id=stripe_charge.id
+                        )
+                        return subscription
+            else:
+                # Stripe subscription creation
+                stripe.Customer.modify(
+                    user.stripe_customer_id,
+                    source=token
+                )
+
+                stripe_subscription = stripe.Subscription.create(
+                    customer=user.stripe_customer_id,
+                    items=[
+                        {
+                            'plan': plan.stripe_plan_id
+                        }
+                    ]
+                )
+                if stripe_subscription:
+                    # Database subscription creation
+                    # If there is an active subscription delete subscription
+                    # Stripe before saving the new subscription
+                    with transaction.atomic():
+                        if active_subscription:
+                            active_subscription.cancel_subscription()
+                        subscription = Subscription.objects.create(
+                            user=user,
+                            plan=plan,
+                            stripe_subscription_id=stripe_subscription.id
+                        )
+                        return subscription
+        else:
+            if active_subscription:
+                active_subscription.cancel_subscription()
+            subscription = Subscription.objects.create(
+                user=user,
+                plan=plan,
+            )
+            return subscription
 
 
 class Subscription(models.Model):
@@ -293,6 +404,7 @@ class Subscription(models.Model):
     stripe_charge_id = models.CharField(max_length=40, null=True,
                                         blank=True)
     active = models.BooleanField(default=True)
+    objects = SubscriptionManager()
 
     class Meta:
         """Meta definition for Subscription."""
@@ -305,7 +417,7 @@ class Subscription(models.Model):
         return self.user.username
 
     @property
-    def created(self):
+    def created_date(self):
         if self.user.is_premium:
             subscription = stripe.Subscription.retrieve(
                 self.stripe_subscription_id)
@@ -319,3 +431,11 @@ class Subscription(models.Model):
                 self.stripe_subscription_id)
             return datetime.fromtimestamp(subscription.current_period_end)
         return False
+
+    def cancel_subscription(self):
+        if self.stripe_subscription_id:
+            subscription = stripe.Subscription.retrieve(
+                self.stripe_subscription_id)
+            subscription.delete()
+        self.active = False
+        self.save()

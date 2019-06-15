@@ -8,21 +8,21 @@ def create_pĺans(apps, schema_editor):
     Plan.objects.bulk_create([
         Plan(
             plan_type='GRATIS',
-            price=0.00,
+            price=0,
         ),
         Plan(
             plan_type='MENSUAL',
-            price=4.99,
+            price=499,
             stripe_plan_id=settings.STRIPE_MONTHLY_ID
         ),
         Plan(
             plan_type='ANUAL',
-            price=69.99,
+            price=6999,
             stripe_plan_id=settings.STRIPE_YEARLY_ID
         ),
         Plan(
             plan_type='PAGO ÚNICO',
-            price=199.99,
+            price=11976,
         ),
     ])
 

@@ -49,3 +49,9 @@ class TestAsistenteUrls:
         view = resolve(path)
         assert view.func.view_class == views.ChangePlanListView, \
             'Should resolve to the view ChangePlanListView'
+
+    def test_stripe_webhooks_view(self):
+        path = reverse('stripe_webhooks')
+        view = resolve(path)
+        assert view.func == views.stripe_webhooks_view, \
+            'Should resolve to the view stripe_webhooks_view'

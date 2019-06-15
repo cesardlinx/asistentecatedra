@@ -57,12 +57,12 @@
                                     <strong>Miembro desde:</strong> {{ user.date_joined }}
                                 </p>
 
-                                {% if user.is_premium %}
+                                {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' %}
                                     <p class="info-item">
-                                        <strong>Premium desde:</strong> {{ user.active_subscription.created }}
+                                        <strong>Premium desde:</strong> {{ user.active_subscription.created_date }}
                                     </p>
                                     <p class="info-item">
-                                        <strong>Siguiente pago:</strong> {{ user.active_subscription.current_period_end }}
+                                        <strong>Siguiente pago:</strong> {{ user.active_subscription.next_billing_date }}
                                     </p>
                                 {% endif %}
 
@@ -136,11 +136,14 @@
                                         Eliminar Cuenta
                                     </button>
                                 </form>
-                                <form action="">
-                                    <button class="secondary-button delete-btn">
-                                        Cancelar Subscripción Premium
-                                    </button>
-                                </form>
+                                {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' %}
+                                    <form action="{% url 'cancel_subscription' %}" method="post">
+                                        {% csrf_token %}
+                                        <button class="secondary-button delete-btn">
+                                            Cancelar Subscripción Premium
+                                        </button>
+                                    </form>
+                                {% endif %}
                                 <button class="primary-button" id="guardarCambios">
                                     Guardar Cambios
                                 </button>
