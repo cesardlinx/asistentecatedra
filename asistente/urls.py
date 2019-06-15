@@ -12,4 +12,6 @@ urlpatterns = [
          name="cancel_subscription"),
     path('cambiar_plan/', views.ChangePlanListView.as_view(),
          name="change_plan"),
+    path('stripe_webhooks/', views.stripe_webhooks_view,
+         name="stripe_webhooks"),
 ]

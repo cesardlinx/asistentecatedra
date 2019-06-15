@@ -282,3 +282,36 @@ def cancel_subscription_view(request):
         return redirect(user.get_absolute_url())
     else:
         return redirect(request.user.get_absolute_url())
+
+
+@csrf_exempt
+def stripe_webhooks_view(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError:
+        # Invalid payload
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError:
+        # Invalid signature
+        return HttpResponse(status=400)
+
+        # Handle the event
+        # if event.type == 'payment_intent.succeeded'
+        # payment_intent = event.data.object # contains a stripe.PaymentIntent
+        # handle_payment_intent_succeeded(payment_intent)
+        # elif event.type == 'payment_method.attached'
+        # payment_method = event.data.object # contains a stripe.PaymentMethod
+        # handle_payment_method_attached(payment_method)
+        # ... handle other event types
+        # else
+        # Unexpected event type
+        # return HttpResponse(status=400)
+        # end
+
+    return HttpResponse(status=200)
