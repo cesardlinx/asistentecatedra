@@ -1,6 +1,5 @@
 import os
-from unittest.mock import patch
-
+from unittest.mock import patch, MagicMock
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -48,6 +47,7 @@ class TestUser(TestCase):
     """Tests del modelo de usuario"""
     def setUp(self):
         self.user = mixer.blend(User)
+        self.free_plan = Plan.objects.get(plan_type='GRATIS')
         self.img = create_test_image('test_logo.jpg', (500, 600))
 
     def test_model(self):
@@ -182,15 +182,15 @@ class TestUser(TestCase):
     def test_active_subscription_property(self):
         """Tests the property to get the user's active_subscription"""
         plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
-        user = mixer.blend(User)
 
-        subscription = Subscription.objects.create(
-            user=user,
+        subscription = Subscription.objects.create_subscription(
+            user=self.user,
             plan=plan,
-            active=True
         )
 
-        assert user.active_subscription == subscription, \
+        self.user.refresh_from_db()
+
+        assert self.user.active_subscription == subscription, \
             "The user's active plan should be the free plan"
 
     def test_active_subscription_property_when_no_active_subscription(self):
@@ -198,30 +198,58 @@ class TestUser(TestCase):
         Tests the property to get the user's active_subscription
         when there is no active subscription
         """
-        user = mixer.blend(User)
-
-        assert user.active_subscription is False, \
-            "Should return False if there is no active subscription"
+        assert self.user.active_subscription.plan == self.free_plan, \
+            "The user should be subscripted to free plan"
 
     def test_active_plan_property(self):
         """Tests the property to get the user's active_plan"""
-        plan = mixer.blend('accounts.Plan')
 
-        # automatically relates the free plan with the user
-        user = mixer.blend(User)
-
-        assert user.active_plan == plan, \
+        assert self.user.active_plan == self.free_plan, \
             "The user's active plan should be the free plan"
 
-    def test_active_plan_property_when_no_active_subscription(self):
-        """
-        Tests the property to get the user's active_plan
-        when there is no active subscription
-        """
+    @patch('accounts.models.stripe.Customer.modify')
+    @patch('accounts.models.stripe.Subscription.create')
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_cancel_active_subscription(self,
+                                        subscription_retrieve,
+                                        subscription_create,
+                                        customer_modify):
+        subscription_mock = MagicMock(id='123456')
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
+        subscription_create.return_value = subscription_mock
+
         user = mixer.blend(User)
 
-        assert user.active_plan is False, \
-            "Should return False if there is no active plan"
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
+        yearly_plan = mixer.blend('accounts.Plan', plan_type='ANUAL')
+
+        monthly_sub = Subscription.objects.create_subscription(
+            user,
+            monthly_plan,
+            '123456'
+        )
+
+        yearly_sub = Subscription.objects.create_subscription(
+            user,
+            yearly_plan,
+            '123456'
+        )
+
+        user.cancel_active_subscription()
+
+        yearly_sub.refresh_from_db()
+        monthly_sub.refresh_from_db()
+        user_subscription = user.active_subscription
+
+        assert user_subscription.plan == self.free_plan, \
+            'Now the active plan should be the free one'
+        assert yearly_sub.active is False, \
+            'Other subscriptions should not be active'
+        assert monthly_sub.active is False, \
+            'Other subscriptions should not be active'
+        assert subscription_mock.delete.call_count == 2, \
+            'Should delete previous subscription from stripe'
 
     def tearDown(self):
         """Method to make the image removal when necesary"""
@@ -233,26 +261,34 @@ def test_user_post_save_signal(mock_stripe):
 
     mock_stripe.Customer.create.return_value = {'id': '12345'}
 
-    free_plan = Plan.objects.create(
-        plan_type='GRATIS',
-        price=0.00,
-        stripe_plan_id=settings.STRIPE_FREE_ID
-    )
-    free_plan = Plan.objects.get(plan_type='GRATIS')
+    # free_plan = Plan.objects.create(
+    #     plan_type='GRATIS',
+    #     price=0.00,
+    # )
     user = User.objects.create_user(
         email='tester2@tester.com',
         password='P455w0rd'
     )
+    free_plan = Plan.objects.get(plan_type='GRATIS')
+
     assert user.subscriptions.get(active=True).plan == free_plan
     assert user.stripe_customer_id == '12345'
 
 
 class TestSubscription:
     """Tests del modelo de Subscription"""
-    def test_model(self):
+    @patch('accounts.models.stripe.Subscription.create')
+    def test_model(self, stripe_subscription):
+        subscription_mock = MagicMock(id='123456')
+        stripe_subscription.return_value = subscription_mock
+
         user = mixer.blend(User)
-        subscription = mixer.blend('accounts.Subscription',
-                                   user=user)
+        plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
+        subscription = Subscription(
+            user=user,
+            plan=plan,
+        )
+        subscription.save('123456')
         assert isinstance(subscription, Subscription), \
             'Should be an instance of Subscription'
         assert isinstance(subscription.user, User)
@@ -262,3 +298,170 @@ class TestSubscription:
             'The table should be named "subscripciones"'
         assert subscription._meta.verbose_name_plural == 'subscripciones', \
             'The plural name should be "subscripciones"'
+
+    @patch('accounts.models.stripe.Customer.modify')
+    @patch('accounts.models.stripe.Subscription.create')
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_subscription_creation(self,
+                                   subscription_retrieve,
+                                   subscription_create,
+                                   customer_modify):
+
+        subscription_mock = MagicMock(id='123456')
+        subscription_mock.delete = MagicMock()
+        subscription_create.return_value = subscription_mock
+        subscription_retrieve.return_value = subscription_mock
+
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
+        yearly_plan = mixer.blend('accounts.Plan', plan_type='ANUAL')
+        another_user = mixer.blend(User, username='cesardlinx')
+        user = mixer.blend(User)
+
+        some_subscription = Subscription.objects.create_subscription(
+            another_user,
+            yearly_plan,
+            '123456'
+        )
+
+        old_subscription = Subscription.objects.create_subscription(
+            user,
+            monthly_plan,
+            '456789'
+        )
+
+        new_subscription = Subscription.objects.create_subscription(
+            user,
+            yearly_plan,
+            '456789'
+        )
+
+        old_subscription.refresh_from_db()
+        some_subscription.refresh_from_db()
+        new_subscription.refresh_from_db()
+
+        active_subscriptions = Subscription.objects.filter(user=user,
+                                                           active=True)
+
+        assert len(active_subscriptions) == 1, \
+            'There should be only one active subscription for that user'
+        assert new_subscription.user == user, \
+            'The user should own the new subscription'
+        assert new_subscription.plan == yearly_plan, \
+            'The new subscription has the actual plan'
+        assert new_subscription.active is True, \
+            'The new subscription is the active one'
+        assert old_subscription.active is False, \
+            'The old subscription should not be active'
+        assert some_subscription.active is True, \
+            'Others subscriptions should remain intact'
+        # should delete previous subscription from stripe
+        subscription_mock.delete.assert_called_once_with()
+
+    @patch('accounts.models.stripe.Charge.create')
+    @patch('accounts.models.stripe.Customer.modify')
+    @patch('accounts.models.stripe.Subscription.create')
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_perpetual_subscription_creation(self,
+                                             subscription_retrieve,
+                                             subscription_create,
+                                             customer_modify,
+                                             charge_create):
+
+        mock = MagicMock(id='123456')
+        mock.delete = MagicMock()
+        subscription_create.return_value = mock
+        subscription_retrieve.return_value = mock
+        charge_create.return_value = mock
+
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
+        perpetual_plan = mixer.blend('accounts.Plan', plan_type='PAGO ÚNICO')
+        another_user = mixer.blend(User, username='cesardlinx')
+        user = mixer.blend(User)
+
+        some_subscription = Subscription.objects.create_subscription(
+            another_user,
+            monthly_plan,
+            '123456'
+        )
+
+        old_subscription = Subscription.objects.create_subscription(
+            user,
+            monthly_plan,
+            '456789'
+        )
+
+        new_subscription = Subscription.objects.create_subscription(
+            user,
+            perpetual_plan,
+            '456789'
+        )
+
+        old_subscription.refresh_from_db()
+        some_subscription.refresh_from_db()
+        new_subscription.refresh_from_db()
+
+        active_subscriptions = Subscription.objects.filter(user=user,
+                                                           active=True)
+
+        assert len(active_subscriptions) == 1, \
+            'There should be only one active subscription for that user'
+        assert new_subscription.user == user, \
+            'The user should own the new subscription'
+        assert new_subscription.plan == perpetual_plan, \
+            'The new subscription has the perpetual plan'
+        assert new_subscription.active is True, \
+            'The new subscription is the active one'
+        assert old_subscription.active is False, \
+            'The old subscription should not be active'
+        assert some_subscription.active is True, \
+            'Others subscriptions should remain intact'
+
+    def test_free_subscription_creation(self):
+
+        plan = mixer.blend('accounts.Plan', plan_type='GRATIS')
+        user = mixer.blend(User)
+
+        Subscription.objects.create_subscription(
+            user,
+            plan,
+        )
+
+        active_subscriptions = Subscription.objects.filter(active=True)
+
+        new_subscription = Subscription.objects.get(user=user, active=True)
+
+        assert len(active_subscriptions) == 1, \
+            'There should be only one active subscription'
+        assert new_subscription.user == user, \
+            'The user should own the new subscription'
+        assert new_subscription.plan == plan, \
+            'The new subscription has the free plan'
+
+    @patch('accounts.models.stripe.Customer.modify')
+    @patch('accounts.models.stripe.Subscription.create')
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_cancel_subscription(self,
+                                 subscription_retrieve,
+                                 subscription_create,
+                                 customer_modify):
+        subscription_mock = MagicMock(id='123456')
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
+        subscription_create.return_value = subscription_mock
+
+        plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
+        user = mixer.blend(User)
+
+        subscription = Subscription(
+            user=user,
+            plan=plan,
+            stripe_subscription_id='123456'
+        )
+        subscription.save()
+
+        subscription.cancel_subscription()
+
+        assert subscription.active is False, \
+            'subscription should not be active'
+        subscription_mock.delete.call_count == 1, \
+            'Should call delete once in stripe'
