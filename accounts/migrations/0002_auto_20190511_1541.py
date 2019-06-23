@@ -17,7 +17,7 @@ def create_pĺans(apps, schema_editor):
         ),
         Plan(
             plan_type='ANUAL',
-            price=6999,
+            price=5988,
             stripe_plan_id=settings.STRIPE_YEARLY_ID
         ),
         Plan(
