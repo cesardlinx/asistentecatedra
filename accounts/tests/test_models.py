@@ -42,6 +42,10 @@ class TestPlan:
         assert plan.slug == 'pago-unico', \
             'The slug should be formed by the plan type'
 
+    def test_real_price_property(self):
+        plan = mixer.blend('accounts.Plan', plan_type='MENSUAL', price=499)
+        assert plan.real_price == 4.99, 'Real price should be divided by 100'
+
 
 class TestUser(TestCase):
     """Tests del modelo de usuario"""
@@ -58,6 +62,7 @@ class TestUser(TestCase):
         slug = 'david-padilla'
         assert user.get_absolute_url() == '/accounts/profile/{0}/{1}/'\
                                           .format(user.pk, slug)
+        assert user.username == user.email, 'The username should be the email'
 
     @patch('accounts.models.stripe')
     def test_superuser(self, mock_stripe):

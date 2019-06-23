@@ -39,13 +39,6 @@ class SignupView(AnonymousRequiredMixin, CheckRecaptchaMixin, CreateView):
             user.save()
 
             if user.pk:
-                # Setting username
-                leading_part_of_email = user.email.split('@', 1)[0]
-                derived_username = '{}_{}'.format(leading_part_of_email,
-                                                  user.pk)
-                user.username = derived_username
-                user.save()
-
                 # Email sending
                 domain = get_current_site(self.request).domain
                 send_confirmation_helper(user, domain)

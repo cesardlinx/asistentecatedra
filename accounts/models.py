@@ -67,6 +67,10 @@ class Plan(models.Model):
             return reverse('checkout',
                            kwargs={'plan_id': self.pk, 'plan_slug': self.slug})
 
+    @property
+    def real_price(self):
+        return self.price / 100
+
 
 class UserManager(BaseUserManager):
     """Define a model manager for User model with no username field."""
@@ -162,6 +166,8 @@ class User(AbstractUser):
         # User slug
         complete_name = '{0} {1}'.format(self.first_name, self.last_name)
         self.slug = slugify(complete_name)
+
+        self.username = self.email  # The username equals the email
 
         if self.institution_logo:
             # Converting imagefield to pil image

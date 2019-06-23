@@ -38,15 +38,15 @@
                         <div class="sub-header">
                             <h5>Subscripción {{ plan.plan_type.title }}</h5>
                             <div class="price">
-                                <h3>{{ plan.price }} USD</h3>
-                                    {% if plan.plan_type == 'MENSUAL' %}
-                                        <small>al mes</small>
-                                    {% elif plan.plan_type == 'ANUAL' %}
-                                        <small>al año</small>
-                                    {% elif plan.plan_type == 'PAGO ÚNICO' %}
-                                        <small>un solo pago!</small>
-                                    {% else %}
-                                    {% endif %}
+                                <h3>{{ plan.real_price }} USD</h3>
+                                {% if plan.plan_type == 'MENSUAL' %}
+                                    <small>al mes</small>
+                                {% elif plan.plan_type == 'ANUAL' %}
+                                    <small>al año</small>
+                                {% elif plan.plan_type == 'PAGO ÚNICO' %}
+                                    <small>un solo pago!</small>
+                                {% else %}
+                                {% endif %}
                             </div>
                         </div>
                         <div class="plan-content">

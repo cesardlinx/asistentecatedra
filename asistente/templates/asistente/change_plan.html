@@ -20,7 +20,7 @@
                             <div class="card-header">
                                 <h5>Subscripción Premium {{ plan.plan_type.title }}</h5>
                                 <div class="price">
-                                    <h3>{{ plan.price }} USD</h3>
+                                    <h3>{{ plan.real_price }} USD</h3>
                                     {% if plan.plan_type == 'MENSUAL' %}
                                         <small>al mes</small>
                                     {% elif plan.plan_type == 'ANUAL' %}

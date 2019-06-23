@@ -128,10 +128,6 @@ class TestSignupView(SignupTestCase):
         self.assertRedirects(response, reverse('planificaciones'))
         assert User.objects.exists() is True, 'Should create a user'
         user = User.objects.last()
-        leading_part_of_email = user.email.split('@', 1)[0]
-        derived_username = '{}_{}'.format(leading_part_of_email, user.pk)
-        assert user.username == derived_username, \
-            'Username creation should be derived from email'
         assert user.first_name == 'David',  \
             "The user's first name should be David"
         assert user.email_confirmed is False, \
