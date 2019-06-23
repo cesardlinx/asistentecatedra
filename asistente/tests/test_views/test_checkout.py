@@ -1,15 +1,13 @@
-import smtplib
 from unittest.mock import patch, MagicMock
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.core import mail
-from django.core.mail import BadHeaderError
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from mixer.backend.django import mixer
 from stripe import error
+from testfixtures import LogCapture
 
 from accounts.models import Subscription
 from asistente import views
@@ -24,6 +22,8 @@ class TestCheckoutView(TestCase):
     @patch('accounts.models.stripe.Customer.create', autospec=True)
     def setUp(self, customer_create):
         customer_create.return_value = {'id': '123456'}
+
+        self.logger = LogCapture()
 
         self.user = User.objects.create_user(
             email='tester@tester.com',
@@ -119,8 +119,6 @@ class TestCheckoutView(TestCase):
             password='P455w0rd_testing'
         )
 
-        assert self.user.is_premium is False, 'User should not be premium'
-
         response = self.client.post(self.url, {
             'stripeToken': 'some-token',
         }, follow=True)
@@ -128,7 +126,7 @@ class TestCheckoutView(TestCase):
         self.user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
-        assert self.user.is_premium is True, 'User should be premium'
+        assert self.user.is_premium is False, 'User should not be premium yet'
         subscription = Subscription.objects.get(plan__plan_type='ANUAL')
         assert subscription.user == self.user, \
             'The user should be related with the subscription'
@@ -143,42 +141,19 @@ class TestCheckoutView(TestCase):
 
         messages = list(response.context.get('messages'))
         assert len(messages) == 1, 'There should be a message'
-        assert 'Su transacción ha sido realizada con éxito' \
+        assert 'Su petición ha sido realizada con éxito. revise su correo '\
+               'para verificar que se realizado correctamente el pago.' \
             == messages[0].message
-        assert 'alert-success' == messages[0].tags, \
+        assert 'alert-info' == messages[0].tags, \
             'There should be a success message'
-        assert len(mail.outbox) == 2, 'Should send 2 mails'
 
-        user_email = mail.outbox[0]
-        admin_email = mail.outbox[1]
-
-        assert self.user.first_name in user_email.body, \
-            "Email body should contain user's first name"
-        assert 'cancelada' not in user_email.body, \
-            'Should not be a cancellation email'
-        assert "Asistente de Cátedra | SUBSCRIPCIÓN" \
-            in user_email.subject
-        assert subscription.plan.plan_type in user_email.body, \
-            "Plan type should be in email body"
-        assert self.user.email in user_email.to, \
-            "The user's email should be in email's field TO "
-
-        assert self.user.email in admin_email.body, \
-            "Email body should contain user's first name"
-        assert 'cancelado' not in admin_email.body, \
-            'Should not be a cancellation email'
-        assert "Asistente de Cátedra | SUBSCRIPCIÓN AÑADIDA" \
-            in admin_email.subject
-        assert subscription.plan.plan_type in admin_email.body, \
-            "Plan type should be in email body"
-        assert self.superuser.email in admin_email.to, \
-            "The admin email should be in email's field TO "
-
+    @patch('accounts.models.stripe.Customer.modify', autospec=True)
     @patch('accounts.models.stripe.Charge.create', autospec=True)
     @patch('accounts.models.stripe.Subscription.retrieve', autospec=True)
     def test_perpetual_subscription(self,
                                     subscription_retrieve,
-                                    charge_create):
+                                    charge_create,
+                                    customer_modify):
         """Tests when a user decides to subscribe to the perpetual plan"""
         mock = MagicMock(id='1234567')
         mock.delete = MagicMock()
@@ -195,8 +170,6 @@ class TestCheckoutView(TestCase):
         url = reverse('checkout',
                       kwargs={'plan_id': plan.pk, 'plan_slug': plan.slug})
 
-        assert self.user.is_premium is False, 'User should not be premium'
-
         response = self.client.post(url, {
             'stripeToken': 'some-token',
         }, follow=True)
@@ -204,7 +177,7 @@ class TestCheckoutView(TestCase):
         self.user.refresh_from_db()
 
         assert response.status_code == 200, 'Should be callable'
-        assert self.user.is_premium is True, 'User should be premium'
+        assert self.user.is_premium is False, 'User should not be premium yet'
         subscription = Subscription.objects.get(plan__plan_type='PAGO ÚNICO')
         assert subscription.user == self.user, \
             'The user should be related with the subscription'
@@ -219,36 +192,11 @@ class TestCheckoutView(TestCase):
 
         messages = list(response.context.get('messages'))
         assert len(messages) == 1, 'There should be a message'
-        assert 'Su transacción ha sido realizada con éxito' \
+        assert 'Su petición ha sido realizada con éxito. revise su correo '\
+               'para verificar que se realizado correctamente el pago.' \
             == messages[0].message
-        assert 'alert-success' == messages[0].tags, \
+        assert 'alert-info' == messages[0].tags, \
             'There should be a success message'
-        assert len(mail.outbox) == 2, 'Should send 2 mails'
-
-        user_email = mail.outbox[0]
-        admin_email = mail.outbox[1]
-
-        assert self.user.first_name in user_email.body, \
-            "Email body should contain user's first name"
-        assert 'cancelada' not in user_email.body, \
-            'Should not be a cancellation email'
-        assert "Asistente de Cátedra | SUBSCRIPCIÓN" \
-            in user_email.subject
-        assert subscription.plan.plan_type in user_email.body, \
-            "Plan type should be in email body"
-        assert self.user.email in user_email.to, \
-            "The user's email should be in email's field TO "
-
-        assert self.user.email in admin_email.body, \
-            "Email body should contain user's first name"
-        assert 'cancelado' not in admin_email.body, \
-            'Should not be a cancellation email'
-        assert "Asistente de Cátedra | SUBSCRIPCIÓN AÑADIDA" \
-            in admin_email.subject
-        assert subscription.plan.plan_type in admin_email.body, \
-            "Plan type should be in email body"
-        assert self.superuser.email in admin_email.to, \
-            "The admin email should be in email's field TO "
 
     @patch('accounts.models.stripe.Customer.modify', autospec=True)
     def test_invalid_card(self, customer_modify):
@@ -266,6 +214,9 @@ class TestCheckoutView(TestCase):
                                                 plan_slug=self.plan.slug)
 
         self.user.refresh_from_db()
+
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert 'CardError' in str(self.logger), 'Should return a CardError log'
 
         assert self.user.is_premium is False, 'User should not be premium'
 
@@ -311,7 +262,7 @@ class TestCheckoutView(TestCase):
 
         assert response.status_code == 302, \
             'Response should send a redirection'
-        assert self.user.is_premium is True, 'User should still being premium'
+        assert self.user.is_premium is True, 'User should still be premium'
         assert self.user.subscriptions.filter(active=True).count() == 1
         active_subscription = self.user.subscriptions.get(active=True)
         assert active_subscription != previous_subscription
@@ -325,7 +276,7 @@ class TestCheckoutView(TestCase):
             error.InvalidRequestError('error', 2)
 
         self.make_error_tests(
-            'Error!. Parámetros inválidos.')
+            'Error!. Parámetros inválidos.', 'InvalidRequestError')
 
     @patch('accounts.models.stripe.Customer.modify', autospec=True)
     def test_api_connection_error(self, customer_modify):
@@ -334,7 +285,8 @@ class TestCheckoutView(TestCase):
             error.APIConnectionError('error')
 
         self.make_error_tests(
-            'Ha ocurrido un error de comunicación. Verifique su conexión.')
+            'Ha ocurrido un error de comunicación. Verifique su conexión.',
+            'APIConnectionError')
 
     @patch('accounts.models.stripe.Customer.modify', autospec=True)
     def test_stripe_error(self, customer_modify):
@@ -343,7 +295,7 @@ class TestCheckoutView(TestCase):
             error.StripeError('error')
 
         self.make_error_tests(
-            'Ha ocurrido un error en el pago.')
+            'Ha ocurrido un error en el pago.', 'StripeError')
 
     @patch('accounts.models.stripe.Customer.modify', autospec=True)
     def test_generic_error(self, customer_modify):
@@ -352,10 +304,10 @@ class TestCheckoutView(TestCase):
         self.subscription_create.side_effect = Exception('error')
 
         self.make_error_tests(
-            'Ha ocurrido un error con la peticion realizada.')
+            'Ha ocurrido un error con la peticion realizada.', 'Exception')
 
-    def make_error_tests(self, error_message):
-        """Method to make error tests"""
+    def make_error_tests(self, error_message, exception_message):
+        """Auxiliary method for making error tests"""
         mixer.blend('accounts.Plan')  # Free Plan
 
         request = RequestFactory().post('/', {
@@ -369,7 +321,11 @@ class TestCheckoutView(TestCase):
                                                 plan_slug=self.plan.slug)
         self.user.refresh_from_db()
 
-        assert self.user.is_premium is False, 'User should not be premium'
+        assert self.user.is_premium is False, 'User should not be premium yet'
+
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert exception_message in str(self.logger), \
+            'Should return a Exception log'
 
         assert error_message\
             in str(response.content.decode("utf-8")
@@ -378,67 +334,6 @@ class TestCheckoutView(TestCase):
         assert 'alert-danger' in str(response.content), \
             'It should display an error message'
 
-    @patch('accounts.models.stripe.Customer.modify', autospec=True)
-    @patch('accounts.models.stripe.Subscription.retrieve', autospec=True)
-    @patch('asistente.views.send_subscription_emails', autospec=True)
-    def test_smtp_error(self,
-                        mock_emails,
-                        subscription_retrieve,
-                        customer_modify):
-        """Tests when a smtp error is raised when sending the emails"""
-        subscription_mock = MagicMock(id='123456')
-        subscription_mock.delete = MagicMock()
-        subscription_retrieve.return_value = subscription_mock
-
-    # def test_smtp_error(self, mock_emails):
-
-        mock_emails.side_effect = smtplib.SMTPException()
-
-        self.make_email_error_tests(
-            'Ha ocurrido un error al tratar de enviar el correo.',
-            mock_emails
-        )
-
-    @patch('accounts.models.stripe.Customer.modify', autospec=True)
-    @patch('accounts.models.stripe.Subscription.retrieve', autospec=True)
-    @patch('asistente.views.send_subscription_emails', autospec=True)
-    def test_badheader_error(self,
-                             mock_emails,
-                             subscription_retrieve,
-                             customer_modify):
-        """Tests when a badheader error is raised when sending the emails"""
-        subscription_mock = MagicMock(id='123456')
-        subscription_mock.delete = MagicMock()
-        subscription_retrieve.return_value = subscription_mock
-
-        mock_emails.side_effect = BadHeaderError()
-
-        self.make_email_error_tests(
-            'Ha ocurrido un error al tratar de enviar el correo.',
-            mock_emails
-        )
-
-    def make_email_error_tests(self, error_message, mock_emails):
-        """Method to make email error tests"""
-        self.client.login(
-            email=self.user.email,
-            password='P455w0rd_testing'
-        )
-
-        response = self.client.post(self.url, {
-            'stripeToken': 'some-token',
-        }, follow=True)
-        self.user.refresh_from_db()
-
-        assert response.status_code == 200, 'Should be callable'
-        assert self.user.is_premium is True, 'User should be premium'
-        # Should redirect to the user's profile
-        self.assertRedirects(response, self.user.get_absolute_url())
-        messages = list(response.context.get('messages'))
-        assert len(messages) == 2, \
-            'There should be two messages'
-        assert error_message == messages[0].message
-        assert 'alert-danger' == messages[0].tags, \
-            'There should be an error message'
-        assert mock_emails.called is True, \
-            'Should call the function to send the emails'
+    def tearDown(self):
+        # stopping log capture
+        self.logger.uninstall()

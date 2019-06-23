@@ -1,5 +1,5 @@
 import smtplib
-
+import logging
 import stripe
 from django.conf import settings
 from django.contrib import messages
@@ -19,10 +19,13 @@ from accounts.mixins import (NotPerpetualNotPremiumUserRequiredMixin,
                              NotPremiumUserRequiredMixin)
 from accounts.models import Plan, Subscription
 
-from .helpers import send_subscription_emails
+from .helpers import send_subscription_emails, send_invoice_email
 from .models import Libro, Pregunta
 
 User = get_user_model()
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 endpoint_secret = settings.STRIPE_WEBHOOKS_SECRET
@@ -83,57 +86,43 @@ class CheckoutView(NotPerpetualPremiumUserRequiredMixin, View):
 
         token = request.POST.get('stripeToken')
         try:
-            with transaction.atomic():
-                Subscription.objects.create_subscription(
-                    user,
-                    plan,
-                    token
-                )
-                user.is_premium = True
-                user.save()
-
-            user_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN'
-            admin_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN AÑADIDA'
-
-            send_subscription_emails(
-                user_mail_subject,
-                admin_mail_subject,
+            # Subscription creation
+            Subscription.objects.create_subscription(
                 user,
-                plan
+                plan,
+                token
             )
-
-        except BadHeaderError:
-            messages.error(request,
-                           'Ha ocurrido un error al tratar de enviar el '
-                           'correo.')
-        except stripe.error.CardError:
+        except stripe.error.CardError as e:
+            logger.error('CardError: ' + e.user_message)
             messages.error(request, 'Error. La tarjeta de crédito ingresada '
                            'no es válida.')
             return render(request, 'asistente/checkout.html', {'plan': plan})
-        except stripe.error.InvalidRequestError:
+        except stripe.error.InvalidRequestError as e:
             # Invalid parameters were supplied to Stripe's API
+            logger.error('InvalidRequestError: ' + e.user_message)
             messages.error(request, 'Error!. Parámetros inválidos.')
             return render(request, 'asistente/checkout.html', {'plan': plan})
-        except stripe.error.APIConnectionError:
+        except stripe.error.APIConnectionError as e:
             # Network communication with Stripe failed
+            logger.error('APIConnectionError: ' + e.user_message)
             messages.error(request, 'Ha ocurrido un error de comunicación. '
                            'Verifique su conexión.')
             return render(request, 'asistente/checkout.html', {'plan': plan})
-        except stripe.error.StripeError:
+        except stripe.error.StripeError as e:
             # Stripe generic error
+            logger.error('StripeError: ' + e.user_message)
             messages.error(request, 'Ha ocurrido un error en el pago.')
             return render(request, 'asistente/checkout.html', {'plan': plan})
-        except smtplib.SMTPException:
-            messages.error(request,
-                           'Ha ocurrido un error al tratar de enviar el '
-                           'correo.')
-        except Exception:
+        except Exception as e:
             # Displays a very generic error to the user
+            logger.error('Exception: ' + e.args[0])
             messages.error(request, 'Ha ocurrido un error con la peticion '
                            'realizada.')
             return render(request, 'asistente/checkout.html', {'plan': plan})
 
-        messages.success(request, 'Su transacción ha sido realizada con éxito')
+        messages.info(request, 'Su petición ha sido realizada con éxito. '
+                               'revise su correo para verificar que se '
+                               'realizado correctamente el pago.')
         return redirect(request.user.get_absolute_url())
 
 
@@ -141,63 +130,39 @@ class CheckoutView(NotPerpetualPremiumUserRequiredMixin, View):
 def cancel_subscription_view(request):
     if request.method == 'POST':
         user = User.objects.get(pk=request.user.pk)
-        previous_plan = user.active_plan
         try:
-            with transaction.atomic():
-                user.cancel_active_subscription()
-                # User is no longer premium
-                user.is_premium = False
-                user.save()
+            # Cancel subscription
+            user.cancel_active_subscription()
+            # User is no longer premium
+            user.is_premium = False
+            user.save()
 
-        except stripe.error.InvalidRequestError:
+        except stripe.error.InvalidRequestError as e:
             # Invalid parameters were supplied to Stripe's API
+            logger.error('InvalidRequestError: ' + e.user_message)
             messages.error(request, 'Error!. Parámetros inválidos.')
             return redirect(user.get_absolute_url())
-        except stripe.error.APIConnectionError:
+        except stripe.error.APIConnectionError as e:
             # Network communication with Stripe failed
+            logger.error('APIConnectionError: ' + e.user_message)
             messages.error(request, 'Ha ocurrido un error de comunicaciones. '
                            'Verifique su conexión.')
             return redirect(user.get_absolute_url())
-        except stripe.error.StripeError:
+        except stripe.error.StripeError as e:
             # General Stripe Error
+            logger.error('StripeError: ' + e.user_message)
             messages.error(request, 'Ha ocurrido un error al tratar de '
                            'cancelar la subscripción.')
             return redirect(user.get_absolute_url())
-        except Exception:
+        except Exception as e:
             # Display a very generic error to the user, and maybe send
             # yourself an email
+            logger.error('Exception: ' + e.args[0])
             messages.error(request, 'Ha ocurrido un error con la peticion '
                            'realizada.')
             return redirect(user.get_absolute_url())
 
-        # email sending
-
-        user_mail_subject = 'Asistente de Cátedra | CANCELACIÓN DE '\
-                            'SUBSCRIPCIÓN'
-        admin_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN CANCELADA'
-
-        try:
-            send_subscription_emails(
-                user_mail_subject,
-                admin_mail_subject,
-                user,
-                previous_plan,
-                cancel=True
-            )
-        except smtplib.SMTPException:
-            messages.error(request,
-                           'Ha ocurrido un error al tratar de enviar el '
-                           'correo.')
-        except BadHeaderError:
-            messages.error(request,
-                           'Ha ocurrido un error al tratar de enviar el '
-                           'correo.')
-        except Exception:
-
-            messages.error(request,
-                           'Ha ocurrido un error al tratar de enviar el '
-                           'correo.')
-
+        logger.info('User subscription successfully cancelled')
         messages.success(request,
                          'Su subscripción ha sido cancelada con éxito')
         return redirect(user.get_absolute_url())

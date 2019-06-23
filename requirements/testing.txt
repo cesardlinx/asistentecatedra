@@ -8,6 +8,7 @@ pytest==4.4.1
 pytest-cov==2.6.1
 pytest-django==3.4.8
 mixer==6.1.3
+testfixtures==6.10.0
 
 # Pytest dependencies
 coverage==4.5.3

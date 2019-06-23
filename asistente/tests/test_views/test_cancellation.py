@@ -1,15 +1,13 @@
 import pytest
-import smtplib
 from unittest.mock import patch, MagicMock
 from accounts.models import Plan, Subscription
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.core import mail
-from django.core.mail import BadHeaderError
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from mixer.backend.django import mixer
 from stripe import error
+from testfixtures import LogCapture
 
 from asistente import views
 
@@ -38,6 +36,8 @@ class TestCancelSubscriptionView(TestCase):
         self.subscription_mock.delete = MagicMock()
         self.subscription_retrieve.return_value = self.subscription_mock
         self.subscription_create.return_value = self.subscription_mock
+
+        self.logger = LogCapture()
 
         self.user = User.objects.create_user(
             email='tester@tester.com',
@@ -82,10 +82,14 @@ class TestCancelSubscriptionView(TestCase):
             'Should redirect to profile'
 
     def test_cancel_subscription_success(self):
+        """
+        Tests when a user can successfuly cancel his/her subscription and go
+        back to the free plan
+        """
 
         monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
 
-        previous_subscription = Subscription.objects.create_subscription(
+        Subscription.objects.create_subscription(
             self.user,
             monthly_plan,
             '456789',
@@ -98,6 +102,10 @@ class TestCancelSubscriptionView(TestCase):
         response = self.client.post(self.url, {}, follow=True)
 
         self.user.refresh_from_db()
+
+        assert 'INFO' in str(self.logger), 'Should return an success log'
+        assert 'User subscription successfully cancelled' in str(self.logger),\
+            'Should return a success log message'
 
         assert response.status_code == 200, 'Should be callable'
         assert self.user.is_premium is False, \
@@ -115,101 +123,90 @@ class TestCancelSubscriptionView(TestCase):
         # Should delete from stripe
         self.subscription_mock.delete.assert_called_once_with()
 
-        assert len(mail.outbox) == 2, 'Should send 2 mails'
-
-        user_email = mail.outbox[0]
-        admin_email = mail.outbox[1]
-
-        assert self.user.first_name in user_email.body, \
-            "Email body should contain user's first name"
-        assert 'cancelada' in user_email.body, \
-            'Should be a cancellation email'
-        assert "Asistente de Cátedra | CANCELACIÓN DE SUBSCRIPCIÓN" \
-            in user_email.subject
-        assert previous_subscription.plan.plan_type in user_email.body, \
-            "Previous Plan type should be in email body"
-        assert self.user.email in user_email.to, \
-            "The user's email should be in email's field TO "
-
-        assert self.user.email in admin_email.body, \
-            "Email body should contain user's first name"
-        assert 'cancelado' in admin_email.body, \
-            'Should be a cancellation email'
-        assert "Asistente de Cátedra | SUBSCRIPCIÓN CANCELADA" \
-            in admin_email.subject
-        assert previous_subscription.plan.plan_type in admin_email.body, \
-            "Plan type should be in email body"
-        assert self.superuser.email in admin_email.to, \
-            "The admin email should be in email's field TO "
-
-    def test_invalid_request_error(self):
+    @patch('accounts.models.Subscription.created_date')
+    @patch('accounts.models.Subscription.next_billing_date')
+    def test_invalid_request_error(self,
+                                   subscription_billing,
+                                   subscription_date):
+        """
+        Test the raise of an  InvalidRequestError when a subscription
+        cancellation is in progress
+        """
+        # Se parchea estos dos métodos de Subscription porque al final
+        # retorna el template que correponde al perfil, el mismo que usa estos
+        # dos métodos, el mismo que usa el método subscription_retrieve que
+        # para este test también es un mock
+        subscription_date.return_value = '05/05/2019'
+        subscription_billing.return_value = '05/05/2019'
 
         self.subscription_retrieve.side_effect = error.\
             InvalidRequestError('error', 2)
 
         self.make_error_tests(
-            'Error!. Parámetros inválidos.', 1, self.subscription_retrieve)
+            'Error!. Parámetros inválidos.', 1, self.subscription_retrieve,
+            'InvalidRequestError')
         assert self.user.is_premium is True, 'User should still be premium'
 
-    def test_api_connection_error(self):
+    @patch('accounts.models.Subscription.created_date')
+    @patch('accounts.models.Subscription.next_billing_date')
+    def test_api_connection_error(self,
+                                  subscription_billing,
+                                  subscription_date):
+        """
+        Test the raise of an  APIConnectionError when a subscription
+        cancellation is in progress
+        """
+        subscription_date.return_value = '05/05/2019'
+        subscription_billing.return_value = '05/05/2019'
 
         self.subscription_retrieve.side_effect = error.\
             APIConnectionError('error')
 
         self.make_error_tests(
             'Ha ocurrido un error de comunicaciones. Verifique su conexión.',
-            1, self.subscription_retrieve)
+            1, self.subscription_retrieve, 'APIConnectionError')
         assert self.user.is_premium is True, 'User should still be premium'
 
-    def test_stripe_error(self):
+    @patch('accounts.models.Subscription.created_date')
+    @patch('accounts.models.Subscription.next_billing_date')
+    def test_stripe_error(self,
+                          subscription_billing,
+                          subscription_date):
+        """
+        Test the raise of an StripeError when a subscription
+        cancellation is in progress
+        """
+        subscription_date.return_value = '05/05/2019'
+        subscription_billing.return_value = '05/05/2019'
 
         self.subscription_retrieve.side_effect = error.StripeError('error')
 
         self.make_error_tests(
             'Ha ocurrido un error al tratar de cancelar la subscripción.',
-            1, self.subscription_retrieve)
+            1, self.subscription_retrieve, 'StripeError')
         assert self.user.is_premium is True, 'User should still be premium'
 
-    @patch('asistente.views.send_subscription_emails', autospec=True)
-    def test_smtp_error(self, mock_emails):
-
-        mock_emails.side_effect = smtplib.SMTPException()
-
-        self.make_error_tests(
-            'Ha ocurrido un error al tratar de enviar el correo.',
-            2, self.subscription_retrieve)
-        assert self.user.is_premium is False, 'User should not be premium'
-
-    @patch('asistente.views.send_subscription_emails', autospec=True)
-    def test_badheader_error(self, mock_emails):
-
-        mock_emails.side_effect = BadHeaderError()
-
-        self.make_error_tests(
-            'Ha ocurrido un error al tratar de enviar el correo.',
-            2, self.subscription_retrieve)
-        assert self.user.is_premium is False, 'User should not be premium'
-
-    @patch('asistente.views.send_subscription_emails', autospec=True)
-    def test_general_error_email(self, mock_emails):
-
-        mock_emails.side_effect = Exception()
-
-        self.make_error_tests(
-            'Ha ocurrido un error al tratar de enviar el correo.',
-            2, self.subscription_retrieve)
-        assert self.user.is_premium is False, 'User should not be premium'
-
-    def test_generic_error(self):
+    @patch('accounts.models.Subscription.created_date')
+    @patch('accounts.models.Subscription.next_billing_date')
+    def test_generic_error(self,
+                           subscription_billing,
+                           subscription_date):
+        """
+        Test the raise of a generic Exception when a subscription
+        cancellation is in progress
+        """
+        subscription_date.return_value = '05/05/2019'
+        subscription_billing.return_value = '05/05/2019'
 
         self.subscription_retrieve.side_effect = Exception('error')
 
         self.make_error_tests(
             'Ha ocurrido un error con la peticion realizada.', 1,
-            self.subscription_retrieve)
+            self.subscription_retrieve, 'Exception')
 
     def make_error_tests(self, error_message, number_of_messages,
-                         subscription_retrieve):
+                         subscription_retrieve, exception_message):
+        """Auxiliary method for making error tests"""
         monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
 
         self.user.is_premium = True
@@ -222,8 +219,11 @@ class TestCancelSubscriptionView(TestCase):
         )
 
         response = self.client.post(self.url, {}, follow=True)
-
         self.user.refresh_from_db()
+
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert exception_message in str(self.logger), \
+            'Should return a Exception log'
 
         assert response.status_code == 200, 'Should be callable'
         # Should redirect to the user's profile
@@ -237,3 +237,7 @@ class TestCancelSubscriptionView(TestCase):
         # Should attempt to delete from stripe
         subscription_retrieve.assert_called_once_with(
             previous_subscription.stripe_subscription_id)
+
+    def tearDown(self):
+        # stopping log capture
+        self.logger.uninstall()
