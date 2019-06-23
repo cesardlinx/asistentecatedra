@@ -5,12 +5,12 @@ Gracias por elegir Asistente de Cátedra.
 <br>
 {% if cancel %}
     {% if plan %}
-    Tu subscripción al plan {{ plan.plan_type }} ha sido cancelada con éxito.
+        Tu subscripción al plan {{ plan.title }} ha sido cancelada con éxito.
     {% else %}
-    Su subscripcion ha regresado al plan FREE
+        Su subscripcion ha regresado al plan GRATIS
     {% endif %}
 {% else %}
-Tu subscripción al plan {{ plan.plan_type }} ha sido realizada con éxito.
+Tu subscripción al plan {{ plan.title }} ha sido realizada con éxito.
 {% endif %}
 <br>
 <br>

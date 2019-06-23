@@ -172,32 +172,202 @@ def cancel_subscription_view(request):
 
 @csrf_exempt
 def stripe_webhooks_view(request):
+    """Handles Stripe events for sending emails"""
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
     event = None
 
     try:
+        # constuct event
         event = stripe.Webhook.construct_event(
             payload, sig_header, endpoint_secret
         )
-    except ValueError:
+    except ValueError as e:
         # Invalid payload
+        logger.error('ValueError: ' + e.args[0])
         return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError:
+    except stripe.error.SignatureVerificationError as e:
+        logger.error('SignatureVerificationError: ' +
+                     e.user_message)
         # Invalid signature
         return HttpResponse(status=400)
 
-        # Handle the event
-        # if event.type == 'payment_intent.succeeded'
-        # payment_intent = event.data.object # contains a stripe.PaymentIntent
-        # handle_payment_intent_succeeded(payment_intent)
-        # elif event.type == 'payment_method.attached'
-        # payment_method = event.data.object # contains a stripe.PaymentMethod
-        # handle_payment_method_attached(payment_method)
-        # ... handle other event types
-        # else
-        # Unexpected event type
-        # return HttpResponse(status=400)
-        # end
+    logger.info('Stripe event received: ' + event.type)
+
+    # getting the user
+    stripe_customer_id = event.data.object.customer
+    user = User.objects.get(stripe_customer_id=stripe_customer_id)
+
+    # Handle the event
+    if event.type == 'customer.subscription.created':
+        # Cuando se ha creado exitosamente la subscripción
+        plan = event.data.object.plan.nickname
+
+        try:
+            user_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN'
+            admin_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN '\
+                'AÑADIDA'
+
+            send_subscription_emails(
+                user_mail_subject,
+                admin_mail_subject,
+                user,
+                plan
+            )
+        except BadHeaderError as e:
+            logger.error('BadHeaderError: ' + e.args[0])
+            return HttpResponse(status=400)
+        except smtplib.SMTPException as e:
+            logger.error('SMTPException: ' + e.args[0])
+            return HttpResponse(status=400)
+
+    elif event.type == 'invoice.payment_succeeded':
+        # Cuando el pago es exitoso
+        amount_paid = event.data.object.amount_paid / 100
+        plan = event.data.object.lines.data[0].plan.nickname
+
+        user_mail_subject = 'Asistente de Cátedra | PAGO DE '\
+            'SUBSCRIPCIÓN'
+
+        # el usuario es premium solo si el pago es exitoso
+        user.is_premium = True
+        user.save()
+
+        try:
+            # Envío del email
+            send_invoice_email(
+                user_mail_subject,
+                user,
+                plan,
+                amount_paid,
+            )
+        except BadHeaderError as e:
+            logger.error('BadHeaderError: ' + e.args[0])
+            return HttpResponse(status=400)
+        except smtplib.SMTPException as e:
+            logger.error('SMTPException: ' + e.args[0])
+            return HttpResponse(status=400)
+
+    elif event.type == 'invoice.payment_failed':
+        # Cuando falla el pago
+        amount_paid = event.data.object.amount_paid / 100
+        plan = event.data.object.lines.data[0].plan.nickname
+
+        user_mail_subject = 'Asistente de Cátedra | PAGO DE '\
+            'SUBSCRIPCIÓN FALLIDO'
+        try:
+            # Envío del email
+            send_invoice_email(
+                user_mail_subject,
+                user,
+                plan,
+                amount_paid,
+                success=False
+            )
+        except BadHeaderError as e:
+            logger.error('BadHeaderError: ' + e.args[0])
+            return HttpResponse(status=400)
+        except smtplib.SMTPException as e:
+            logger.error('SMTPException: ' + e.args[0])
+            return HttpResponse(status=400)
+        finally:
+            try:
+                with transaction.atomic():
+                    # cancela la subscripción por falta de pago
+                    user.cancel_active_subscription()
+                    user.is_premium = False
+                    user.save()
+            except stripe.error.StripeError as e:
+                logger.error('StripeError: ' + e.args[0])
+                return HttpResponse(status=400)
+            except Exception as e:
+                logger.error('Exception: ' + e.args[0])
+                return HttpResponse(status=400)
+
+    elif event.type == 'customer.subscription.deleted':
+        """Cuando el usuario cancela su subscripción"""
+        plan = event.data.object.plan.nickname
+
+        user_mail_subject = 'Asistente de Cátedra | CANCELACIÓN DE '\
+            'SUBSCRIPCIÓN'
+        admin_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN '\
+            'CANCELADA'
+        try:
+            # Envío de emails
+            send_subscription_emails(
+                user_mail_subject,
+                admin_mail_subject,
+                user,
+                plan,
+                cancel=True
+            )
+        except BadHeaderError as e:
+            logger.error('BadHeaderError: ' + e.args[0])
+            return HttpResponse(status=400)
+        except smtplib.SMTPException as e:
+            logger.error('SMTPException: ' + e.args[0])
+            return HttpResponse(status=400)
+
+    elif event.type == 'charge.succeeded':
+        """Cuando se subscribe al plan PAGO ÚNICO"""
+        plan = 'PAGO ÚNICO'
+        charge_description = event.data.object.description
+        amount_paid = event.data.object.amount / 100
+
+        if plan in charge_description:
+            user_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN'
+            admin_mail_subject = 'Asistente de Cátedra | SUBSCRIPCIÓN '\
+                'AÑADIDA'
+            user_mail_subject_payment = 'Asistente de Cátedra | PAGO DE '\
+                'SUBSCRIPCIÓN'
+
+            user.is_premium = True
+            user.save()
+
+            try:
+                # envío de email
+                send_subscription_emails(
+                    user_mail_subject,
+                    admin_mail_subject,
+                    user,
+                    plan
+                )
+                send_invoice_email(
+                    user_mail_subject_payment,
+                    user,
+                    plan,
+                    amount_paid,
+                )
+            except BadHeaderError as e:
+                logger.error('BadHeaderError: ' + e.args[0])
+                return HttpResponse(status=400)
+            except smtplib.SMTPException as e:
+                logger.error('SMTPException: ' + e.args[0])
+                return HttpResponse(status=400)
+
+    elif event.type == 'charge.failed':
+        """Cuando falla el pago al tratar de subscribirse al plan PAGO ÚNICO"""
+        plan = 'PAGO ÚNICO'
+        charge_description = event.data.object.description
+        amount_paid = event.data.object.amount
+
+        if plan in charge_description:
+            user_mail_subject = 'Asistente de Cátedra | PAGO DE '\
+                'SUBSCRIPCIÓN FALLIDO'
+            try:
+                # Envío del email
+                send_invoice_email(
+                    user_mail_subject,
+                    user,
+                    plan,
+                    amount_paid,
+                    success=False
+                )
+            except BadHeaderError as e:
+                logger.error('BadHeaderError: ' + e.args[0])
+                return HttpResponse(status=400)
+            except smtplib.SMTPException as e:
+                logger.error('SMTPException: ' + e.args[0])
+                return HttpResponse(status=400)
 
     return HttpResponse(status=200)

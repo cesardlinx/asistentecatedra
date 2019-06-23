@@ -1,0 +1,20 @@
+Hola {{ user.first_name }}!,
+<br>
+<br>
+Gracias por elegir Asistente de Cátedra.
+<br>
+
+{% if success %}
+Tu pago de {{ amount_paid }} USD por la subscripción al plan {{ plan.title }} del Asistente de Cátedra ha sido cancelada con éxito.
+{% else %}
+Desafortunadamente, su último pago por la subscripción al plan {{ plan.title }} fue rechazado.
+Esto podría deberse debido a un cambio en el número de su tarjeta de crédito, que su tarjeta haya caducado,
+, que la misma haya sido dada de baja.
+
+Por favor actualice los datos de su tarjeta lo antes posible.
+
+{% endif %}
+<br>
+<br>
+Prueba lo fácil que es ahora realizar tus planificaciones!. No dudes en contactarnos
+si tienes alguna pregunta o sugerencia.
