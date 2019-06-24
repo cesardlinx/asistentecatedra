@@ -1,4 +1,5 @@
 import json
+import logging
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from .forms import ElementoCurricularFormset, PlanClaseForm
@@ -15,6 +16,8 @@ from django.utils import timezone
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 from django.db import transaction
+
+logger = logging.getLogger(__name__)
 
 
 class PlanificacionesTemplateView(LoginRequiredMixin, TemplateView):
@@ -50,6 +53,8 @@ def plan_clase_create(request):
                 # Almacenado del formset
                 elementos_formset.instance = plan_clase
                 elementos_formset.save()
+                logger.info('Plan de clase created for the user: {}.'
+                            .format(request.user.email))
                 return redirect('home')
 
     context = {
@@ -80,6 +85,8 @@ def plan_clase_update(request, pk, slug):
                 plan_clase.save()
                 elementos_formset.save()
                 form._save_m2m()
+                logger.info('Plan de clase updated for the user: {}.'
+                            .format(request.user.email))
                 return redirect('home')
 
     context = {

@@ -6,9 +6,9 @@ from . import views
 urlpatterns = [
      path('signup/', views.SignupView.as_view(), name='signup'),
      path('send-confirmation/', views.send_confirmation_view,
-          name='send-confirmation'),
+          name='send_confirmation'),
      path('confirm-email/<uidb64>/<token>/',
-          views.confirm_email,
+          views.confirm_email_view,
           name='confirm_email'),
      path('ajax/unique_email_validator/',
           views.unique_email_validator,

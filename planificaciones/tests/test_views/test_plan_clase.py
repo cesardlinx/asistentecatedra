@@ -18,6 +18,7 @@ from planificaciones.models.proceso_didactico import ProcesoDidactico
 from django.core.exceptions import ValidationError
 from django.http.response import Http404
 from django.contrib.auth import get_user_model
+from testfixtures import LogCapture
 
 User = get_user_model()
 pytestmark = pytest.mark.django_db
@@ -26,6 +27,9 @@ pytestmark = pytest.mark.django_db
 class PlanClaseTestCase(TestCase):
     def setUp(self):
         """Creates data for testing Planes de Clase"""
+
+        self.logger = LogCapture()
+
         subnivel = mixer.blend(Subnivel)
         self.curso_1 = mixer.blend(Curso, subnivel=subnivel)
         self.curso_2 = mixer.blend(Curso, subnivel=subnivel)
@@ -172,7 +176,7 @@ class PlanClaseTestCaseCreateView(PlanClaseTestCase):
         self.assertContains(response, 'name="observaciones"')
         self.assertContains(response, 'name="aprobado_por"')
 
-    def test_post(self):
+    def test_post_success(self):
         """Prueba la creación de planes de clase"""
         request = RequestFactory().post('/', data=self.data)
         request.user = self.user
@@ -187,6 +191,11 @@ class PlanClaseTestCaseCreateView(PlanClaseTestCase):
         assert elemento.plan_clase == plan, \
             'el elemento curricular debe pertenecer al plan de clase'
 
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'Plan de clase created for the user: {}.'.format(
+            self.user.email) in str(self.logger), \
+            'Log when a Plan de Clase is created.'
+
     def test_invalid_data(self):
         """Tests the view when sending invalid data"""
         request = RequestFactory().post('/', data={})
@@ -194,6 +203,9 @@ class PlanClaseTestCaseCreateView(PlanClaseTestCase):
         # Invalid data raises ValidationError
         with pytest.raises(ValidationError):
             views.plan_clase_create(request)
+
+    def tearDown(self):
+        self.logger.uninstall()
 
 
 class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
@@ -240,7 +252,7 @@ class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
         self.assertContains(response, 'name="observaciones"')
         self.assertContains(response, 'name="aprobado_por"')
 
-    def test_post(self):
+    def test_post_success(self):
         """Prueba la actualización de planes de clase"""
         plan = mixer.blend(PlanClase)
         assert plan.name != 'Plan de Clase1', \
@@ -252,6 +264,11 @@ class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
         plan.refresh_from_db()
         assert plan.name == 'Plan de Clase1', \
             'Debe actualizar el plan de clase'
+
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'Plan de clase updated for the user: {}.'.format(
+            self.user.email) in str(self.logger), \
+            'Log when a Plan de Clase is updated.'
 
     def test_invalid_plan(self):
         """Tests the view when sending invalid data about a plan"""
@@ -269,3 +286,6 @@ class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
         # Invalid data raises ValidationError
         with pytest.raises(ValidationError):
             views.plan_clase_update(request, pk=plan.pk, slug=plan.slug)
+
+    def tearDown(self):
+        self.logger.uninstall()

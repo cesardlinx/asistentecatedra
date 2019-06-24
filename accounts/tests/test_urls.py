@@ -20,6 +20,24 @@ class TestAccountsUrls:
         assert view.func.view_class == views.SignupView, \
             'Should resolve to the Signup View'
 
+    def test_send_confirmation(self):
+        path = reverse('send_confirmation')
+        view = resolve(path)
+        assert view.func == views.send_confirmation_view, \
+            'Should resolve to the send_confirmation_view View'
+
+    def test_confirm_email(self):
+        user = mixer.blend(User)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        path = reverse('confirm_email', kwargs={
+            'uidb64': uid,
+            'token': token
+        })
+        view = resolve(path)
+        assert view.func == views.confirm_email_view, \
+            'Should resolve to the confirm_email_view View'
+
     def test_profile(self):
         user = mixer.blend(User)
         path = reverse('profile', kwargs={'pk': user.pk, 'slug': user.slug})

@@ -19,6 +19,7 @@ from django.utils.http import urlsafe_base64_encode
 from accounts import views
 from accounts.forms import SignupForm
 from .conftest import create_test_image, clean_test_files
+from testfixtures import LogCapture
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -48,6 +49,8 @@ class SignupTestCase(TestCase):
         stripe = self.mock_stripe.start()
         stripe.Customer.create.return_value = {'id': '12345'}
 
+        self.logger = LogCapture()
+
         self.data = {
             'first_name': 'David',
             'last_name': 'Padilla',
@@ -61,6 +64,8 @@ class SignupTestCase(TestCase):
 
     def tearDown(self):
         self.mock_stripe.stop()
+        # stopping log capture
+        self.logger.uninstall()
 
 
 class AuthTestCase(TestCase):
@@ -70,6 +75,8 @@ class AuthTestCase(TestCase):
         self.mock_stripe = patch('accounts.models.stripe')
         stripe = self.mock_stripe.start()
         stripe.Customer.create.return_value = {'id': '12345'}
+
+        self.logger = LogCapture()
 
         self.user = User.objects.create_user(
             email='tester@tester.com',
@@ -81,6 +88,8 @@ class AuthTestCase(TestCase):
 
     def tearDown(self):
         self.mock_stripe.stop()
+        # stopping log capture
+        self.logger.uninstall()
 
 
 class TestSignupView(SignupTestCase):
@@ -108,7 +117,7 @@ class TestSignupView(SignupTestCase):
 
     @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
            autospec=True)
-    def test_post_success(self, mock_recaptcha):
+    def test_form_valid(self, mock_recaptcha):
         """
         Test for user creation and authentication
         """
@@ -120,7 +129,7 @@ class TestSignupView(SignupTestCase):
 
         messages = list(get_messages(response.wsgi_request))
         assert len(messages) == 1, 'There should be one message'
-        assert 'Exito!, un mensaje ha sido enviado a tu correo para que '\
+        assert 'Exito!, un email ha sido enviado a tu correo para que '\
                'verifiques tu cuenta.' == messages[0].message, \
                'Should return a success message'
         assert messages[0].tags == 'alert-success', \
@@ -136,6 +145,10 @@ class TestSignupView(SignupTestCase):
         user = response.context.get('user')
         assert user.is_authenticated is True, \
             'User should be authenticated'
+
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'Confirmation email sent to {}'.format(user.email) \
+            in str(self.logger), 'Log from confirmation sending'
 
     @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
            autospec=True)
@@ -156,9 +169,13 @@ class TestSignupView(SignupTestCase):
         assert messages[0].tags == 'alert-danger', \
             'There should be an error message.'
 
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert 'reCAPTCHA invalid error.' in str(self.logger), \
+            'Error Log from reCAPTCHA error'
+
     @patch("accounts.views.CheckRecaptchaMixin.is_recaptcha_valid",
            autospec=True)
-    def test_post_invalid(self, mock_recaptcha):
+    def test_form_invalid(self, mock_recaptcha):
         """Test for invalid data in signup"""
         # Mocking recaptcha
         mock_recaptcha.return_value = True
@@ -191,7 +208,7 @@ class TestSendConfirmationView(AuthTestCase):
     """
     def setUp(self):
         super().setUp()
-        self.url = reverse('send-confirmation')
+        self.url = reverse('send_confirmation')
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -200,7 +217,7 @@ class TestSendConfirmationView(AuthTestCase):
         response = views.send_confirmation_view(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
-    def test_can_access_only_by_get(self):
+    def test_can_access_only_through_get(self):
         """Tests the view can't be access by a get method"""
         request = RequestFactory().head('/')
         request.user = self.user
@@ -221,6 +238,10 @@ class TestSendConfirmationView(AuthTestCase):
         assert ('Un mensaje ha sido enviado a tu correo para que '
                 'verifiques tu cuenta.') == messages[0].message
         assert len(mail.outbox) == 1, 'Should send the email'
+
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'Confirmation email sent to {}'.format(self.user.email) \
+            in str(self.logger), 'Log from confirmation sending'
 
     def test_user_has_email_already_confirmed(self):
         """
@@ -287,7 +308,7 @@ class TestConfirmationEmail(SignupTestCase):
             "The user's email should be in email's field TO "
 
 
-class TestEmailConfirmationView(SignupTestCase):
+class TestConfirmEmailView(SignupTestCase):
     """
     Caso de prueba para probar la vista que confirma el correo electrónico
     del usuario.
@@ -306,7 +327,8 @@ class TestEmailConfirmationView(SignupTestCase):
         self.uid = response.context.get('uid')
         self.token = response.context.get('token')
         self.confirm_url = reverse(
-            'confirm_email', kwargs={'uidb64': self.uid, 'token': self.token})
+            'confirm_email',
+            kwargs={'uidb64': self.uid, 'token': self.token})
 
     def test_success_confirmation(self):
         """Pruebas al recibir un link válido de confirmación de correo"""
@@ -323,7 +345,12 @@ class TestEmailConfirmationView(SignupTestCase):
         assert user.is_authenticated is True, \
             'The user should be authenticated'
 
-    def test_invalid_confirmation(self):
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'Email address: {} successfuly confirmed.'\
+            .format(self.user.email) in str(self.logger),\
+            'Should return a log with the email that was confirmed'
+
+    def test_invalid_token_confirmation(self):
         """
         Pruebas al recibir un link de confirmación de correo con un
         token inválido.
@@ -340,13 +367,18 @@ class TestEmailConfirmationView(SignupTestCase):
         assert self.user.email_confirmed is False, \
             'The user should not have the email confirmed'
 
-    def test_invalid_confirmation_data(self):
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert "Email address can't be confirmed." in str(self.logger),\
+            'Should return a log with the email that cannot be confirmed'
+
+    def test_invalid_uid_confirmation(self):
         """
         Pruebas al recibir un link de confirmación de correo con un
         uid inválido.
         """
         confirm_url = reverse(
-            'confirm_email', kwargs={'uidb64': 123456, 'token': self.token})
+            'confirm_email',
+            kwargs={'uidb64': 123456, 'token': self.token})
         response = self.client.get(confirm_url, follow=True)
         assert response.status_code == 200, \
             'The view should be callable by Anonymous user'
@@ -355,6 +387,10 @@ class TestEmailConfirmationView(SignupTestCase):
             'The user should not have the email confirmed'
         self.assertContains(
             response, 'Error. El enlace no es válido o ha expirado')
+
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert "Email address can't be confirmed" in str(self.logger),\
+            'Should return a log with the email that cannot be confirmed'
 
 
 class TestExistsEmailValidator(AuthTestCase):
@@ -404,10 +440,6 @@ class TestExistsEmailValidator(AuthTestCase):
 
 class TestProfileView(AuthTestCase):
     """Tests para la vista de Perfil de usuario"""
-
-    def setUp(self):
-        """Creates data for testing and user"""
-        super().setUp()
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -470,6 +502,11 @@ class TestProfileView(AuthTestCase):
             'First name should have changed'
         assert self.user.institution_logo.name is not None
 
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'User {} has updated his data successfuly.'\
+            .format(self.user.email) in str(self.logger),\
+            'Should return a log with the user email that has updated his data'
+
     def test_post_invalid(self):
         request = RequestFactory().post('/', data={'first_name': ''})
         request.user = self.user
@@ -485,6 +522,7 @@ class TestProfileView(AuthTestCase):
     def tearDown(self):
         """Method to make the image removal when necesary"""
         clean_test_files()
+        self.logger.uninstall()
 
 
 class TestPhotoUploadView(AuthTestCase):
@@ -549,6 +587,7 @@ class TestPhotoUploadView(AuthTestCase):
 
     def tearDown(self):
         clean_test_files()
+        self.logger.uninstall()
 
 
 class TestLoginView(AuthTestCase):
@@ -583,6 +622,11 @@ class TestLoginView(AuthTestCase):
         assert user_session.email == self.user.email, \
             'The session data should be the same as the database data'
 
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'User {} has logged in successfuly.'\
+            .format(user_session.email) in str(self.logger),\
+            'Should return a log with the user email that has logged in'
+
     def test_post_invalid(self):
         """Test if data has been invalid"""
         data = {
@@ -596,6 +640,10 @@ class TestLoginView(AuthTestCase):
         user_session = response.context.get('user')
         assert user_session.is_authenticated is False,\
             'User should not be authenticated'
+
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert 'There has been a failed login.' in str(self.logger),\
+            'Should return log informing the failed login'
 
 
 class TestLogoutView(AuthTestCase):
@@ -647,6 +695,12 @@ class TestPasswordResetView(AuthTestCase):
                                       'tu contraseña.', \
                                       'Should return a success message'
 
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'A reset password email has been sent to the email {}.'\
+            .format(self.user.email) in str(self.logger),\
+            'Should return a log with the user email that has requested a '\
+            'reset password email'
+
     def test_post_invalid(self):
         """Test cuando un email perteneciente a ningún usuario es enviado a
         la vista Password Reset
@@ -669,6 +723,11 @@ class TestPasswordResetView(AuthTestCase):
         assert messages[0].message == 'La cuenta de correo que has escrito '\
                                       'es incorrecta, verifica tus datos.', \
                                       'Should return an error message'
+
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert 'Wrong user email in a reset pasword email request.' \
+            in str(self.logger), 'Should return a log the error of ' \
+            'requesting with a bad user email'
 
 
 class TestPasswordResetConfirmView(AuthTestCase):
@@ -867,6 +926,12 @@ class TestPasswordChangeView(AuthTestCase):
         self.user.refresh_from_db()
         assert self.user.check_password('P455w0rd_2') is True, \
             'The password should have changed for the new one'
+
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'The user {} has successfuly changed his password.'\
+            .format(self.user.email) in str(self.logger),\
+            'Should return a log with the user email that has requested a '\
+            'password change'
 
     def test_post_invalid(self):
         """

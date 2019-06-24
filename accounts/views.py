@@ -1,4 +1,5 @@
 
+import logging
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
@@ -24,6 +25,9 @@ from .tokens import account_token_generator
 
 User = get_user_model()
 
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+
 
 class SignupView(AnonymousRequiredMixin, CheckRecaptchaMixin, CreateView):
     """Vista para registro de usuarios"""
@@ -47,9 +51,10 @@ class SignupView(AnonymousRequiredMixin, CheckRecaptchaMixin, CreateView):
                 login(self.request, user)
                 messages.success(
                     self.request,
-                    'Exito!, un mensaje ha sido enviado a tu correo para que '
+                    'Exito!, un email ha sido enviado a tu correo para que '
                     'verifiques tu cuenta.'
                 )
+                logger.info('Confirmation email sent to {}'.format(user.email))
                 return redirect('planificaciones')
             else:
                 messages.error(
@@ -63,6 +68,7 @@ class SignupView(AnonymousRequiredMixin, CheckRecaptchaMixin, CreateView):
                 'reCAPTCHA no válido. Por favor intente de nuevo recargando '
                 'la página.'
             )
+            logger.error('reCAPTCHA invalid error.')
             # Regresar a la misma página
             return HttpResponseRedirect(self.request.path_info)
 
@@ -82,6 +88,8 @@ def send_confirmation_view(request):
                 'Un mensaje ha sido enviado a tu correo para que '
                 'verifiques tu cuenta.'
             )
+            logger.info('Confirmation email sent to {}'.format(
+                request.user.email))
         else:
             messages.info(request, 'Su cuenta ya está verificada')
         return redirect('profile', pk=request.user.pk, slug=request.user.slug)
@@ -97,6 +105,16 @@ class CustomLoginView(AnonymousRequiredMixin, LoginView):
             'reset_form': PasswordResetForm(),
         })
         return context
+
+    def form_valid(self, form):
+        email = form.cleaned_data.get('username')
+        logger.info('User {} has logged in successfuly.'.format(email))
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        email = form.cleaned_data.get('username')
+        logger.error('There has been a failed login.'.format(email))
+        return super().form_invalid(form)
 
 
 def unique_email_validator(request):
@@ -134,7 +152,7 @@ def exists_email_validator(request):
         return HttpResponse(status=405)
 
 
-def confirm_email(request, uidb64, token):
+def confirm_email_view(request, uidb64, token):
     """
     Vista llamada el momento de seguir el link provisto en el correo
     electrónico para confirmar el email
@@ -150,9 +168,12 @@ def confirm_email(request, uidb64, token):
         user.save()
         login(request, user)
         messages.success(request, 'Su correo ha sido confirmado exitosamente')
+        logger.info('Email address: {} successfuly confirmed.'.format(
+            user.email))
         return redirect('planificaciones')
     else:
         messages.error(request, 'Error. El enlace no es válido o ha expirado.')
+        logger.error("Email address can't be confirmed.")
         return redirect('home')
 
 
@@ -169,6 +190,8 @@ class ProfileView(LoginRequiredMixin, UpdateView):
             self.request,
             'Sus datos han sido modificados con éxito.'
         )
+        logger.info('User {} has updated his data successfuly.'.format(
+            self.object.email))
         url = reverse('profile', kwargs={
             'pk': self.object.pk,
             'slug': self.object.slug
@@ -219,12 +242,17 @@ class CustomPasswordResetView(PasswordResetView):
                 'Un mensaje ha sido enviado a tu correo para que '
                 'reestablezcas tu contraseña.'
             )
+            logger.info(
+                'A reset password email has been sent to the email {}.'
+                .format(email))
         else:
             messages.error(
                 self.request,
                 'La cuenta de correo que has escrito es incorrecta, verifica '
                 'tus datos.'
             )
+            logger.error(
+                'Wrong user email in a reset pasword email request.')
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -271,4 +299,6 @@ class CustomPasswordChangeView(PasswordChangeView):
             self.request,
             'Tu contraseña ha sido cambiada exitosamente.'
         )
+        logger.info('The user {} has successfuly changed his password.'
+                    .format(self.request.user.email))
         return super().form_valid(form)
