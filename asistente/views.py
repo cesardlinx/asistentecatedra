@@ -131,11 +131,12 @@ def cancel_subscription_view(request):
     if request.method == 'POST':
         user = User.objects.get(pk=request.user.pk)
         try:
-            # Cancel subscription
-            user.cancel_active_subscription()
-            # User is no longer premium
-            user.is_premium = False
-            user.save()
+            with transaction.atomic():
+                # Cancel subscription
+                user.cancel_active_subscription()
+                # User is no longer premium
+                user.is_premium = False
+                user.save()
 
         except stripe.error.InvalidRequestError as e:
             # Invalid parameters were supplied to Stripe's API

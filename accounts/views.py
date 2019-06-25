@@ -1,5 +1,6 @@
 
 import logging
+import stripe
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
@@ -9,17 +10,18 @@ from django.contrib.auth.views import (LoginView, PasswordChangeView,
                                        PasswordResetConfirmView,
                                        PasswordResetView)
 from django.contrib.sites.shortcuts import get_current_site
-
+from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
-from .helpers import send_confirmation_helper
+from django.urls import reverse, reverse_lazy
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
-from django.urls import reverse, reverse_lazy
-from django.views.generic import UpdateView
+from django.views.generic import DeleteView, UpdateView
 from django.views.generic.edit import CreateView
-from .forms import (CustomPasswordChangeForm, CustomSetPasswordForm,
-                    ProfileForm, SignupForm, PhotoForm)
+
+from .forms import (CustomPasswordChangeForm, CustomSetPasswordForm, PhotoForm,
+                    ProfileForm, SignupForm)
+from .helpers import send_confirmation_helper
 from .mixins import AnonymousRequiredMixin, CheckRecaptchaMixin
 from .tokens import account_token_generator
 
@@ -115,6 +117,47 @@ class CustomLoginView(AnonymousRequiredMixin, LoginView):
         email = form.cleaned_data.get('username')
         logger.error('There has been a failed login.'.format(email))
         return super().form_invalid(form)
+
+
+class UserDeleteView(LoginRequiredMixin, DeleteView):
+    model = User
+    success_url = reverse_lazy('signup')
+
+    def get(self, request, *args, **kwargs):
+        return redirect('home')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        try:
+            with transaction.atomic():
+                # Cancel subscription
+                self.object.cancel_active_subscription()
+                self.object.soft_delete()
+                # User is no longer premium
+                self.object.is_premium = False
+                self.object.save()
+        except stripe.error.StripeError as e:
+            # General Stripe Error
+            logger.error('StripeError: ' + e.user_message)
+            messages.error(request, 'Ha ocurrido un error al tratar de '
+                           'eliminar su cuenta.')
+            return HttpResponseRedirect(request.path_info)
+        except Exception as e:
+            # Display a very generic error to the user, and maybe send
+            # yourself an email
+            logger.error('Exception: ' + e.args[0])
+            messages.error(request, 'Ha ocurrido un error al tratar de '
+                           'eliminar su cuenta.')
+            return HttpResponseRedirect(request.path_info)
+
+        messages.success(
+            request,
+            'Tu cuenta ha sido eliminada con éxito.'
+        )
+        logger.info('The user {} has successfuly deleted his/her account.'\
+            .format(self.object.email))
+        return HttpResponseRedirect(self.get_success_url())
 
 
 def unique_email_validator(request):

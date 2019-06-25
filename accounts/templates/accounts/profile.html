@@ -138,15 +138,16 @@
 
                         <div class="action-buttons">
                             <div class="action-btns-wrapper">
-                                <form action="">
-                                    <button class="secondary-button delete-btn">
+                                <form action="{% url 'user_delete' pk=user.pk %}" method="post" id="deleteAccountForm">
+                                    {% csrf_token %}
+                                    <button class="secondary-button delete-btn" id="deleteAccount">
                                         Eliminar Cuenta
                                     </button>
                                 </form>
-                                {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' %}
-                                    <form action="{% url 'cancel_subscription' %}" method="post">
+                                {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' and not user.is_superuser%}
+                                    <form action="{% url 'cancel_subscription' %}" method="post" id="cancelSubscriptionForm">
                                         {% csrf_token %}
-                                        <button class="secondary-button delete-btn">
+                                        <button class="secondary-button delete-btn" id="cancelSubscription">
                                             Cancelar Subscripción Premium
                                         </button>
                                     </form>

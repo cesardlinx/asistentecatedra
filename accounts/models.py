@@ -243,6 +243,11 @@ class User(AbstractUser):
                 free_plan,
             )
 
+    def soft_delete(self):
+        """Soft deletes user (sets is_active to False)"""
+        self.is_active = False
+        self.save()
+
     @property
     def get_logo(self):
         """

@@ -32,4 +32,7 @@ urlpatterns = [
      path('password_change/',
           views.CustomPasswordChangeView.as_view(),
           name='password_change'),
+     path('user_delete/<int:pk>/',
+          views.UserDeleteView.as_view(),
+          name='user_delete')
 ]

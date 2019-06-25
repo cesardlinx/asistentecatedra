@@ -1,6 +1,6 @@
-from unittest.mock import patch
-from accounts.forms import PhotoForm
+from unittest.mock import MagicMock, patch
 import pytest
+from accounts.models import Subscription
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
@@ -16,10 +16,13 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from accounts import views
-from accounts.forms import SignupForm
-from .conftest import create_test_image, clean_test_files
+from mixer.backend.django import mixer
 from testfixtures import LogCapture
+from stripe import error
+from accounts import views
+from accounts.forms import PhotoForm, SignupForm
+
+from .conftest import clean_test_files, create_test_image
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -445,7 +448,9 @@ class TestProfileView(AuthTestCase):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.ProfileView.as_view()(request)
+        response = views.ProfileView.as_view()(request,
+                                               pk=self.user.pk,
+                                               slug=self.user.slug)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get(self):
@@ -863,13 +868,6 @@ class TestPasswordResetEmail(AuthTestCase):
         })
         assert password_reset_confirm_url in self.email.body, \
             'Link to password reset confirm should be in email body'
-        # assert 'David' in self.email.body, \
-        #     'First name should be in email body'
-        # assert 'Asistente de Cátedra | Restablecimiento de contraseña' \
-        #     in self.email.subject, \
-        #     'The subject of email'
-        # assert 'tester@tester.com' in self.email.to, \
-        #     "The user's email should be in email's field TO "
 
 
 # PASSWORD CHANGE TESTS
@@ -953,3 +951,155 @@ class TestPasswordChangeView(AuthTestCase):
         assert self.user.check_password('P455w0rd_testing') is True, \
             'The password should not have changed.'
         self.assertTrue(form.errors)  # Form has errors
+
+
+# User soft delete view
+class TestUserDeleteView(AuthTestCase):
+
+    def setUp(self):
+        super().setUp()
+        subscription_create_mock = patch(
+            'accounts.models.stripe.Subscription.create')
+        customer_modify_mock = patch(
+            'accounts.models.stripe.Customer.modify')
+        subscription_create = subscription_create_mock.start()
+        customer_modify_mock.start()
+        subscription_mock = MagicMock(id='123456')
+        subscription_create.return_value = subscription_mock
+
+        monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
+
+        Subscription.objects.create_subscription(
+            self.user,
+            monthly_plan,
+            '456789',
+        )
+
+        self.user.is_premium = True
+        self.user.save()
+
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.UserDeleteView.as_view()(request,
+                                                  pk=self.user.pk,
+                                                  slug=self.user.slug)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_get(self):
+        """
+        Tests that with a get request returns a redirection to the register.
+        """
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.UserDeleteView.as_view()(request,
+                                                  pk=self.user.pk,
+                                                  slug=self.user.slug)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == '/', 'Should redirect to home'
+
+    def test_soft_delete(self):
+        """
+        Test that user soft delete works
+        """
+        self.client.login(
+            username='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+        assert self.user.is_active is True, 'Should be active'
+        url = reverse('user_delete', kwargs={
+            'pk': self.user.pk
+        })
+        response = self.client.post(url, {}, follow=True)
+        self.user.refresh_from_db()
+        assert self.user.is_active is False, 'Should not be active'
+        assert self.user.active_plan.plan_type == 'GRATIS', \
+            'Should return to the free plan'
+        assert response.status_code == 200, \
+            'Should return a successful response'
+        # Should redirect to signup
+        self.assertRedirects(response, reverse('signup'))
+        # Messages
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be one message'
+        assert 'Tu cuenta ha sido eliminada con éxito.' \
+            == messages[0].message, 'Should return a success message'
+        assert messages[0].tags == 'alert-success', \
+            'There should be a success message.'
+        # Logs
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'The user {} has successfuly deleted his/her account.'\
+            .format(self.user.email) in str(self.logger),\
+            'Should return a log with the user email that has requested an '\
+            'account deletion'
+
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_soft_delete_stripe_error(self, subscription_retrieve):
+        """
+        Test user soft delete view when a stripe error is raised
+        """
+        subscription_retrieve.side_effect = error.StripeError('error')
+
+        self.client.login(
+            username='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+        assert self.user.is_active is True, 'Should be active'
+        url = reverse('user_delete', kwargs={
+            'pk': self.user.pk
+        })
+
+        response = self.client.post(url, {}, follow=True)
+        self.user.refresh_from_db()
+        assert self.user.is_active is True, 'Should still be active'
+        assert self.user.active_plan.plan_type == 'MENSUAL', \
+            'Should still have the same plan'
+        assert response.status_code == 200, \
+            'Should return a successful response'
+        # Messages
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be one message'
+        assert 'Ha ocurrido un error al tratar de eliminar su cuenta.' \
+            == messages[0].message, 'Should return an error message'
+        assert messages[0].tags == 'alert-danger', \
+            'There should be a error message.'
+        # Logs
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert 'StripeError' in str(self.logger),\
+            'Should return the exception raised.'
+
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_soft_delete_generic_error(self, subscription_retrieve):
+        """
+        Test user soft delete view when a generic error is raised
+        """
+        subscription_retrieve.side_effect = Exception('error')
+
+        self.client.login(
+            username='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+        assert self.user.is_active is True, 'Should be active'
+        url = reverse('user_delete', kwargs={
+            'pk': self.user.pk
+        })
+
+        response = self.client.post(url, {}, follow=True)
+        self.user.refresh_from_db()
+        assert self.user.is_active is True, 'Should still be active'
+        assert self.user.active_plan.plan_type == 'MENSUAL', \
+            'Should still have the same plan'
+        assert response.status_code == 200, \
+            'Should return a successful response'
+        # Messages
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'There should be one message'
+        assert 'Ha ocurrido un error al tratar de eliminar su cuenta.' \
+            == messages[0].message, 'Should return an error message'
+        assert messages[0].tags == 'alert-danger', \
+            'There should be a error message.'
+        # Logs
+        assert 'ERROR' in str(self.logger), 'Should return an error log'
+        assert 'Exception' in str(self.logger),\
+            'Should return the exception raised.'

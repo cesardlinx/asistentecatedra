@@ -256,6 +256,14 @@ class TestUser(TestCase):
         assert subscription_mock.delete.call_count == 2, \
             'Should delete previous subscription from stripe'
 
+    def test_soft_delete(self):
+        """Test user soft delete feature"""
+        assert self.user.is_active is True, \
+            'User should be active before soft deletion'
+        self.user.soft_delete()
+        assert self.user.is_active is False, \
+            'User should no logner be active after soft deletion'
+
     def tearDown(self):
         """Method to make the image removal when necesary"""
         clean_test_files()

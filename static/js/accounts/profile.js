@@ -130,5 +130,25 @@ $(document).ready(function() {
         $('#photoForm').submit();
     });
 
+    // Delete account confirmation
+    $('#deleteAccount').on('click', function(e) {
+        e.preventDefault();
+        var message = '¿Está seguro de eliminar su cuenta?. Todos sus datos serán eliminados y no podrá recuperarlos en el futuro.';
+
+        if (confirm(message)) {
+            $('#deleteAccountForm').submit();
+        }
+    });
+
+    // Delete account confirmation
+    $('#cancelSubscription').on('click', function(e) {
+        e.preventDefault();
+        var message = '¿Está seguro de cancelar su subscripción premium?. Recuerde que perderá todos los beneficios.';
+
+        if (confirm(message)) {
+            $('#cancelSubscriptionForm').submit();
+        }
+    });
+
 
 });

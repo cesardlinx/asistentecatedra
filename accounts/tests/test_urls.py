@@ -1,4 +1,5 @@
 import pytest
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import LogoutView
@@ -13,7 +14,16 @@ pytestmark = pytest.mark.django_db
 User = get_user_model()
 
 
-class TestAccountsUrls:
+class TestAccountsUrls(TestCase):
+    @patch('accounts.models.stripe')
+    def setUp(self, mock_stripe):
+        mock_stripe.Customer.create.return_value = {'id': '12345'}
+
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+
     def test_signup(self):
         path = reverse('signup')
         view = resolve(path)
@@ -70,17 +80,9 @@ class TestAccountsUrls:
         assert view.func.view_class == views.CustomPasswordResetView, \
             'Should resolve to the PasswordReset View'
 
-    @patch('accounts.models.stripe')
-    def test_password_reset_confirm(self, mock_stripe):
-        mock_stripe.Customer.create.return_value = {'id': '12345'}
-
-        user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing'
-        )
-
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
+    def test_password_reset_confirm(self):
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        token = default_token_generator.make_token(self.user)
         path = reverse('password_reset_confirm', kwargs={
             'uidb64': uid,
             'token': token
@@ -102,3 +104,11 @@ class TestAccountsUrls:
         view = resolve(path)
         assert view.func == views.unique_email_validator, \
             'Should resolve to the unique_email_validator View'
+
+    def test_user_delete(self):
+        path = reverse('user_delete', kwargs={
+            'pk': self.user.pk
+        })
+        view = resolve(path)
+        assert view.func.view_class == views.UserDeleteView, \
+            'Should return the UserDeleteView'
