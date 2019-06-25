@@ -21,7 +21,11 @@
                         <div class="plan-img unidad-img vertically-center">
                             <img class="imagen" src="{% static 'img/plan_unidad.png' %}" alt="Plan de Unidad">
                         </div>
-                        <span class="premium-badge">PREMIUM</span>
+
+                        {% if not user.is_premium %}
+                            <span class="premium-badge premium-badge-top">PREMIUM</span>
+                        {% endif %}
+
                     </a>
                     <a class="choice-text" href="#">Planificación de Unidad Didáctica</a>
                 </div>
@@ -30,7 +34,11 @@
                         <div class="plan-img destrezas-img vertically-center">
                             <img class="imagen" src="{% static 'img/plan_destrezas.png' %}" alt="Plan de Destrezas">
                         </div>
-                        <span class="premium-badge">PREMIUM</span>
+
+                        {% if not user.is_premium %}
+                            <span class="premium-badge premium-badge-top">PREMIUM</span>
+                        {% endif %}
+
                     </a>
                     <a class="choice-text" href="#">Planificación de Destrezas</a>
                 </div>
@@ -39,7 +47,11 @@
                         <div class="plan-img anual-img vertically-center">
                             <img class="imagen" src="{% static 'img/plan_anual.png' %}" alt="Plan Anual">
                         </div>
-                        <span class="premium-badge">PREMIUM</span>
+
+                        {% if not user.is_premium %}
+                            <span class="premium-badge premium-badge-top">PREMIUM</span>
+                        {% endif %}
+
                     </a>
                     <a class="choice-text" href="#">Planificación Curricular Anual</a>
                 </div>

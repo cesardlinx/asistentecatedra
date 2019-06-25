@@ -75,18 +75,17 @@ $(document).ready(function(){
     });
 
     // User Dropdown Menu
-    $('.user-account').mouseover(function(){
-        var dropdown = $(this).find('.dropdown-menu');
+    $('.dropdown-container').mouseover(function(){
+        var dropdown = $(this).find('.dropdown-menu')
         $(dropdown).addClass('dropdown-active');
         $(dropdown).removeClass('dropdown-inactive');
     });
 
 
-    $('.user-account').mouseleave(function () {
-        var dropdown = $(this).find('.dropdown-menu');
+    $('.dropdown-container').mouseleave(function () {
+        var dropdown = $(this).find('.dropdown-menu')
         $(dropdown).addClass('dropdown-inactive');
         $(dropdown).removeClass('dropdown-active');
-
     });
 
     /* Forms with floating placeholder */

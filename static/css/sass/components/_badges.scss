@@ -1,0 +1,18 @@
+.premium-badge {
+  display: inline-block;
+  background: $primary-color;
+  border-radius: 50px;
+  padding: .1em .7em;
+  color: $white;
+  font-size: .6rem;
+  font-weight: bold;
+  position: relative;
+  bottom: 2px;
+
+  &.premium-badge-top {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: auto;
+  }
+}

@@ -173,6 +173,12 @@ header {
   }
 }
 
+.menu-item-dropdown {
+  right: 0;
+  top: 0;
+  transition: all 200ms ease-in-out;
+}
+
 
 .user-dropdown {
   text-align: center;
@@ -375,6 +381,27 @@ header {
     height: 100%;
     padding: 0 3em;
   }
+
+  // navbar item that holds a submenu
+  &.navbar-submenu {
+    position: relative;
+    // dropdown submenu inside the main menu
+    .navbar-submenu-dropdown {
+      left: 0;
+      top: 94%;
+      width: fit-content;
+      position: absolute;
+      transition: all 200ms ease-in-out;
+    }
+
+    .navbar-link.dropdown-toggle::after {
+      margin: auto;
+      border: 0;
+    }
+
+  }
+
+
 }
 
 //## Animations
@@ -444,8 +471,8 @@ header {
 }
 
 // stroke effect
-.stroke {
-  a {
+.stroke{
+  & > a {
     position: relative;
 
     &::after {
