@@ -155,8 +155,8 @@ class UserDeleteView(LoginRequiredMixin, DeleteView):
             request,
             'Tu cuenta ha sido eliminada con éxito.'
         )
-        logger.info('The user {} has successfuly deleted his/her account.'\
-            .format(self.object.email))
+        logger.info('The user {} has successfuly deleted his/her account.'
+                    .format(self.object.email))
         return HttpResponseRedirect(self.get_success_url())
 
 
@@ -272,8 +272,8 @@ class CustomPasswordResetView(PasswordResetView):
     """
     http_method_names = ['post']
     success_url = reverse_lazy('login')
-    html_email_template_name = 'accounts/password_reset_email.html',
-    subject_template_name = 'accounts/password_reset_subject.txt'
+    html_email_template_name = 'accounts/emails/password_reset_email.html',
+    subject_template_name = 'accounts/emails/password_reset_subject.txt'
     template_name = 'accounts/password_reset.html'
 
     def form_valid(self, form):

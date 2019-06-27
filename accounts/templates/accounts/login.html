@@ -18,14 +18,7 @@
             <form method="POST" id="loginForm" novalidate>
                 {% csrf_token %}
                 {{ form.non_field_errors }}
-                <div class="form-group-float">
-                    {{ form.username | add_label_class:"form-control-placeholder" }}
-                    {% render_field form.username class="form-control floating-input" %}
-                </div>
-                <div class="form-group-float">
-                    {{ form.password | add_label_class:"form-control-placeholder" }}
-                    {% render_field form.password class="form-control floating-input" %}
-                </div>
+                {% include "forms/floating_form.html" %}
                 <div><a class="modal-opening" modal-target="#password-reset" href="#">¿Olvidaste tu contraseña?</a></div>
                 <button type="submit" class="primary-button submit-btn">INGRESO</button>
             </form>
@@ -46,7 +39,7 @@
             </p>
             <form action="{% url 'password_reset' %}" method="POST" id="passwordResetForm" novalidate>
                 {% csrf_token %}
-                {% include 'accounts/includes/password_reset_form.html' %}
+                {% include 'accounts/forms/password_reset_form.html' %}
                 <button type="submit" class="primary-button">Enviar Correo</button>
             </form>
         </div>

@@ -21,7 +21,7 @@ def send_subscription_emails(user_mail_subject, admin_mail_subject,
     # User email sending
 
     user_email_html = render_to_string(
-        'asistente/subscription_email.html',
+        'asistente/emails/subscription_email.html',
         {
             'user': user,
             'plan': plan,
@@ -40,7 +40,7 @@ def send_subscription_emails(user_mail_subject, admin_mail_subject,
     admins_emails = [admin.email for admin in admins]
 
     admin_email_html = render_to_string(
-        'asistente/subscription_admin_email.html',
+        'asistente/emails/subscription_admin_email.html',
         {
             'user': user,
             'plan': plan,
@@ -64,7 +64,7 @@ def send_invoice_email(user_mail_subject, user, plan, amount_paid,
     # User email sending
 
     user_email_html = render_to_string(
-        'asistente/invoice_email.html',
+        'asistente/emails/invoice_email.html',
         {
             'user': user,
             'plan': plan,

@@ -17,7 +17,7 @@ def send_confirmation_helper(user, domain):
                    'Confirmar Correo Electrónico'
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = account_token_generator.make_token(user)
-    html_email_body = render_to_string('accounts/confirm_email.html', {
+    html_email_body = render_to_string('accounts/emails/confirm_email.html', {
         'user': user,
         'protocol': protocol,
         'domain': domain,
