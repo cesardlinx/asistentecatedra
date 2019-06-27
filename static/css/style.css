@@ -2207,6 +2207,10 @@ footer {
   }
 }
 
+.resp-column-md.curso-cell ul {
+  list-style: none;
+}
+
 .resp-column-lg {
   display: none;
 }

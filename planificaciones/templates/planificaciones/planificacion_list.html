@@ -7,7 +7,7 @@
         <section class="planificaciones list">
             <h2>Planes de Clase</h2>
             <div class="list-buttons">
-                <a href="{% url 'create_plan_clase' %}" class="primary-button list-btn">
+                <a href="{% url 'plan_clase_create' %}" class="primary-button list-btn">
                     <span class="fas fa-file"></span> Nueva Planficación
                 </a>
                 <a href="{% url 'planificaciones' %}" class="primary-button list-btn back-menu">
@@ -31,13 +31,19 @@
                          {% for plan in planes %}
                             <tr>
                                 <th scope="row">{{ forloop.counter }}</th>
-                                <td><a href="#">{{ plan.name }}</a></td>
+                                <td><a href="{% url 'plan_clase_update' pk=plan.pk slug=plan.slug %}">{{ plan.name }}</a></td>
                                 <td class="resp-column-md">{{ plan.asignatura.name }}</td>
-                                <td class="resp-column-md">{{ plan.curso.name }}</td>
+                                <td class="resp-column-md curso-cell">
+                                <ul>
+                                {% for curso in plan.cursos.all %}
+                                    <li>{{ curso.name }}</li>
+                                {% endfor %}
+                                </ul>
+                                </td>
                                 <td class="resp-column-lg">{{ plan.paralelos }}</td>
                                 <td class="resp-column-sm">{{ plan.fecha }}</td>
                                 <td>
-                                    <a class="icon edit" href="#" title="Editar">
+                                    <a class="icon edit" href="{% url 'plan_clase_update' pk=plan.pk slug=plan.slug %}" title="Editar">
                                         <span class="fas fa-edit"></span>
                                     </a>
                                     <a class="icon word" href="#" title="Exportar a Word">
@@ -52,7 +58,6 @@
                     {% else %}
                         <tr>
                             <td colspan="7">No hay ninguna planificación creada</td>
-
                         </tr>
                     {% endif %}
 

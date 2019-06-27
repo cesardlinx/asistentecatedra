@@ -133,8 +133,33 @@ class PlanClaseTestCase(TestCase):
             'recursos': 'lorem ipsum',
         }
 
+    def tearDown(self):
+        self.logger.uninstall()
 
-class PlanClaseTestCaseCreateView(PlanClaseTestCase):
+
+class TestPlanClaseListView(TestCase):
+    def setUp(self):
+        self.user = mixer.blend(User)
+
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.PlanClaseListView.as_view()(request)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_get(self):
+        """Tests that an authenticated user can access the view"""
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.PlanClaseListView.as_view()(request)
+        assert response.status_code == 200, 'Authenticated user can access'
+        assert 'planificaciones/planificacion_list.html' in \
+            response.template_name, \
+            'Template should be the one for listing planning'
+
+
+class TestPlanClaseCreateView(PlanClaseTestCase):
     """Prueba la vista para la creación de planes de clase"""
 
     def setUp(self):
@@ -204,8 +229,6 @@ class PlanClaseTestCaseCreateView(PlanClaseTestCase):
         with pytest.raises(ValidationError):
             views.plan_clase_create(request)
 
-    def tearDown(self):
-        self.logger.uninstall()
 
 
 class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
@@ -286,6 +309,3 @@ class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
         # Invalid data raises ValidationError
         with pytest.raises(ValidationError):
             views.plan_clase_update(request, pk=plan.pk, slug=plan.slug)
-
-    def tearDown(self):
-        self.logger.uninstall()
