@@ -10,6 +10,7 @@ from .models.proceso_didactico import ProcesoDidactico
 from django import forms
 from django.http import QueryDict
 from django.forms import BaseInlineFormSet, inlineformset_factory
+from planificaciones.widgets import EnhancedCheckboxSelectMultiple
 
 
 class PlanClaseForm(forms.ModelForm):
@@ -50,10 +51,12 @@ class PlanClaseForm(forms.ModelForm):
             'instrumento_evaluacion': 'Instrumento de Evaluación',
         }
         widgets = {
+            'numero_plan': forms.TextInput,
             'fecha': forms.TextInput,
-            'cursos': forms.CheckboxSelectMultiple,
-            'objetivos': forms.CheckboxSelectMultiple,
-            'objetivos_generales': forms.CheckboxSelectMultiple,
+            'cursos': EnhancedCheckboxSelectMultiple(
+                attrs={'li_class': 'inline-list-item'}),
+            'objetivos': EnhancedCheckboxSelectMultiple,
+            'objetivos_generales': EnhancedCheckboxSelectMultiple,
         }
 
     def __init__(self, *args, **kwargs):
@@ -282,7 +285,7 @@ ElementoCurricularFormset = inlineformset_factory(
     fields=('destreza', 'conocimientos_asociados', 'indicadores_logro',
             'actividades_evaluacion'),
     widgets={
-        'indicadores_logro': forms.CheckboxSelectMultiple,
+        'indicadores_logro': EnhancedCheckboxSelectMultiple,
     },
     formset=BaseElementoCurricularFormset,
     max_num=10,
