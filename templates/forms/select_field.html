@@ -1,0 +1,20 @@
+{% load widget_tweaks %}
+
+<div class="select-wrapper{% if field.errors %} select-error {% endif %}">
+    {% if destreza %}
+        {% if field.errors %}
+            {% render_field field class="custom-select error destrezas" %}
+            {% include 'forms/field_errors.html'%}
+        {% else %}
+            {% render_field field class="custom-select destrezas" %}
+        {% endif %}
+
+    {% else %}
+        {% if field.errors %}
+            {% render_field field class="custom-select error" %}
+            {% include 'forms/field_errors.html'%}
+        {% else %}
+            {% render_field field class="custom-select" %}
+        {% endif %}
+    {% endif %}
+</div>

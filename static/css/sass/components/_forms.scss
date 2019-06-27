@@ -235,12 +235,16 @@ textarea {
   width: 100%;
 }
 
-ul {
-  &.error {
-    border: 1px solid $danger;
-    padding: 1em;
-  }
+ul.error {
+  border: 1px solid $danger;
+  padding: 1em;
 }
+
+div.error {
+  border: 1px solid $danger;
+  padding: 1em .1em .5em 1em;
+}
+
 
 
 input {

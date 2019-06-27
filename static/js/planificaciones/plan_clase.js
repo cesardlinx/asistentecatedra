@@ -3,153 +3,25 @@ $(document).ready(function() {
     // All textarea resizables
     textareaResizables();
 
-    /**
-     * Form Validation
-     */
-    var form = $('#planClaseForm').validate({
-        rules: {
-            numero_plan: {
-                min: 1,
-                max: 100
-            },
-            name: {
-                required: true,
-                maxlength: 40
-            },
-            fecha: {
-                required: true,
-                dateISO: true
-            },
-            asignatura: "required",
-            paralelos: {
-                required: true,
-                maxlength: 20
-            },
-            numero_estudiantes: {
-                required: true,
-                maxlength: 10
-            },
-            tema: {
-                required: true,
-                maxlength: 200
-            },
-            periodos: {
-                required: true,
-                maxlength: 20
-            },
-            metodologia: {
-                required: true,
-                minlength: 4,
-                maxlength: 200
-            },
-            tecnica: {
-                required: true,
-                minlength: 4,
-                maxlength: 200
-            },
-            "elementos_curriculares-0-conocimientos_asociados": {
-                required: true,
-                maxlength: 200
-            },
-            "proceso-elementos_curriculares-0-procesos_didacticos-0-name": {
-                required: true,
-                maxlength: 50
-            },
-            "proceso-elementos_curriculares-0-procesos_didacticos-0-description": {
-                required: true,
-                maxlength: 200
-            },
-            "proceso-elementos_curriculares-0-procesos_didacticos-0-tiempo": {
-                required: true,
-                maxlength: 11
-            },
-            "proceso-elementos_curriculares-0-procesos_didacticos-0-recursos": {
-                required: true,
-                maxlength: 200
-            },
-            "elementos_curriculares-0-actividades_evaluacion": {
-                required: true,
-                maxlength: 200
-            },
-            observaciones: {
-                maxlength: 200
-            },
-            aprobado_por: {
-                maxlength: 50
-            },
-        },
-        errorElement: "em",
-        wrapper: 'div',
-        errorPlacement: errorFeedback,
-        highlight: fieldHighlight,
-        unhighlight: fieldUnhighlight,
-    });
-
     // Extra Fields Validation
     var extraFields = SpecialFields({
         fields: [
-            'id_cursos',
-            'id_elementos_curriculares-0-destreza',
-            'id_elementos_curriculares-0-indicadores_logro'
+            'id_cursos'
         ],
-        formId: 'planClaseForm',
-        ckeditorValidation: true,
-        highlight: function(element) {
-            // cambio de color a danger para campos select
-            if ($(element).hasClass('custom-select')) {
-                $(element).parent().addClass('select-error');
-            }
-        },
-        unhighlight: function(element) {
-            // quitar cambio de color a danger para campos select
-            if ($(element).hasClass('custom-select')) {
-                $(element).parent().removeClass('select-error');
-            }
-        }
+        formId: 'planClaseForm'
     });
-
-
-
-    // Complete Form Validation
-    var isFormValid = function() {
-        var result = (form.valid() && extraFields.areValid()) ? true : false;
-        return result;
-    };
-
-    // Envio del formulario
-    $('#planClaseForm').submit(function(e) {
-        e.preventDefault();
-        // Enviar formulario si es válido
-
-        if (isFormValid()) {
-            var formulario = document.getElementById('planClaseForm');
-            formulario.submit();
-        }
-    });
-
-
-    // Mensaje por defecto en cursos y objetivos
-    $('#id_cursos').html('<span>Seleccione una asignatura.</span>');
-    $('#id_objetivos').html('<span>Seleccione una asignatura</span>');
 
     // Configuración del datepicker
     $("#id_fecha").datepicker({
         dateFormat: 'yy-mm-dd',
-        onSelect: function(dateText) {
-            if ($("#id_fecha").valid()) {
-                $("#id_fecha").removeClass("error");
-            }
-        },
         onClose: function() {
             testFloatingInput(this); // en useful_functions
         }
     }).datepicker("setDate", new Date());
 
-
     /**
      * Al elegir una asignatura
      * se cargan los cursos
-     * o si ya tiene un valor
      */
     var cargarCursos = function() {
         var asignaturaId = $('#id_asignatura').val();
@@ -178,9 +50,6 @@ $(document).ready(function() {
         }
     };
 
-    if ($('#id_asignatura').val != '') {
-        cargarCursos();
-    }
 
     $("#id_asignatura").change(cargarCursos);
 

@@ -40,7 +40,7 @@ class PlanClaseForm(forms.ModelForm):
         ]
         labels = {
             'name': 'Nombre del Plan de Clase',
-            'numero_plan': 'Número de Plan de Clase',
+            'numero_plan': 'Número de Plan de Clase (opcional)',
             'objetivos': 'Objetivos de la unidad',
             'numero_estudiantes': 'Número de estudiantes',
             'periodo': 'Período',
@@ -49,6 +49,8 @@ class PlanClaseForm(forms.ModelForm):
             'contenido_cientifico': 'Contenido Científico',
             'material_didactico': 'Material Didáctico',
             'instrumento_evaluacion': 'Instrumento de Evaluación',
+            'observaciones': 'Observaciones (opcional)',
+            'aprobado_por': 'Aprobado por (opcional)',
         }
         widgets = {
             'numero_plan': forms.TextInput,
@@ -123,7 +125,9 @@ class PlanClaseForm(forms.ModelForm):
 
         elif self.instance.pk:
             asignatura_id = self.instance.asignatura.pk
-            cursos_id = self.instance.cursos.all()
+            cursos = self.instance.cursos.all()
+
+            cursos_id = [curso.pk for curso in cursos]
 
             objetivos = Objetivo.objects.get_objetivos_by_asignatura_cursos(
                 asignatura_id, cursos_id)
@@ -149,12 +153,28 @@ class BaseProcesoDidacticoFormset(BaseInlineFormSet):
             form.empty_permitted = False
 
     def total_form_count(self):
-        """Añade un formulario extra solo cuando no hay datos"""
-        if self.data or self.files:
-            return self.management_form.cleaned_data['TOTAL_FORMS']
+        """
+        Return the total number of forms in this FormSet.
+        Also adds an initial extra form only if there is no instance attached
+        """
+        if self.is_bound:
+            return super().total_form_count()
         else:
-            total_forms = self.initial_form_count() + self.extra
-            return total_forms
+
+            initial_forms = self.initial_form_count()
+
+            # Considers the extra fields only if there is no instance
+            if self.instance.pk:
+                total_forms = max(initial_forms, self.min_num)
+            else:
+                total_forms = max(initial_forms, self.min_num) + self.extra
+            # Allow all existing related objects/inlines to be displayed,
+            # but don't allow extra beyond max_num.
+            if initial_forms > self.max_num >= 0:
+                total_forms = initial_forms
+            elif total_forms > self.max_num >= 0:
+                total_forms = self.max_num
+        return total_forms
 
 
 ProcesoDidacticoFormset = inlineformset_factory(
@@ -206,7 +226,9 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
                     pass
             elif form.instance.pk:
                 asignatura_id = form.instance.plan_clase.asignatura.pk
-                cursos_id = form.instance.plan_clase.cursos.all()
+                cursos = form.instance.plan_clase.cursos.all()
+
+                cursos_id = [curso.pk for curso in cursos]
 
                 form.fields['destreza'].queryset = Destreza.objects\
                     .get_destrezas_by_asignatura_cursos(
@@ -269,13 +291,26 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
 
     def total_form_count(self):
         """
-        Añade un formulario extra (inicial) solo cuando no hay datos
+        Return the total number of forms in this FormSet.
+        Also adds an initial extra form only if there is no instance attached
         """
-        if self.data or self.files:
-            return self.management_form.cleaned_data['TOTAL_FORMS']
+        if self.is_bound:
+            return super().total_form_count()
         else:
-            total_forms = self.initial_form_count() + self.extra
-            return total_forms
+            initial_forms = self.initial_form_count()
+
+            # Considers the extra fields only if there is no instance
+            if self.instance.pk:
+                total_forms = max(initial_forms, self.min_num)
+            else:
+                total_forms = max(initial_forms, self.min_num) + self.extra
+            # Allow all existing related objects/inlines to be displayed,
+            # but don't allow extra beyond max_num.
+            if initial_forms > self.max_num >= 0:
+                total_forms = initial_forms
+            elif total_forms > self.max_num >= 0:
+                total_forms = self.max_num
+        return total_forms
 
 
 # Creación del formset para ElementoCurricular

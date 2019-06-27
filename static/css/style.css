@@ -349,6 +349,11 @@ ul.error {
   padding: 1em;
 }
 
+div.error {
+  border: 1px solid #dc3545;
+  padding: 1em .1em .5em 1em;
+}
+
 input.error {
   border: 1px solid #dc3545;
 }

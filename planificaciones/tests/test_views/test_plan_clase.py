@@ -1,24 +1,26 @@
 import pytest
-from django.test import RequestFactory, TestCase
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from mixer.backend.django import mixer
-from planificaciones import views
-from planificaciones.models.asignatura import Asignatura
-from planificaciones.models.curso import Curso
-from planificaciones.models.objetivo import Objetivo
-from planificaciones.models.objetivo_general import ObjetivoGeneral
-from planificaciones.models.indicador import Indicador
-from planificaciones.models.destreza import Destreza
-from planificaciones.models.unidad import Unidad
-from planificaciones.models.subnivel import Subnivel
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
-from planificaciones.models.plan_clase import PlanClase
-from planificaciones.models.elemento_curricular import ElementoCurricular
-from planificaciones.models.proceso_didactico import ProcesoDidactico
 from django.core.exceptions import ValidationError
 from django.http.response import Http404
-from django.contrib.auth import get_user_model
+from django.test import RequestFactory, TestCase
+from mixer.backend.django import mixer
 from testfixtures import LogCapture
+
+from planificaciones import views
+from planificaciones.models.asignatura import Asignatura
+from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
+from planificaciones.models.curso import Curso
+from planificaciones.models.destreza import Destreza
+from planificaciones.models.elemento_curricular import ElementoCurricular
+from planificaciones.models.indicador import Indicador
+from planificaciones.models.objetivo import Objetivo
+from planificaciones.models.objetivo_general import ObjetivoGeneral
+from planificaciones.models.plan_clase import PlanClase
+from planificaciones.models.proceso_didactico import ProcesoDidactico
+from planificaciones.models.subnivel import Subnivel
+from planificaciones.models.unidad import Unidad
+from accounts.tests.conftest import add_middleware_to_request
 
 User = get_user_model()
 pytestmark = pytest.mark.django_db
@@ -223,6 +225,19 @@ class TestPlanClaseCreateView(PlanClaseTestCase):
 
     def test_invalid_data(self):
         """Tests the view when sending invalid data"""
+        self.data['name'] = ''
+
+        request = RequestFactory().post('/', data=self.data)
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.plan_clase_create(request)
+
+        assert response.status_code == 200, 'Should get a success response'
+        assert 'Por favor corrija los campos resaltados en rojo.' \
+            in str(response.content), 'Should have an error message'
+
+    def test_empty_data(self):
+        """Tests the view when sending empty data"""
         request = RequestFactory().post('/', data={})
         request.user = self.user
         # Invalid data raises ValidationError
@@ -230,13 +245,13 @@ class TestPlanClaseCreateView(PlanClaseTestCase):
             views.plan_clase_create(request)
 
 
-
-class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
+class TestPlanClaseUpdateView(PlanClaseTestCase):
 
     def setUp(self):
         """Creates data for testing and user"""
         super().setUp()
         self.user = mixer.blend(User)
+        self.plan_clase = mixer.blend(PlanClase)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -247,12 +262,12 @@ class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
 
     def test_get(self):
         """Tests that an authenticated user can access the view"""
-        plan = mixer.blend(PlanClase)
-        elemento = mixer.blend(ElementoCurricular, plan_clase=plan)
+        elemento = mixer.blend(ElementoCurricular, plan_clase=self.plan_clase)
         mixer.blend(ProcesoDidactico, elemento_curricular=elemento)
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.plan_clase_update(request, pk=plan.pk, slug=plan.slug)
+        response = views.plan_clase_update(
+            request, pk=self.plan_clase.pk, slug=self.plan_clase.slug)
         assert response.status_code == 200, 'Authenticated user can access'
         # Tempĺate Testing
         self.assertContains(response, 'name="name"')
@@ -277,15 +292,15 @@ class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
 
     def test_post_success(self):
         """Prueba la actualización de planes de clase"""
-        plan = mixer.blend(PlanClase)
-        assert plan.name != 'Plan de Clase1', \
+        assert self.plan_clase.name != 'Plan de Clase1', \
             'El plan inicialmente tiene un nombre diferente'
         request = RequestFactory().post('/', data=self.data)
         request.user = self.user
-        resp = views.plan_clase_update(request, pk=plan.pk, slug=plan.slug)
-        assert resp.status_code == 302, 'Should redirect to success view'
-        plan.refresh_from_db()
-        assert plan.name == 'Plan de Clase1', \
+        response = views.plan_clase_update(
+            request, pk=self.plan_clase.pk, slug=self.plan_clase.slug)
+        assert response.status_code == 302, 'Should redirect to success view'
+        self.plan_clase.refresh_from_db()
+        assert self.plan_clase.name == 'Plan de Clase1', \
             'Debe actualizar el plan de clase'
 
         assert 'INFO' in str(self.logger), 'Should return an info log'
@@ -303,6 +318,21 @@ class PlanClaseTestCaseUpdateView(PlanClaseTestCase):
 
     def test_invalid_data(self):
         """Tests the view when sending invalid data"""
+
+        self.data['name'] = ''
+
+        request = RequestFactory().post('/', data=self.data)
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.plan_clase_update(
+            request, pk=self.plan_clase.pk, slug=self.plan_clase.slug)
+
+        assert response.status_code == 200, 'Should get a success response'
+        assert 'Por favor corrija los campos resaltados en rojo.' \
+            in str(response.content), 'Should have an error message'
+
+    def test_empty_data(self):
+        """Tests the view when sending empty data"""
         plan = mixer.blend(PlanClase)
         request = RequestFactory().post('/', data={})
         request.user = self.user

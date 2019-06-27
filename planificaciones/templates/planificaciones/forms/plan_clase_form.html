@@ -27,74 +27,47 @@
                 <h5 class="form-label">Datos Informativos:</h5>
 
                 <div class="form-group-2">
-                    <div class="form-group-float">
-                        {{ form.numero_plan | add_label_class:"form-control-placeholder" }}
-                        {% render_field form.numero_plan class="form-control floating-input" type="text" %}
-                    </div>
-
-                    <div class="form-group-float">
-                        {{ form.name|add_label_class:"form-control-placeholder"}}
-                        {% render_field form.name class="form-control floating-input" %}
-                    </div>
+                    {% include "forms/floating_input.html" with field=form.numero_plan %}
+                    {% include "forms/floating_input.html" with field=form.name %}
                 </div>
 
                 <div class="form-group-2">
-                    <div class="form-group-float">
-                        {{ form.fecha|add_label_class:"form-control-placeholder" }}
-                        {% render_field form.fecha class="form-control floating-input" %}
-                    </div>
-
-                    <div class="select-wrapper">
-                        {% render_field form.asignatura class="custom-select" %}
-                    </div>
+                    {% include "forms/floating_input.html" with field=form.fecha %}
+                    {% include "forms/select_field.html" with field=form.asignatura %}
                 </div>
 
                 <div class="form-group-2">
-                    <div class="form-group-float">
-                        {{ form.paralelos|add_label_class:"form-control-placeholder" }}
-                        {% render_field form.paralelos class="form-control floating-input" %}
-                    </div>
-
-                    <div class="form-group-float">
-                        {{ form.numero_estudiantes|add_label_class:"form-control-placeholder" }}
-                        {% render_field form.numero_estudiantes class="form-control floating-input" %}
-                    </div>
+                    {% include "forms/floating_input.html" with field=form.paralelos %}
+                    {% include "forms/floating_input.html" with field=form.numero_estudiantes %}
                 </div>
 
                 <div class="form-group-2">
-                    <div class="form-group-float">
-                        {{ form.tema|add_label_class:"form-control-placeholder" }}
-                        {% render_field form.tema class="form-control floating-input" %}
-                    </div>
-
-                    <div class="form-group-float">
-                        {{ form.periodos|add_label_class:"form-control-placeholder" }}
-                        {% render_field form.periodos class="form-control floating-input" %}
-                    </div>
+                    {% include "forms/floating_input.html" with field=form.tema %}
+                    {% include "forms/floating_input.html" with field=form.periodos %}
                 </div>
 
                 <div class="form-group-2">
-                    <div class="form-group-float">
-                        {{ form.metodologia|add_label_class:"form-control-placeholder" }}
-                        {% render_field form.metodologia class="form-control floating-input" %}
-                    </div>
-
-                    <div class="form-group-float">
-                        {{ form.tecnica|add_label_class:"form-control-placeholder" }}
-                        {% render_field form.tecnica class="form-control floating-input" %}
-                    </div>
+                    {% include "forms/floating_input.html" with field=form.metodologia %}
+                    {% include "forms/floating_input.html" with field=form.tecnica %}
                 </div>
 
                 <div class="form-group">
                     {{ form.cursos|add_label_class:"form-label" }}
-                    {% render_field form.cursos class="checkbox-list" %}
+
+                    {% if field.errors %}
+                        {% render_field form.cursos class="checkbox-list error" %}
+                        {% include 'forms/field_errors.html'%}
+                    {% else %}
+                        {% render_field form.cursos class="checkbox-list" %}
+                    {% endif %}
+
 
                 </div>
+
                 <div class="form-group">
                     {{ form.objetivos|add_label_class:"form-label" }}
                     {{ form.objetivos }}
                     {{ form.objetivos_generales }}
-
                 </div>
 
                 <h5 class="form-label">Relación de Elementos Curriculares:</h5>
@@ -130,20 +103,14 @@
 
                             <tr>
                                 <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
-                                    {% with field=elementos_form.destreza %}
                                     <div class="cell-wrapper-select">
-                                        <div class="select-wrapper">
-                                            {% render_field field class="destrezas custom-select" %}
-                                        </div>
+                                        {% include "forms/select_field.html" with field=elementos_form.destreza destreza=True %}
                                     </div>
-                                    {% endwith %}
                                 </td>
                                 <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
-                                    {% with field=elementos_form.conocimientos_asociados %}
                                     <div class="cell-wrapper-lg">
-                                        {% render_field field class="table-textarea textarea-full" placeholder="Conocimientos Asociados" %}
+                                        {% include "forms/table_textarea.html" with field=elementos_form.conocimientos_asociados placeholder="Conocimientos Asociados" %}
                                     </div>
-                                    {% endwith %}
                                 </td>
 
                                 {# Formset Anidado de procesos didácticos (Primera fila) #}
@@ -159,7 +126,7 @@
                                         {% endif %}
 
                                         {% if forloop.first %}
-                                            {% include 'planificaciones/includes/procesos_didacticos_form.html' %}
+                                            {% include 'planificaciones/forms/procesos_didacticos_form.html' %}
                                         {% endif %}
 
                                     {% endfor %}
@@ -169,16 +136,19 @@
 
                                 <td class="indicadores elementos-form" rowspan="{{ elementos_form.nested.total_form_count }}">
                                     {% with field=elementos_form.indicadores_logro %}
-                                    {{ field }}
+                                        {% if field.errors %}
+                                            {% render_field field class="error" %}
+                                            {% include 'forms/field_errors.html'%}
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
                                     {% endwith %}
                                 </td>
 
                                 <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
-                                    {% with field=elementos_form.actividades_evaluacion %}
                                     <div class="cell-wrapper-md">
-                                        {% render_field field class="table-textarea textarea-full" placeholder="Actividades de Evaluación" %}
+                                        {% include "forms/table_textarea.html" with field=elementos_form.actividades_evaluacion placeholder="Actividades de Evaluación" %}
                                     </div>
-                                    {% endwith %}
                                 </td>
                             </tr>
 
@@ -188,7 +158,7 @@
 
                                 {% if not forloop.first %}
                                     <tr rowspan="1">
-                                        {% include 'planificaciones/includes/procesos_didacticos_form.html' %}
+                                        {% include 'planificaciones/forms/procesos_didacticos_form.html' %}
                                     </tr>
                                 {% endif %}
 
@@ -218,7 +188,14 @@
                     {% if forloop.counter > 13 and forloop.counter < 18 %}
                         <div class="form-group">
                             {{ field|add_label_class:"form-label" }}
-                            {{ field }}
+                            {% if field.errors %}
+                                <div class="error">
+                                {{ field }}
+                                {% include 'forms/field_errors.html'%}
+                                </div>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
                         </div>
                     {% endif %}
                 {% endfor %}

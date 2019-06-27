@@ -66,7 +66,6 @@ class TestLoadCursosView(AjaxTestCase):
         request.user = self.user
         response = views.load_cursos(request)
         assert response.status_code == 200, 'Authenticated user can access'
-        self.assertContains(response, 'Not Allowed')
 
     def test_auth_user(self):
         """Tests that an authenticated user can access the view"""
@@ -184,7 +183,6 @@ class TestLoadIndicadoresView(AjaxTestCase):
         request.user = self.user
         response = views.load_indicadores(request)
         assert response.status_code == 200, 'Authenticated user can access'
-        self.assertContains(response, 'Not Allowed')
 
     def test_auth_user(self):
         """Tests that an authenticated user can access the view"""

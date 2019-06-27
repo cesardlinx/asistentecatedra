@@ -8,8 +8,6 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import LoginView
 from django.contrib.messages import get_messages
-from django.contrib.messages.storage.fallback import FallbackStorage
-from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.test import RequestFactory, TestCase
@@ -22,25 +20,12 @@ from stripe import error
 from accounts import views
 from accounts.forms import PhotoForm, SignupForm
 
-from .conftest import clean_test_files, create_test_image
+from .conftest import (clean_test_files,
+                       create_test_image,
+                       add_middleware_to_request)
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
-
-
-def add_middleware_to_request(request):
-    """
-    Función para agregar middleware a un request creado con RequestFactory
-    """
-    # Add session middleware
-    middleware = SessionMiddleware()
-    middleware.process_request(request)
-    request.session.save()
-
-    # Add messages middleware
-    messages = FallbackStorage(request)
-    request._messages = messages
-    return request
 
 
 class SignupTestCase(TestCase):

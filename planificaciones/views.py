@@ -1,21 +1,24 @@
 import json
 import logging
-from django.contrib.auth.mixins import LoginRequiredMixin
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import ElementoCurricularFormset, PlanClaseForm
-from .models.plan_clase import PlanClase
-from .models.destreza import Destreza
-from .models.indicador import Indicador
-from .models.objetivo import Objetivo
-from .models.asignatura import Asignatura
-from .models.objetivo_general import ObjetivoGeneral
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
-from django.db import transaction
+
+from .forms import ElementoCurricularFormset, PlanClaseForm
+from .models.asignatura import Asignatura
+from .models.destreza import Destreza
+from .models.indicador import Indicador
+from .models.objetivo import Objetivo
+from .models.objetivo_general import ObjetivoGeneral
+from .models.plan_clase import PlanClase
 
 logger = logging.getLogger(__name__)
 
@@ -55,13 +58,16 @@ def plan_clase_create(request):
                 elementos_formset.save()
                 logger.info('Plan de clase created for the user: {}.'
                             .format(request.user.email))
-                return redirect('home')
+                return redirect('plan_clase_list')
+        messages.error(request,
+                       'Por favor corrija los campos resaltados en rojo.')
 
     context = {
         'form': form,
         'elementos_formset': elementos_formset,
     }
-    return render(request, 'planificaciones/plan_clase_form.html', context)
+    return render(request, 'planificaciones/forms/plan_clase_form.html',
+                  context)
 
 
 @login_required
@@ -87,13 +93,17 @@ def plan_clase_update(request, pk, slug):
                 form._save_m2m()
                 logger.info('Plan de clase updated for the user: {}.'
                             .format(request.user.email))
-                return redirect('home')
+                return redirect('plan_clase_list')
+
+        messages.error(request,
+                       'Por favor corrija los campos resaltados en rojo.')
 
     context = {
         'form': form,
         'elementos_formset': elementos_formset,
     }
-    return render(request, 'planificaciones/plan_clase_form.html', context)
+    return render(request, 'planificaciones/forms/plan_clase_form.html',
+                  context)
 
 
 @login_required
@@ -108,7 +118,7 @@ def load_cursos(request):
             request, 'planificaciones/ajax/cursos_checklist_options.html',
             context)
     else:
-        return HttpResponse('Not Allowed.')
+        return HttpResponse('')
 
 
 @login_required
@@ -175,4 +185,4 @@ def load_indicadores(request):
             request, 'planificaciones/ajax/indicadores_checklist_options.html',
             context)
     else:
-        return HttpResponse('Not Allowed.')
+        return HttpResponse('')
