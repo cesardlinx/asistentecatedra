@@ -10,6 +10,8 @@ urlpatterns = [
          name="plan_clase_create"),
     path('plan_clase/update/<int:pk>/<slug:slug>/', views.plan_clase_update,
          name="plan_clase_update"),
+    path('plan_clase/delete/<int:pk>/', views.PlanClaseDeleteView.as_view(),
+         name="plan_clase_delete"),
     path('plan_clase/ajax/cursos/', views.load_cursos,
          name="ajax_load_cursos"),
     path('plan_clase/ajax/objetivos/', views.load_objetivos,

@@ -4,9 +4,11 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.http.response import Http404
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 from mixer.backend.django import mixer
 from testfixtures import LogCapture
-
+from unittest.mock import patch
+from accounts.tests.conftest import add_middleware_to_request
 from planificaciones import views
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
@@ -20,7 +22,6 @@ from planificaciones.models.plan_clase import PlanClase
 from planificaciones.models.proceso_didactico import ProcesoDidactico
 from planificaciones.models.subnivel import Subnivel
 from planificaciones.models.unidad import Unidad
-from accounts.tests.conftest import add_middleware_to_request
 
 User = get_user_model()
 pytestmark = pytest.mark.django_db
@@ -30,7 +31,19 @@ class PlanClaseTestCase(TestCase):
     def setUp(self):
         """Creates data for testing Planes de Clase"""
 
+        self.mock_stripe = patch('accounts.models.stripe')
+        stripe = self.mock_stripe.start()
+        stripe.Customer.create.return_value = {'id': '12345'}
+
         self.logger = LogCapture()
+
+        self.user = User.objects.create_user(
+            email='tester@tester.com',
+            password='P455w0rd_testing',
+            first_name='David',
+            last_name='Padilla',
+            institution='Colegio Benalcazar'
+        )
 
         subnivel = mixer.blend(Subnivel)
         self.curso_1 = mixer.blend(Curso, subnivel=subnivel)
@@ -135,13 +148,13 @@ class PlanClaseTestCase(TestCase):
             'recursos': 'lorem ipsum',
         }
 
+        self.plan_clase = mixer.blend(PlanClase)
+
     def tearDown(self):
         self.logger.uninstall()
 
 
 class TestPlanClaseListView(TestCase):
-    def setUp(self):
-        self.user = mixer.blend(User)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -163,11 +176,6 @@ class TestPlanClaseListView(TestCase):
 
 class TestPlanClaseCreateView(PlanClaseTestCase):
     """Prueba la vista para la creación de planes de clase"""
-
-    def setUp(self):
-        """Creates data for testing and user"""
-        super().setUp()
-        self.user = mixer.blend(User)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -246,12 +254,6 @@ class TestPlanClaseCreateView(PlanClaseTestCase):
 
 
 class TestPlanClaseUpdateView(PlanClaseTestCase):
-
-    def setUp(self):
-        """Creates data for testing and user"""
-        super().setUp()
-        self.user = mixer.blend(User)
-        self.plan_clase = mixer.blend(PlanClase)
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -339,3 +341,55 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         # Invalid data raises ValidationError
         with pytest.raises(ValidationError):
             views.plan_clase_update(request, pk=plan.pk, slug=plan.slug)
+
+
+class TestPlanClaseDeleteView(PlanClaseTestCase):
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.PlanClaseDeleteView.as_view()(request,
+                                                       pk=self.user.pk)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_get(self):
+        """Tests that an authenticated user can't access by get method"""
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.PlanClaseDeleteView.as_view()(request,
+                                                       pk=self.user.pk)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == '/planificaciones/plan_clase/list/', \
+            'Should redirect to the list of class plannings'
+
+    def test_delete_success(self):
+        """Tests when a successful class plan is deleted"""
+        plan_clase = mixer.blend(PlanClase)
+        elemento_curricular = mixer.blend(ElementoCurricular,
+                                          plan_clase=plan_clase)
+        proceso_didactico = mixer.blend(
+            ProcesoDidactico,
+            elemento_curricular=elemento_curricular
+        )
+
+        url = reverse('plan_clase_delete', kwargs={
+            'pk': plan_clase.pk
+        })
+
+        self.client.login(
+            username='tester@tester.com',
+            password='P455w0rd_testing'
+        )
+
+        response = self.client.post(url, {}, follow=True)
+
+        assert response.status_code == 200, \
+            'Should return a successful response'
+
+        # The instances should no longer exist in database
+        with pytest.raises(PlanClase.DoesNotExist):
+            PlanClase.objects.get(pk=plan_clase.pk)
+        with pytest.raises(ElementoCurricular.DoesNotExist):
+            ElementoCurricular.objects.get(pk=elemento_curricular.pk)
+        with pytest.raises(ProcesoDidactico.DoesNotExist):
+            ProcesoDidactico.objects.get(pk=proceso_didactico.pk)

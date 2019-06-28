@@ -8,7 +8,9 @@ from django.db import transaction
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.utils import timezone
+from django.views.generic import DeleteView
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 
@@ -104,6 +106,14 @@ def plan_clase_update(request, pk, slug):
     }
     return render(request, 'planificaciones/forms/plan_clase_form.html',
                   context)
+
+
+class PlanClaseDeleteView(LoginRequiredMixin, DeleteView):
+    model = PlanClase
+    success_url = reverse_lazy('plan_clase_list')
+
+    def get(self, request, *args, **kwargs):
+        return redirect('plan_clase_list')
 
 
 @login_required
