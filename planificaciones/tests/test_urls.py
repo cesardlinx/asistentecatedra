@@ -44,6 +44,15 @@ class TestPlanificacionesUrls:
         assert view.func.view_class == views.PlanClaseDeleteView, \
             'Should resolve to the view PlanClaseDeleteView'
 
+    def test_plan_clase_duplicate(self):
+        plan = mixer.blend(PlanClase)
+        path = reverse('plan_clase_duplicate', kwargs={
+            'pk': plan.id
+        })
+        view = resolve(path)
+        assert view.func.view_class == views.PlanClaseDuplicateView, \
+            'Should resolve to the view PlanClaseDuplicateView'
+
     def test_ajax_load_cursos(self):
         path = reverse('ajax_load_cursos')
         view = resolve(path)

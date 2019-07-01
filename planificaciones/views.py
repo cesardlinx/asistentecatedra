@@ -10,13 +10,14 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.views import View
 from django.views.generic import DeleteView
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
-
 from .forms import ElementoCurricularFormset, PlanClaseForm
 from .models.asignatura import Asignatura
 from .models.destreza import Destreza
+from .models.elemento_curricular import ElementoCurricular
 from .models.indicador import Indicador
 from .models.objetivo import Objetivo
 from .models.objetivo_general import ObjetivoGeneral
@@ -109,10 +110,50 @@ def plan_clase_update(request, pk, slug):
 
 
 class PlanClaseDeleteView(LoginRequiredMixin, DeleteView):
+    """Vista para borrar un plan de clase"""
     model = PlanClase
     success_url = reverse_lazy('plan_clase_list')
 
     def get(self, request, *args, **kwargs):
+        return HttpResponse(status=405)
+
+
+class PlanClaseDuplicateView(LoginRequiredMixin, View):
+    """Vista para realizar una copia de un plan de clase"""
+    def post(self, request, *args, **kwargs):
+        with transaction.atomic():
+            plan_clase = PlanClase.objects.get(pk=kwargs['pk'])
+            elementos = ElementoCurricular.objects.filter(
+                plan_clase=plan_clase
+            )
+            objetivos_old = plan_clase.objetivos.all()
+            objetivos_generales_old = plan_clase.objetivos_generales.all()
+            cursos_old = plan_clase.cursos.all()
+            plan_clase.pk = None
+            plan_clase.id = None
+            new_name = '{} (copia)'.format(plan_clase.name)
+            counter = 1
+            while PlanClase.objects.filter(name=new_name).exists():
+                counter += 1
+                new_name = '{0} (copia {1})'.format(plan_clase.name, counter)
+            plan_clase.name = new_name
+            plan_clase.save()
+            plan_clase.objetivos.set(objetivos_old)
+            plan_clase.objetivos_generales.set(objetivos_generales_old)
+            plan_clase.cursos.set(cursos_old)
+
+            for elemento in elementos:
+                indicadores = elemento.indicadores_logro.all()
+                procesos = elemento.procesos_didacticos.all()
+                elemento.pk = None
+                elemento.plan_clase = plan_clase
+                elemento.save()
+                elemento.indicadores_logro.set(indicadores)
+                for proceso in procesos:
+                    proceso.pk = None
+                    proceso.elemento_curricular = elemento
+                    proceso.save()
+
         return redirect('plan_clase_list')
 
 

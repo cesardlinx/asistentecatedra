@@ -4,7 +4,6 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.http.response import Http404
 from django.test import RequestFactory, TestCase
-from django.urls import reverse
 from mixer.backend.django import mixer
 from testfixtures import LogCapture
 from unittest.mock import patch
@@ -154,7 +153,7 @@ class PlanClaseTestCase(TestCase):
         self.logger.uninstall()
 
 
-class TestPlanClaseListView(TestCase):
+class TestPlanClaseListView(PlanClaseTestCase):
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
@@ -349,7 +348,7 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
         response = views.PlanClaseDeleteView.as_view()(request,
-                                                       pk=self.user.pk)
+                                                       pk=self.plan_clase.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get(self):
@@ -357,10 +356,9 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
         request = RequestFactory().get('/')
         request.user = self.user
         response = views.PlanClaseDeleteView.as_view()(request,
-                                                       pk=self.user.pk)
-        assert response.status_code == 302, 'Should return a redirection'
-        assert response.url == '/planificaciones/plan_clase/list/', \
-            'Should redirect to the list of class plannings'
+                                                       pk=self.plan_clase.pk)
+        assert response.status_code == 405, \
+            'Should return a not allowed response'
 
     def test_delete_success(self):
         """Tests when a successful class plan is deleted"""
@@ -372,19 +370,15 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
             elemento_curricular=elemento_curricular
         )
 
-        url = reverse('plan_clase_delete', kwargs={
-            'pk': plan_clase.pk
-        })
+        request = RequestFactory().post('/', {})
+        request.user = self.user
+        response = views.PlanClaseDeleteView.as_view()(request,
+                                                       pk=plan_clase.pk)
 
-        self.client.login(
-            username='tester@tester.com',
-            password='P455w0rd_testing'
-        )
-
-        response = self.client.post(url, {}, follow=True)
-
-        assert response.status_code == 200, \
-            'Should return a successful response'
+        assert response.status_code == 302, \
+            'Should return a redirection'
+        assert response.url == '/planificaciones/plan_clase/list/', \
+            'Should redirect to the list of planes de clase'
 
         # The instances should no longer exist in database
         with pytest.raises(PlanClase.DoesNotExist):
@@ -393,3 +387,129 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
             ElementoCurricular.objects.get(pk=elemento_curricular.pk)
         with pytest.raises(ProcesoDidactico.DoesNotExist):
             ProcesoDidactico.objects.get(pk=proceso_didactico.pk)
+
+
+class TestPlanClaseDuplicateView(PlanClaseTestCase):
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.PlanClaseDuplicateView.as_view()(request,
+                                                          pk=self.user.pk)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_get(self):
+        """Tests that an authenticated user can't access by get method"""
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.PlanClaseDuplicateView.as_view()(request,
+                                                          pk=self.user.pk)
+        assert response.status_code == 405, \
+            'Should return a not allowed response'
+
+    def test_success_plan_duplication(self):
+        """Tests a plan has been successfuly duplicated"""
+
+        objetivo_1 = mixer.blend('planificaciones.Objetivo')
+        objetivo_2 = mixer.blend('planificaciones.Objetivo')
+        objetivo_general_1 = mixer.blend('planificaciones.ObjetivoGeneral')
+        objetivo_general_2 = mixer.blend('planificaciones.ObjetivoGeneral')
+
+        curso_1 = mixer.blend('planificaciones.Curso')
+        curso_2 = mixer.blend('planificaciones.Curso')
+
+        plan_clase = mixer.blend(PlanClase)
+        plan_clase.objetivos.set([objetivo_1, objetivo_2])
+        plan_clase.objetivos_generales.set(
+            [objetivo_general_1, objetivo_general_2])
+        plan_clase.cursos.set([curso_1, curso_2])
+
+        indicador_1 = mixer.blend('planificaciones.Indicador')
+        indicador_2 = mixer.blend('planificaciones.Indicador')
+
+        destreza_1 = mixer.blend('planificaciones.Destreza')
+
+        elemento_curricular_1 = mixer.blend(ElementoCurricular,
+                                            plan_clase=plan_clase,
+                                            destreza=destreza_1)
+        elemento_curricular_1.indicadores_logro.set([indicador_1, indicador_2])
+
+        elemento_curricular_2 = mixer.blend(ElementoCurricular,
+                                            plan_clase=plan_clase)
+        elemento_curricular_2.indicadores_logro.set([indicador_1, ])
+
+        proceso_didactico_1 = mixer.blend(
+            ProcesoDidactico,
+            elemento_curricular=elemento_curricular_1
+        )
+
+        request = RequestFactory().post('/', {})
+        request.user = self.user
+        response = views.PlanClaseDuplicateView.as_view()(request,
+                                                          pk=plan_clase.pk)
+
+        assert response.status_code == 302, \
+            'Should return a redirection'
+        assert response.url == '/planificaciones/plan_clase/list/', \
+            'Should redirect to the list of planes de clase'
+
+        # Test plan de clase
+        plan_clase_new = PlanClase.objects.last()
+        elemento_curricular_new = ElementoCurricular.objects.last()
+        proceso_didactico_new = ProcesoDidactico.objects.last()
+        assert plan_clase.pk != plan_clase_new.pk, \
+            'Should be another instance'
+        assert plan_clase_new.name == '{} (copia)'.format(plan_clase.name), \
+            'Should have a new name'
+        assert plan_clase_new.tema == plan_clase.tema, \
+            'Should have the same property values'
+        # Debe tener igual todos los campos many to many al original
+        assert plan_clase_new.objetivos.first() == objetivo_1
+        assert plan_clase_new.objetivos.last() == objetivo_2
+        assert plan_clase_new.objetivos_generales.first() == objetivo_general_1
+        assert plan_clase_new.objetivos_generales.last() == objetivo_general_2
+        assert plan_clase_new.cursos.first() == curso_1
+        assert plan_clase_new.cursos.last() == curso_2
+
+        # Tests elemento curricular
+        elemento_curricular_new = plan_clase_new.elementos_curriculares.first()
+
+        assert elemento_curricular_new.pk != elemento_curricular_1.pk, \
+            'Should be another instance'
+        assert elemento_curricular_new.plan_clase == plan_clase_new
+        assert elemento_curricular_new.conocimientos_asociados == \
+            elemento_curricular_1.conocimientos_asociados
+        assert elemento_curricular_new.destreza == destreza_1
+
+        # Debe tener igual todos los campos many to many al elemento curricular
+        # original
+        assert elemento_curricular_new.indicadores_logro.first() == indicador_1
+        assert elemento_curricular_new.indicadores_logro.last() == indicador_2
+
+        proceso_didactico_new = elemento_curricular_new.procesos_didacticos\
+            .first()
+
+        # Tests proceso didáctico
+        assert proceso_didactico_new.pk != proceso_didactico_1.pk, \
+            'Should be another instance'
+        assert proceso_didactico_new.elemento_curricular == \
+            elemento_curricular_new
+        assert proceso_didactico_new.name == proceso_didactico_1.name
+
+        # Test second duplication
+
+        response = views.PlanClaseDuplicateView.as_view()(request,
+                                                          pk=plan_clase.pk)
+
+        plan_clase_new = PlanClase.objects.last()
+        assert plan_clase_new.name == '{} (copia 2)'.format(plan_clase.name)
+        assert plan_clase_new.tema == plan_clase.tema
+
+        # Test third duplication
+
+        response = views.PlanClaseDuplicateView.as_view()(request,
+                                                          pk=plan_clase.pk)
+
+        plan_clase_new = PlanClase.objects.last()
+        assert plan_clase_new.name == '{} (copia 3)'.format(plan_clase.name)
+        assert plan_clase_new.tema == plan_clase.tema
