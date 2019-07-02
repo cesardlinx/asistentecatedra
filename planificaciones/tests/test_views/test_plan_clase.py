@@ -1,12 +1,15 @@
+from unittest.mock import patch
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.http.response import Http404
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 from mixer.backend.django import mixer
 from testfixtures import LogCapture
-from unittest.mock import patch
+
 from accounts.tests.conftest import add_middleware_to_request
 from planificaciones import views
 from planificaciones.models.asignatura import Asignatura
@@ -370,15 +373,29 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
             elemento_curricular=elemento_curricular
         )
 
-        request = RequestFactory().post('/', {})
-        request.user = self.user
-        response = views.PlanClaseDeleteView.as_view()(request,
-                                                       pk=plan_clase.pk)
+        # request = RequestFactory().post('/', {})
+        # request.user = self.user
+        # response = views.PlanClaseDeleteView.as_view()(request,
+        #                                                pk=plan_clase.pk)
 
-        assert response.status_code == 302, \
-            'Should return a redirection'
-        assert response.url == '/planificaciones/plan_clase/list/', \
-            'Should redirect to the list of planes de clase'
+        # assert response.status_code == 302, \
+        #     'Should return a redirection'
+        # assert response.url == '/planificaciones/plan_clase/list/', \
+        #     'Should redirect to the list of planes de clase'
+
+        self.client.login(username='tester@tester.com',
+                          password='P455w0rd_testing',)
+        url = reverse('plan_clase_delete', kwargs={'pk': plan_clase.pk})
+        response = self.client.post(url, {}, follow=True)
+
+        assert response.status_code == 200, 'Should return a success code'
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'Should return one message'
+        assert messages[0].message == 'Plan de clase eliminado exitosamente.',\
+            'Should return a success message'
+        assert messages[0].tags == 'alert-success', \
+            'Should return a success message'
+        self.assertRedirects(response, reverse('plan_clase_list'))
 
         # The instances should no longer exist in database
         with pytest.raises(PlanClase.DoesNotExist):
@@ -442,16 +459,29 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
             ProcesoDidactico,
             elemento_curricular=elemento_curricular_1
         )
+        self.client.login(username='tester@tester.com',
+                          password='P455w0rd_testing',)
+        url = reverse('plan_clase_duplicate', kwargs={'pk': plan_clase.pk})
+        response = self.client.post(url, {}, follow=True)
 
-        request = RequestFactory().post('/', {})
-        request.user = self.user
-        response = views.PlanClaseDuplicateView.as_view()(request,
-                                                          pk=plan_clase.pk)
+        assert response.status_code == 200, 'Should return a success code'
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'Should return one message'
+        assert messages[0].message == 'Plan de clase duplicado exitosamente.',\
+            'Should return a success message'
+        assert messages[0].tags == 'alert-success', \
+            'Should return a success message'
+        self.assertRedirects(response, reverse('plan_clase_list'))
 
-        assert response.status_code == 302, \
-            'Should return a redirection'
-        assert response.url == '/planificaciones/plan_clase/list/', \
-            'Should redirect to the list of planes de clase'
+        # response = views.PlanClaseDuplicateView.as_view()(request,
+        #                                                   pk=plan_clase.pk)
+
+        # assert response.status_code == 302, \
+        #     'Should return a redirection'
+        # assert response.url == '/planificaciones/plan_clase/list/', \
+        #     'Should redirect to the list of planes de clase'
+
+        # Test success message
 
         # Test plan de clase
         plan_clase_new = PlanClase.objects.last()
@@ -498,8 +528,12 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
 
         # Test second duplication
 
-        response = views.PlanClaseDuplicateView.as_view()(request,
-                                                          pk=plan_clase.pk)
+        request = RequestFactory().post('/', {})
+        request.user = self.user
+        request = add_middleware_to_request(request)
+
+        views.PlanClaseDuplicateView.as_view()(request,
+                                               pk=plan_clase.pk)
 
         plan_clase_new = PlanClase.objects.last()
         assert plan_clase_new.name == '{} (copia 2)'.format(plan_clase.name)
@@ -507,8 +541,8 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
 
         # Test third duplication
 
-        response = views.PlanClaseDuplicateView.as_view()(request,
-                                                          pk=plan_clase.pk)
+        views.PlanClaseDuplicateView.as_view()(request,
+                                               pk=plan_clase.pk)
 
         plan_clase_new = PlanClase.objects.last()
         assert plan_clase_new.name == '{} (copia 3)'.format(plan_clase.name)

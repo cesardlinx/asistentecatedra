@@ -117,6 +117,10 @@ class PlanClaseDeleteView(LoginRequiredMixin, DeleteView):
     def get(self, request, *args, **kwargs):
         return HttpResponse(status=405)
 
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Plan de clase eliminado exitosamente.')
+        return super().delete(request, *args, **kwargs)
+
 
 class PlanClaseDuplicateView(LoginRequiredMixin, View):
     """Vista para realizar una copia de un plan de clase"""
@@ -153,7 +157,7 @@ class PlanClaseDuplicateView(LoginRequiredMixin, View):
                     proceso.pk = None
                     proceso.elemento_curricular = elemento
                     proceso.save()
-
+        messages.success(request, 'Plan de clase duplicado exitosamente.')
         return redirect('plan_clase_list')
 
 
