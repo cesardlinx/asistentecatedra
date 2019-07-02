@@ -12,12 +12,18 @@ $(document).ready(function() {
     });
 
     // Configuración del datepicker
-    $("#id_fecha").datepicker({
+    var datepicker = $("#id_fecha").datepicker({
         dateFormat: 'yy-mm-dd',
         onClose: function() {
             testFloatingInput(this); // en useful_functions
         }
-    }).datepicker("setDate", new Date());
+    });
+
+    // If the datepicker has no value then add actual date
+    if (!datepicker.val()) {
+        datepicker.datepicker("setDate", new Date());
+    }
+
 
     /**
      * Al elegir una asignatura

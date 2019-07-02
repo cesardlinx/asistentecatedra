@@ -2168,28 +2168,43 @@ footer {
   text-decoration: none;
 }
 
-.icon.delete {
-  color: #dc3545;
-}
-
-.icon.delete:hover {
-  color: #e4606d;
-}
-
-.icon.word {
-  color: #2c3e50;
-}
-
-.icon.word:hover {
-  color: #507192;
-}
-
 .icon.edit {
   color: #16a085;
 }
 
 .icon.edit:hover {
   color: #1bc4a3;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1.4rem;
+}
+
+.icon-button.delete {
+  color: #dc3545;
+}
+
+.icon-button.delete:hover {
+  color: #e4606d;
+}
+
+.icon-button.word {
+  color: #2c3e50;
+}
+
+.icon-button.word:hover {
+  color: #507192;
+}
+
+.icon-button.copy {
+  color: #000;
+}
+
+.icon-button.copy:hover {
+  color: rgba(0, 0, 0, 0.7);
 }
 
 .resp-column-sm {

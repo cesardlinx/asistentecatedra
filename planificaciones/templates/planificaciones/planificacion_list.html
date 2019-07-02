@@ -43,15 +43,30 @@
                                 <td class="resp-column-lg">{{ plan.paralelos }}</td>
                                 <td class="resp-column-sm">{{ plan.fecha }}</td>
                                 <td>
-                                    <a class="icon edit" href="{% url 'plan_clase_update' pk=plan.pk slug=plan.slug %}" title="Editar">
+                                    <a class="icon edit" href="{% url 'plan_clase_update' pk=plan.pk slug=plan.slug %}" title="Editar plan">
                                         <span class="fas fa-edit"></span>
                                     </a>
-                                    <a class="icon word" href="#" title="Exportar a Word">
-                                        <span class="fas fa-file-word"></span>
-                                    </a>
-                                    <a class="icon delete" href="#" title="Borrar">
-                                        <span class="fas fa-trash"></span>
-                                    </a>
+
+                                    <form action="">
+                                        {% csrf_token %}
+                                        <button class="icon-button word" type="submit" title="Exportar a word">
+                                            <span class="fas fa-file-word"></span>
+                                        </button>
+                                    </form>
+
+                                    <form method="POST" action="{% url 'plan_clase_duplicate' pk=plan.pk %}">
+                                        {% csrf_token %}
+                                        <button class="icon-button copy" type="submit" title="Duplicar Plan">
+                                            <span class="far fa-copy"></span>
+                                        </button>
+                                    </form>
+
+                                    <form method="POST" action="{% url 'plan_clase_delete' pk=plan.pk %}">
+                                        {% csrf_token %}
+                                        <button class="icon-button delete" type="submit" title="Eliminar Plan">
+                                            <span class="fas fa-trash"></span>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         {% endfor %}
