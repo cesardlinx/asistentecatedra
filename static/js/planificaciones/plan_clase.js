@@ -24,6 +24,16 @@ $(document).ready(function() {
         datepicker.datepicker("setDate", new Date());
     }
 
+    // Delete planning confirmation
+    $('#deletePlanificacion').on('click', function(e) {
+        e.preventDefault();
+        var message = '¿Está seguro que desea eliminar esta planificación?';
+
+        if (confirm(message)) {
+            $('#deletePlanificacionForm').submit();
+        }
+    });
+
 
     /**
      * Al elegir una asignatura
