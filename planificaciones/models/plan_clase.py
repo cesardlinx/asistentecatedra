@@ -6,14 +6,27 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.core.validators import MaxValueValidator, MinLengthValidator, \
     MinValueValidator
 from django.db import models
+from .curso import Curso
 from django.urls import reverse
+from .asignatura import Asignatura
+from django.conf import settings
 
 
 class PlanClase(Planificacion):
     numero_plan = models.IntegerField(
         blank=True, null=True,
         validators=[MinValueValidator(1), MaxValueValidator(100)])
-    paralelos = models.CharField(max_length=20)
+    fecha = models.DateField()
+    cursos = models.ManyToManyField(
+        Curso,
+        related_name='planes_clase',
+    )
+    asignatura = models.ForeignKey(
+        Asignatura,
+        related_name='planes_clase',
+        on_delete=models.SET_NULL,
+        null=True
+    )
     objetivos = models.ManyToManyField(
         Objetivo,
         related_name='planes_clase',
@@ -35,6 +48,11 @@ class PlanClase(Planificacion):
     contenido_cientifico = RichTextUploadingField()
     material_didactico = RichTextUploadingField()
     instrumento_evaluacion = RichTextUploadingField()
+    elaborado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='planes_clase',
+        on_delete=models.CASCADE
+    )
 
     class Meta:
         db_table = 'planes_clase'

@@ -1,6 +1,7 @@
 import pytest
 from mixer.backend.django import mixer
 from django.utils.text import Truncator
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from planificaciones.models.area import Area
 from planificaciones.models.asignatura import Asignatura
@@ -17,6 +18,12 @@ from planificaciones.models.indicador import Indicador
 from planificaciones.models.plan_clase import PlanClase
 from planificaciones.models.elemento_curricular import ElementoCurricular
 from planificaciones.models.proceso_didactico import ProcesoDidactico
+from planificaciones.models.plan_anual import PlanAnual
+from planificaciones.models.planificacion import Planificacion
+from planificaciones.models.desarrollo_unidad import DesarrolloUnidad
+from planificaciones.models.plan_unidad import PlanUnidad
+from planificaciones.models.actividad_aprendizaje import ActividadAprendizaje
+from planificaciones.models.plan_destrezas import PlanDestrezas
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -316,3 +323,78 @@ class TestProcesoDidactico:
             'The table should be named "procesos_didacticos"'
         assert proceso._meta.verbose_name_plural == 'procesos didácticos', \
             'The plural name should be "procesos didácticos"'
+
+
+class TestPlanAnual(TestCase):
+    def setUp(self):
+        self.plan = mixer.blend(
+            PlanAnual,
+            carga_horaria=8,
+            semanas_trabajo=5,
+            semanas_imprevistos=2
+        )
+
+    def test_model(self):
+        assert isinstance(self.plan, PlanAnual), \
+            'Should be an instance of PlanAnual'
+        assert isinstance(self.plan, Planificacion), \
+            'Should be an instance of Planificacion'
+        assert isinstance(self.plan.asignatura, Asignatura), \
+            'Should be an instance of Asignatura'
+        assert self.plan._meta.db_table == 'planes_anuales', \
+            'The table should be named "planes_anuales"'
+        assert self.plan._meta.verbose_name_plural == 'planes anuales', \
+            'The plural name should be "planes anuales"'
+
+    def test_property_total_semanas(self):
+        assert self.plan.total_semanas == self.plan.semanas_trabajo + \
+            self.plan.semanas_imprevistos, 'Should equal the sum'
+
+    def test_property_total_periodos(self):
+        assert self.plan.total_periodos == self.plan.carga_horaria * \
+            self.plan.semanas_trabajo, 'Should equal the product'
+
+
+class TestDesarrolloUnidad:
+    def test_model(self):
+        desarrollo_unidad = mixer.blend(DesarrolloUnidad)
+        assert isinstance(desarrollo_unidad, DesarrolloUnidad)
+        assert isinstance(desarrollo_unidad.plan_anual, PlanAnual)
+        assert isinstance(desarrollo_unidad.unidad, Unidad)
+        assert desarrollo_unidad._meta.db_table == 'desarrollo_unidades', \
+            'The table should be named "desarrollo_unidades"'
+        assert desarrollo_unidad._meta.verbose_name_plural == \
+            'desarrollo de unidades', \
+            'The plural name should be "desarrollo de unidades"'
+
+
+class TestPlanUnidad(TestCase):
+    def setUp(self):
+        self.plan = mixer.blend(PlanUnidad)
+
+    def test_model(self):
+        assert isinstance(self.plan, PlanUnidad), \
+            'Should be instance of PlanUnidad'
+        assert isinstance(self.plan.unidad, Unidad), \
+            'Should be instance fo Unidad'
+
+
+class TestActividadAprendizaje:
+    def test_model(self):
+        actividad = mixer.blend(ActividadAprendizaje)
+        assert isinstance(actividad, ActividadAprendizaje)
+        assert isinstance(actividad.plan_unidad, PlanUnidad)
+        assert actividad._meta.db_table == 'actividades_aprendizaje', \
+            'The table should be named "actividades_aprendizaje"'
+        assert actividad._meta.verbose_name_plural == \
+            'actividades de aprendizaje', \
+            'The plural name should be "actividades de aprendizaje"'
+
+
+class TestPlanDestrezas(TestCase):
+    def setUp(self):
+        self.plan = mixer.blend(PlanDestrezas)
+
+    def test_model(self):
+        assert isinstance(self.plan, PlanDestrezas), \
+            'Should be instance of PlanDestrezas'

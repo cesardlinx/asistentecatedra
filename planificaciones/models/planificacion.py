@@ -1,32 +1,16 @@
 from django.db import models
-from django.conf import settings
-from .asignatura import Asignatura
-from .curso import Curso
 from django.template.defaultfilters import slugify
 
 
 class Planificacion(models.Model):
     name = models.CharField(max_length=40)
     slug = models.SlugField()
-    fecha = models.DateField()
-    asignatura = models.ForeignKey(
-        Asignatura,
-        related_name='planificaciones',
-        on_delete=models.SET_NULL,
-        null=True
-    )
-    cursos = models.ManyToManyField(
-        Curso,
-        related_name='planificaciones',
-    )
-    elaborado_por = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='planificaciones',
-        on_delete=models.CASCADE
-    )
+    docentes = models.TextField(max_length=255)
+    paralelos = models.CharField(max_length=20)
     aprobado_por = models.CharField(max_length=50, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(blank=True, null=True)
+    revisado_por = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
     observaciones = models.TextField(max_length=200, blank=True, null=True)
 
     class Meta:
