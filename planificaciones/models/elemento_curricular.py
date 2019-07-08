@@ -14,7 +14,8 @@ class ElementoCurricular(models.Model):
         Destreza,
         related_name='elementos_curriculares',
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=False
     )
     conocimientos_asociados = models.TextField(max_length=200)
     indicadores_logro = models.ManyToManyField(

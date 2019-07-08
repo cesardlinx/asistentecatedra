@@ -38,5 +38,3 @@ class Objetivo(models.Model):
 
     def __str__(self):
         return "{} - {}".format(self.codigo, self.description)
-
-

@@ -10,6 +10,7 @@ class Unidad(models.Model):
     numero_unidad = models.PositiveIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(12)]
     )
+    titulo = models.CharField(max_length=400)
     curso = models.ForeignKey(
         Curso,
         related_name='unidades',
@@ -23,12 +24,12 @@ class Unidad(models.Model):
     objetivos_generales = models.ManyToManyField(
         ObjetivoGeneral,
         related_name='unidades',
-        blank=True
+        blank=True,
     )
     objetivos = models.ManyToManyField(
         Objetivo,
         related_name='unidades',
-        blank=True
+        blank=True,
     )
 
     class Meta:
