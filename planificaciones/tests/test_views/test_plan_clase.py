@@ -298,11 +298,26 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         """Prueba la actualización de planes de clase"""
         assert self.plan_clase.name != 'Plan de Clase1', \
             'El plan inicialmente tiene un nombre diferente'
-        request = RequestFactory().post('/', data=self.data)
-        request.user = self.user
-        response = views.plan_clase_update(
-            request, pk=self.plan_clase.pk, slug=self.plan_clase.slug)
-        assert response.status_code == 302, 'Should redirect to success view'
+        self.client.login(username='tester@tester.com',
+                          password='P455w0rd_testing',)
+        url = reverse('plan_clase_update', kwargs={
+            'pk': self.plan_clase.pk, 'slug': self.plan_clase.slug})
+        response = self.client.post(url, self.data, follow=True)
+        assert response.status_code == 200, 'Should return a success response'
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'Should return one message'
+        assert messages[0].message == 'Plan de clase actualizado '\
+            'exitosamente.', 'Should return a success message'
+        assert messages[0].tags == 'alert-success', \
+            'Should return a success message'
+        self.assertRedirects(response, reverse('plan_clase_list'))
+
+        # request = RequestFactory().post('/', data=self.data)
+        # request.user = self.user
+        # response = views.plan_clase_update(
+        #     request, pk=self.plan_clase.pk, slug=self.plan_clase.slug)
+        # assert response.status_code == 302, 'Should redirect to success view'
+
         self.plan_clase.refresh_from_db()
         assert self.plan_clase.name == 'Plan de Clase1', \
             'Debe actualizar el plan de clase'
@@ -372,16 +387,6 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
             ProcesoDidactico,
             elemento_curricular=elemento_curricular
         )
-
-        # request = RequestFactory().post('/', {})
-        # request.user = self.user
-        # response = views.PlanClaseDeleteView.as_view()(request,
-        #                                                pk=plan_clase.pk)
-
-        # assert response.status_code == 302, \
-        #     'Should return a redirection'
-        # assert response.url == '/planificaciones/plan_clase/list/', \
-        #     'Should redirect to the list of planes de clase'
 
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
@@ -473,14 +478,6 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
             'Should return a success message'
         self.assertRedirects(response, reverse('plan_clase_list'))
 
-        # response = views.PlanClaseDuplicateView.as_view()(request,
-        #                                                   pk=plan_clase.pk)
-
-        # assert response.status_code == 302, \
-        #     'Should return a redirection'
-        # assert response.url == '/planificaciones/plan_clase/list/', \
-        #     'Should redirect to the list of planes de clase'
-
         # Test success message
 
         # Test plan de clase
@@ -500,6 +497,8 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         assert plan_clase_new.objetivos_generales.last() == objetivo_general_2
         assert plan_clase_new.cursos.first() == curso_1
         assert plan_clase_new.cursos.last() == curso_2
+        assert plan_clase.updated_at != plan_clase_new.updated_at, \
+            'The updated_at field should not be copied'
 
         # Tests elemento curricular
         elemento_curricular_new = plan_clase_new.elementos_curriculares.first()

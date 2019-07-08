@@ -41,7 +41,7 @@
                                 </ul>
                                 </td>
                                 <td class="resp-column-lg">{{ plan.paralelos }}</td>
-                                <td class="resp-column-sm">{{ plan.fecha }}</td>
+                                <td class="resp-column-sm">{{ plan.created_at }}</td>
                                 <td>
                                     <a class="icon edit" href="{% url 'plan_clase_update' pk=plan.pk slug=plan.slug %}" title="Editar plan">
                                         <span class="fas fa-edit"></span>
@@ -61,9 +61,9 @@
                                         </button>
                                     </form>
 
-                                    <form method="POST" action="{% url 'plan_clase_delete' pk=plan.pk %}">
+                                    <form method="POST" action="{% url 'plan_clase_delete' pk=plan.pk %}" id="deletePlanificacionForm">
                                         {% csrf_token %}
-                                        <button class="icon-button delete" type="submit" title="Eliminar Plan">
+                                        <button class="icon-button delete" type="submit" title="Eliminar Plan" id="deletePlanificacion">
                                             <span class="fas fa-trash"></span>
                                         </button>
                                     </form>

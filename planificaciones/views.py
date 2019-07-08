@@ -34,8 +34,18 @@ class PlanificacionesTemplateView(LoginRequiredMixin, TemplateView):
 class PlanClaseListView(LoginRequiredMixin, ListView):
     """Vista para listado de planes de clase"""
     template_name = 'planificaciones/planificacion_list.html'
-    queryset = PlanClase.objects.all()
+    ordering = '-updated_at'
     context_object_name = 'planes'
+
+    def get_queryset(self):
+        queryset = PlanClase.objects.filter(elaborado_por=self.request.user)
+        ordering = self.get_ordering()
+        if ordering:
+            if isinstance(ordering, str):
+                ordering = (ordering,)
+            queryset = queryset.order_by(*ordering)
+
+        return queryset
 
 
 @login_required
@@ -96,6 +106,8 @@ def plan_clase_update(request, pk, slug):
                 form._save_m2m()
                 logger.info('Plan de clase updated for the user: {}.'
                             .format(request.user.email))
+                messages.success(
+                    request, 'Plan de clase actualizado exitosamente.')
                 return redirect('plan_clase_list')
 
         messages.error(request,
