@@ -63,7 +63,7 @@ class PlanDestrezas(Planificacion):
         related_name='planes_destrezas',
         blank=True
     )
-    estrategias_metodológicas = models.TextField(max_length=700)
+    estrategias_metodologicas = models.TextField(max_length=700)
     recursos = models.TextField(max_length=500)
     indicadores = models.ManyToManyField(
         Indicador,

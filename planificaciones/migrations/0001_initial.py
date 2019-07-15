@@ -245,7 +245,7 @@ class Migration(migrations.Migration):
                 ('periodos', models.PositiveIntegerField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'), (6, '6'), (7, '7'), (8, '8'), (9, '9'), (10, '10'), (11, '11'), (12, '12'), (13, '13'), (14, '14'), (15, '15'), (16, '16'), (17, '17'), (18, '18'), (19, '19'), (20, '20'), (21, '21'), (22, '22'), (23, '23'), (24, '24'), (25, '25'), (26, '26'), (27, '27'), (28, '28'), (29, '29'), (30, '30'), (31, '31'), (32, '32'), (33, '33'), (34, '34'), (35, '35'), (36, '36'), (37, '37'), (38, '38'), (39, '39'), (40, '40')], default=1, validators=[django.core.validators.MaxValueValidator(40)])),
                 ('semana_inicio', models.CharField(max_length=60)),
                 ('ejes_transversales', models.TextField(max_length=255)),
-                ('estrategias_metodológicas', models.TextField(max_length=700)),
+                ('estrategias_metodologicas', models.TextField(max_length=700)),
                 ('recursos', models.TextField(max_length=500)),
                 ('actividades_evaluacion', models.TextField(max_length=600)),
                 ('necesidad_adaptacion', models.TextField(blank=True, max_length=600, null=True)),

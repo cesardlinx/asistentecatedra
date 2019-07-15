@@ -4,7 +4,7 @@ from mixer.backend.django import mixer
 from planificaciones.forms import (ElementoCurricularFormset,
                                    DesarrolloUnidadFormset,
                                    ActividadAprendizajeFormset,
-                                #    PlanDestrezasForm,
+                                   PlanDestrezasForm,
                                    PlanAnualForm,
                                    PlanUnidadForm,
                                    PlanClaseForm)
@@ -402,7 +402,7 @@ class TestPlanDestrezasForm(PlanificacionesTestCase):
             'name': 'Plan de Unidad1',
             'ano_lectivo': '2019-2020',
             'docentes': 'David Padilla, Tatiana Carpio',
-            'unidad': self.unidad_1,
+            'unidad': self.unidad_1.id,
             'asignatura': self.asignatura.id,
             'curso': self.curso_1.id,
             'paralelos': 'A y C',
