@@ -1,6 +1,5 @@
 import json
 import logging
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,7 +13,9 @@ from django.views import View
 from django.views.generic import DeleteView
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
-from .forms import ElementoCurricularFormset, PlanClaseForm
+from planificaciones.forms.plan_clase_form import PlanClaseForm
+from planificaciones.forms.elemento_curricular_formset import \
+    ElementoCurricularFormset
 from .models.asignatura import Asignatura
 from .models.destreza import Destreza
 from .models.elemento_curricular import ElementoCurricular

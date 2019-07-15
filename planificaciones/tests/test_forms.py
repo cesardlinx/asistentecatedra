@@ -1,13 +1,18 @@
 import pytest
 from django.test import TestCase
 from mixer.backend.django import mixer
-from planificaciones.forms import (ElementoCurricularFormset,
-                                   DesarrolloUnidadFormset,
-                                   ActividadAprendizajeFormset,
-                                   PlanDestrezasForm,
-                                   PlanAnualForm,
-                                   PlanUnidadForm,
-                                   PlanClaseForm)
+
+from planificaciones.forms.elemento_curricular_formset import \
+    ElementoCurricularFormset
+from planificaciones.forms.desarrollo_unidad_formset import \
+    DesarrolloUnidadFormset
+from planificaciones.forms.actividad_aprendizaje_formset import \
+    ActividadAprendizajeFormset
+from planificaciones.forms.plan_destrezas_form import PlanDestrezasForm
+from planificaciones.forms.plan_anual_form import PlanAnualForm
+from planificaciones.forms.plan_unidad_form import PlanUnidadForm
+from planificaciones.forms.plan_clase_form import PlanClaseForm
+
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.curso import Curso
 from planificaciones.models.objetivo import Objetivo
