@@ -222,7 +222,7 @@ def load_objetivos(request):
 
 
 @login_required
-def load_destrezas(request):
+def load_destrezas_select(request):
     """Regresa las destrezas por asignatura y cursos si la solicitud
     fue via ajax"""
     asignatura_id = request.GET.get('asignatura')

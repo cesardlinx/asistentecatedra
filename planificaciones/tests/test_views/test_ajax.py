@@ -124,7 +124,7 @@ class TestLoadObjetivosView(AjaxTestCase):
             response, self.objetivo_general.codigo)
 
 
-class TestLoadDestrezasView(AjaxTestCase):
+class TestLoadDestrezasSelectView(AjaxTestCase):
 
     def setUp(self):
         """Creates data for testing and user"""
@@ -136,13 +136,13 @@ class TestLoadDestrezasView(AjaxTestCase):
         request = RequestFactory().get('/',
                                        HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         request.user = AnonymousUser()
-        response = views.load_destrezas(request)
+        response = views.load_destrezas_select(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_not_ajax(self):
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.load_destrezas(request)
+        response = views.load_destrezas_select(request)
         assert response.status_code == 200, 'Authenticated user can access'
         assert str(response.content) == "b'<option>---------</option>'"
 
@@ -157,7 +157,7 @@ class TestLoadDestrezasView(AjaxTestCase):
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         request.user = self.user
-        response = views.load_destrezas(request)
+        response = views.load_destrezas_select(request)
         assert response.status_code == 200, 'Authenticated user can access'
         self.assertContains(
             response, self.destreza.codigo)

@@ -65,11 +65,11 @@ class TestPlanificacionesUrls:
         assert view.func == views.load_objetivos, \
             'Should resolve to the view load_objetivos'
 
-    def test_ajax_load_destrezas(self):
-        path = reverse('ajax_load_destrezas')
+    def test_ajax_load_destrezas_select(self):
+        path = reverse('ajax_load_destrezas_select')
         view = resolve(path)
-        assert view.func == views.load_destrezas, \
-            'Should resolve to the view load_destrezas'
+        assert view.func == views.load_destrezas_select, \
+            'Should resolve to the view load_destrezas_select'
 
     def test_ajax_load_indicadores(self):
         path = reverse('ajax_load_indicadores')

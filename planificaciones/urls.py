@@ -19,8 +19,8 @@ urlpatterns = [
          name="ajax_load_cursos"),
     path('plan_clase/ajax/objetivos/', views.load_objetivos,
          name="ajax_load_objetivos"),
-    path('plan_clase/ajax/destrezas/', views.load_destrezas,
-         name="ajax_load_destrezas"),
+    path('plan_clase/ajax/destrezas_select/', views.load_destrezas_select,
+         name="ajax_load_destrezas_select"),
     path('plan_clase/ajax/indicadores/', views.load_indicadores,
          name="ajax_load_indicadores"),
 ]

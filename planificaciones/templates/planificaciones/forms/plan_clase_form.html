@@ -15,7 +15,7 @@
         <form method="post" id="planClaseForm"
             load-cursos-url={% url 'ajax_load_cursos' %}
             load-objetivos-url={% url 'ajax_load_objetivos' %}
-            load-destrezas-url={% url 'ajax_load_destrezas' %}
+            load-destrezas-url={% url 'ajax_load_destrezas_select' %}
             load-indicadores-url={% url 'ajax_load_indicadores' %}
             novalidate>
             {% csrf_token %}
