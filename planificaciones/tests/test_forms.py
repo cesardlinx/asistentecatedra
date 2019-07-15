@@ -3,10 +3,10 @@ from django.test import TestCase
 from mixer.backend.django import mixer
 from planificaciones.forms import (ElementoCurricularFormset,
                                    DesarrolloUnidadFormset,
-                                #    ActividadesAprendizajeFormset,
+                                   ActividadAprendizajeFormset,
                                 #    PlanDestrezasForm,
                                    PlanAnualForm,
-                                #    PlanUnidadForm,
+                                   PlanUnidadForm,
                                    PlanClaseForm)
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.curso import Curso
@@ -305,7 +305,7 @@ class TestPlanUnidadForm(PlanificacionesTestCase):
             'name': 'Plan de Unidad1',
             'ano_lectivo': '2019-2020',
             'docentes': 'David Padilla, Tatiana Carpio',
-            'unidad': self.unidad_1,
+            'unidad': self.unidad_1.id,
             'asignatura': self.asignatura.id,
             'curso': self.curso_1.id,
             'paralelos': 'A y C',
@@ -339,6 +339,9 @@ class TestActividadesAprendizajeFormset(PlanificacionesTestCase):
     def setUp(self):
         super().setUp()
         self.data = {
+            'asignatura': self.asignatura.id,
+            'curso': self.curso_1.id,
+            # Formset Actividades Aprendizaje 1
             'actividades_aprendizaje-TOTAL_FORMS': '2',
             'actividades_aprendizaje-INITIAL_FORMS': '0',
             'actividades_aprendizaje-MIN_NUM_FORMS': '0',
@@ -356,7 +359,7 @@ class TestActividadesAprendizajeFormset(PlanificacionesTestCase):
                 self.indicador_2.id
             ],
             'actividades_aprendizaje-0-instrumentos_evaluacion': 'lorem ipsum',
-
+            # Formset Actividades Aprendizaje 2
             'actividades_aprendizaje-1-destrezas': [
                 self.destreza_1.id,
                 self.destreza_2.id
@@ -373,21 +376,21 @@ class TestActividadesAprendizajeFormset(PlanificacionesTestCase):
         }
 
     def test_valid_data(self):
-        formset = ActividadesAprendizajeFormset(self.data)
+        formset = ActividadAprendizajeFormset(self.data)
         assert formset.is_valid() is True, 'The formset should be valid'
 
     def test_empty_data(self):
         with pytest.raises(ValidationError,
                            match='Los datos de ManagementForm faltan o han '
                                  'sido manipulados'):
-            formset = ActividadesAprendizajeFormset({})
+            formset = ActividadAprendizajeFormset({})
             formset.is_valid()
 
     def test_invalid_data(self):
         data = self.data
         data['asignatura'] = 'lorem ipsum'
         data['actividades_aprendizaje-0-destrezas'] = 'lorem ipsum'
-        formset = ActividadesAprendizajeFormset(data)
+        formset = ActividadAprendizajeFormset(data)
         assert formset.is_valid() is False, 'The formset should be invalid'
 
 
