@@ -6,6 +6,15 @@ from .objetivo_general import ObjetivoGeneral
 from .objetivo import Objetivo
 
 
+class UnidadManager(models.Manager):
+    def get_unidades_by_asignatura_curso(self, asignatura_id, curso_id):
+        unidades = super().get_queryset().filter(
+            asignatura__id=asignatura_id,
+            curso__id=curso_id,
+        ).distinct('pk')
+        return unidades
+
+
 class Unidad(models.Model):
     numero_unidad = models.PositiveIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(12)]
@@ -31,6 +40,7 @@ class Unidad(models.Model):
         related_name='unidades',
         blank=True,
     )
+    objects = UnidadManager()
 
     class Meta:
         db_table = 'unidades'

@@ -188,6 +188,16 @@ class TestUnidad:
         assert unidad._meta.verbose_name_plural == 'unidades', \
             'The plural name should be "unidades"'
 
+    def test_get_unidades_by_asignatura_curso(self):
+        curso = mixer.blend(Curso)
+        asignatura = mixer.blend(Asignatura)
+        unidad = mixer.blend(Unidad, curso=curso, asignatura=asignatura)
+
+        unidades = Unidad.objects.get_unidades_by_asignatura_curso(
+            asignatura.id, curso.id)
+        assert unidad in unidades, \
+            'Should get unidades by asignatura and cursos'
+
 
 class TestDestreza:
     def test_model(self):
@@ -238,6 +248,20 @@ class TestCriterioEvaluacion:
             'The table should be named "criterios_evaluacion"'
         assert criterio._meta.verbose_name_plural == 'criterios de evaluación'
 
+    def test_get_criterios_by_destrezas(self):
+        destreza_1 = mixer.blend(Destreza)
+        destreza_2 = mixer.blend(Destreza)
+        criterio_1 = mixer.blend(CriterioEvaluacion)
+        criterio_2 = mixer.blend(CriterioEvaluacion)
+        criterio_1.destrezas.add(destreza_1)
+        criterio_2.destrezas.add(destreza_2)
+
+        criterios = CriterioEvaluacion.objects.get_criterios_by_destrezas(
+            [destreza_1.pk, destreza_2.pk])
+        # Should get the "criterios de evaluacion" by "destreza"
+        assert criterio_1 in criterios
+        assert criterio_2 in criterios
+
 
 class TestIndicador:
     def test_model(self):
@@ -266,6 +290,18 @@ class TestIndicador:
             destreza.id)
         assert indicador in indicadores, \
             'Should get indicadores by destreza'
+
+    def test_get_indicadores_by_criterios(self):
+        criterio_1 = mixer.blend(CriterioEvaluacion)
+        criterio_2 = mixer.blend(CriterioEvaluacion)
+        indicador_1 = mixer.blend(Indicador, criterio_evaluacion=criterio_1)
+        indicador_2 = mixer.blend(Indicador, criterio_evaluacion=criterio_2)
+
+        indicadores = Indicador.objects.get_indicadores_by_criterios(
+            [criterio_1.pk, criterio_2.pk])
+        # Should get the "indicadores" by "criterios de evaluación"
+        assert indicador_1 in indicadores
+        assert indicador_2 in indicadores
 
 
 class TestPlanClase:

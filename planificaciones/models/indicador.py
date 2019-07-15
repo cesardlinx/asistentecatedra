@@ -9,6 +9,17 @@ class IndicadorManager(models.Manager):
         ).distinct('codigo')
         return indicadores
 
+    def get_indicadores_by_criterios(self, criterios_id):
+
+        indicadores = super().get_queryset().none()
+        for idx, criterio_id in enumerate(criterios_id):
+            indicadores_query = super().get_queryset().filter(
+                criterio_evaluacion__id=criterio_id
+            ).order_by('pk', 'codigo').distinct('pk')
+            indicadores = indicadores | indicadores_query
+
+        return indicadores
+
 
 class Indicador(models.Model):
     description = models.TextField(max_length=700)

@@ -6,6 +6,19 @@ from django.db import models
 from django.utils.text import Truncator
 
 
+class CriterioManager(models.Manager):
+    def get_criterios_by_destrezas(self, destrezas_id):
+
+        criterios = super().get_queryset().none()
+        for idx, destreza_id in enumerate(destrezas_id):
+            criterios_query = super().get_queryset().filter(
+                destrezas__id=destreza_id
+            ).order_by('pk', 'codigo').distinct('pk')
+            criterios = criterios | criterios_query
+
+        return criterios
+
+
 class CriterioEvaluacion(models.Model):
     description = models.TextField(max_length=700)
     codigo = models.CharField(max_length=15)
@@ -27,6 +40,7 @@ class CriterioEvaluacion(models.Model):
         Destreza,
         related_name='criterios_evaluacion',
     )
+    objects = CriterioManager()
 
     class Meta:
         db_table = 'criterios_evaluacion'
