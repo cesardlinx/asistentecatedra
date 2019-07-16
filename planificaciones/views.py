@@ -174,6 +174,66 @@ class PlanClaseDuplicateView(LoginRequiredMixin, View):
         return redirect('plan_clase_list')
 
 
+class PlanAnualListView(ListView):
+    pass
+
+
+def plan_anual_create(request):
+    pass
+
+
+def plan_anual_update(request):
+    pass
+
+
+class PlanAnualDeleteView(DeleteView):
+    pass
+
+
+class PlanAnualDuplicateView(View):
+    pass
+
+
+class PlanUnidadListView(ListView):
+    pass
+
+
+def plan_unidad_create(request):
+    pass
+
+
+def plan_unidad_update(request):
+    pass
+
+
+class PlanUnidadDeleteView(DeleteView):
+    pass
+
+
+class PlanUnidadDuplicateView(View):
+    pass
+
+
+class PlanDestrezasListView(ListView):
+    pass
+
+
+def plan_destrezas_create(request):
+    pass
+
+
+def plan_destrezas_update(request):
+    pass
+
+
+class PlanDestrezasDeleteView(DeleteView):
+    pass
+
+
+class PlanDestrezasDuplicateView(View):
+    pass
+
+
 @login_required
 def load_cursos(request):
     """Regresa los cursos por asignatura si la solicitud fue via ajax"""
@@ -187,6 +247,10 @@ def load_cursos(request):
             context)
     else:
         return HttpResponse('')
+
+
+def load_unidades(request):
+    pass
 
 
 @login_required
@@ -222,7 +286,7 @@ def load_objetivos(request):
 
 
 @login_required
-def load_destrezas_select(request):
+def load_destrezas(request):
     """Regresa las destrezas por asignatura y cursos si la solicitud
     fue via ajax"""
     asignatura_id = request.GET.get('asignatura')
@@ -237,6 +301,10 @@ def load_destrezas_select(request):
             context)
     else:
         return HttpResponse('<option>---------</option>')
+
+
+def load_criterios(request):
+    pass
 
 
 @login_required

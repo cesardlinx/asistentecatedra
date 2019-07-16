@@ -13,10 +13,10 @@
             <h3 class="main-title">Nuevo Plan de Clase</h3>
         </div>
         <form method="post" id="planClaseForm"
-            load-cursos-url={% url 'ajax_load_cursos' %}
-            load-objetivos-url={% url 'ajax_load_objetivos' %}
-            load-destrezas-url={% url 'ajax_load_destrezas_select' %}
-            load-indicadores-url={% url 'ajax_load_indicadores' %}
+            load-cursos-url={% url 'ajax_load_cursos' template='checkbox' %}
+            load-objetivos-url={% url 'ajax_load_objetivos' option='curso' %}
+            load-destrezas-url={% url 'ajax_load_destrezas' template='select' %}
+            load-indicadores-url={% url 'ajax_load_indicadores' option='destreza' %}
             novalidate>
             {% csrf_token %}
             {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
