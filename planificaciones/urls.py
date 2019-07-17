@@ -53,19 +53,21 @@ urlpatterns = [
 
      # Ajax urls
      # templates: select, checkbox
-     path('ajax/cursos/<str:template>/', views.load_cursos,
+     path('ajax/cursos/<str:template>/', views.LoadCursosView.as_view(),
           name="ajax_load_cursos"),
-     path('ajax/unidades/', views.load_unidades,
+     path('ajax/unidades/', views.LoadUnidadesView.as_view(),
           name="ajax_load_unidades"),
      # options: area, curso, unidad
-     path('ajax/objetivos/<str:option>/', views.load_objetivos,
+     path('ajax/objetivos/<str:option>/', views.LoadObjetivosView.as_view(),
           name="ajax_load_objetivos"),
      # templates: select, checkbox
-     path('ajax/destrezas/<str:template>/', views.load_destrezas,
+     path('ajax/destrezas/<str:template>/<str:formset>/',
+          views.LoadDestrezasView.as_view(),
           name="ajax_load_destrezas"),
-     path('ajax/criterios/', views.load_criterios,
+     path('ajax/criterios/', views.LoadCriteriosView.as_view(),
           name="ajax_load_criterios"),
      # options: destreza, criterio
-     path('ajax/indicadores/<str:option>/', views.load_indicadores,
+     path('ajax/indicadores/<str:option>/<str:formset>/',
+          views.LoadIndicadoresView.as_view(),
           name="ajax_load_indicadores"),
 ]

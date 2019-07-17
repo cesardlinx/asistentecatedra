@@ -189,36 +189,38 @@ class TestAjaxUrls:
     def test_ajax_load_cursos(self):
         path = reverse('ajax_load_cursos', kwargs={'template': 'select'})
         view = resolve(path)
-        assert view.func == views.load_cursos, \
+        assert view.func.view_class == views.LoadCursosView, \
             'Should resolve to the view load_cursos'
 
     def test_ajax_load_unidades(self):
         path = reverse('ajax_load_unidades')
         view = resolve(path)
-        assert view.func == views.load_unidades, \
+        assert view.func.view_class == views.LoadUnidadesView, \
             'Should resolve to the view load_unidades'
 
     def test_ajax_load_objetivos(self):
         path = reverse('ajax_load_objetivos', kwargs={'option': 'area'})
         view = resolve(path)
-        assert view.func == views.load_objetivos, \
+        assert view.func.view_class == views.LoadObjetivosView, \
             'Should resolve to the view load_objetivos'
 
     def test_ajax_load_destrezas(self):
-        path = reverse('ajax_load_destrezas', kwargs={'template': 'select'})
+        path = reverse('ajax_load_destrezas',
+                       kwargs={'template': 'select', 'formset': 'somename'})
         view = resolve(path)
-        assert view.func == views.load_destrezas, \
+        assert view.func.view_class == views.LoadDestrezasView, \
             'Should resolve to the view load_destrezas'
 
     def test_ajax_load_criterios(self):
         path = reverse('ajax_load_criterios')
         view = resolve(path)
-        assert view.func == views.load_criterios, \
+        assert view.func.view_class == views.LoadCriteriosView, \
             'Should resolve to the view load_criterios'
 
     def test_ajax_load_indicadores(self):
-        path = reverse('ajax_load_indicadores', kwargs={'option': 'destreza'})
+        path = reverse('ajax_load_indicadores',
+                       kwargs={'option': 'destreza', 'formset': 'somename'})
         view = resolve(path)
-        assert view.func == views.load_indicadores, \
+        assert view.func.view_class == views.LoadIndicadoresView, \
             'Should resolve to the view load_indicadores'
 

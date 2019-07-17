@@ -1,7 +1,4 @@
 import pytest
-from django.test import TestCase
-from mixer.backend.django import mixer
-
 from planificaciones.forms.elemento_curricular_formset import \
     ElementoCurricularFormset
 from planificaciones.forms.desarrollo_unidad_formset import \
@@ -12,66 +9,10 @@ from planificaciones.forms.plan_destrezas_form import PlanDestrezasForm
 from planificaciones.forms.plan_anual_form import PlanAnualForm
 from planificaciones.forms.plan_unidad_form import PlanUnidadForm
 from planificaciones.forms.plan_clase_form import PlanClaseForm
+from .planificaciones_testcase import PlanificacionesTestCase
 
-from planificaciones.models.asignatura import Asignatura
-from planificaciones.models.curso import Curso
-from planificaciones.models.objetivo import Objetivo
-from planificaciones.models.objetivo_general import ObjetivoGeneral
-from planificaciones.models.indicador import Indicador
-from planificaciones.models.destreza import Destreza
-from planificaciones.models.unidad import Unidad
-from planificaciones.models.subnivel import Subnivel
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 from django.core.exceptions import ValidationError
 pytestmark = pytest.mark.django_db
-
-
-class PlanificacionesTestCase(TestCase):
-    def setUp(self):
-        subnivel = mixer.blend(Subnivel)
-        self.curso_1 = mixer.blend(Curso, subnivel=subnivel)
-        self.curso_2 = mixer.blend(Curso, subnivel=subnivel)
-        self.asignatura = mixer.blend(Asignatura)
-        self.asignatura.cursos.add(self.curso_1, self.curso_2)
-
-        self.unidad_1 = mixer.blend(Unidad, curso=self.curso_1,
-                                    asignatura=self.asignatura)
-        self.unidad_2 = mixer.blend(Unidad, curso=self.curso_2,
-                                    asignatura=self.asignatura)
-        self.objetivo_1 = mixer.blend(Objetivo, asignatura=self.asignatura)
-        self.objetivo_2 = mixer.blend(Objetivo, asignatura=self.asignatura)
-        self.general_1 = mixer.blend(ObjetivoGeneral,
-                                     area=self.asignatura.area)
-        self.general_2 = mixer.blend(ObjetivoGeneral,
-                                     area=self.asignatura.area)
-
-        self.unidad_1.objetivos.set([self.objetivo_1, self.objetivo_2])
-        self.unidad_1.objetivos_generales.set([self.general_1, self.general_2])
-
-        self.unidad_2.objetivos.set([self.objetivo_1, self.objetivo_2])
-        self.unidad_2.objetivos_generales.set([self.general_1, self.general_2])
-
-        self.destreza_1 = mixer.blend(Destreza, asignatura=self.asignatura,
-                                      subnivel=subnivel)
-        self.destreza_2 = mixer.blend(Destreza, asignatura=self.asignatura,
-                                      subnivel=subnivel)
-        self.criterio_1 = mixer.blend(CriterioEvaluacion,
-                                      asignatura=self.asignatura,
-                                      subnivel=subnivel)
-        self.criterio_1.destrezas.add(self.destreza_1)
-        self.indicador_1 = mixer.blend(Indicador,
-                                       criterio_evaluacion=self.criterio_1)
-        self.indicador_2 = mixer.blend(Indicador,
-                                       criterio_evaluacion=self.criterio_1)
-
-        self.criterio_2 = mixer.blend(CriterioEvaluacion,
-                                      asignatura=self.asignatura,
-                                      subnivel=subnivel)
-        self.criterio_2.destrezas.add(self.destreza_2)
-        self.indicador_3 = mixer.blend(Indicador,
-                                       criterio_evaluacion=self.criterio_2)
-        self.indicador_4 = mixer.blend(Indicador,
-                                       criterio_evaluacion=self.criterio_2)
 
 
 class TestPlanClaseForm(PlanificacionesTestCase):
@@ -128,12 +69,12 @@ class TestElementoCurricularFormset(PlanificacionesTestCase):
             'elementos_curriculares-MAX_NUM_FORMS': '1000',
             'elementos_curriculares-0-destreza': self.destreza_1.id,
             'elementos_curriculares-0-conocimientos_asociados': 'lorem ipsum',
-            'elementos_curriculares-0-indicadores_logro': [
+            'elementos_curriculares-0-indicadores': [
                 self.indicador_1.id, self.indicador_2.id],
             'elementos_curriculares-0-actividades_evaluacion': 'lorem ipsum',
             'elementos_curriculares-1-destreza': self.destreza_1.id,
             'elementos_curriculares-1-conocimientos_asociados': 'lorem ipsum',
-            'elementos_curriculares-1-indicadores_logro': [
+            'elementos_curriculares-1-indicadores': [
                 self.indicador_1.id, self.indicador_2.id],
             'elementos_curriculares-1-actividades_evaluacion': 'lorem ipsum',
 

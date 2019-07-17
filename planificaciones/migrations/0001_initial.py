@@ -338,7 +338,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='elementocurricular',
-            name='indicadores_logro',
+            name='indicadores',
             field=models.ManyToManyField(related_name='elementos_curriculares', to='planificaciones.Indicador'),
         ),
         migrations.AddField(

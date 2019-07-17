@@ -169,7 +169,7 @@ $(document).ready(function() {
 
          var idDestrezas = $(this).attr('id');
          var pattern = /(id_elementos_curriculares-(\d+)-)destreza/i
-         var idIndicadores = pattern.exec(idDestrezas)[1] + 'indicadores_logro'
+         var idIndicadores = pattern.exec(idDestrezas)[1] + 'indicadores'
 
          var destrezaId = $(`#${idDestrezas}`).val();
          var numeroFila = pattern.exec(idDestrezas)[2];
@@ -262,7 +262,7 @@ $(document).ready(function() {
                             </div>
                         </td>
                         <td class="indicadores elementos-form" rowspan="1">
-                            <ul id="id_elementos_curriculares-${numeroFila}-indicadores_logro"></ul>
+                            <ul id="id_elementos_curriculares-${numeroFila}-indicadores"></ul>
                         </td>
                         <td rowspan="1" class="elementos-form">
                             <div class="cell-wrapper-md">

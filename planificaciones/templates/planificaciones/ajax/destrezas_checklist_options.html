@@ -1,0 +1,11 @@
+{% for destreza in destrezas %}
+    <li>
+        <input type="checkbox" class="custom-checkbox"
+            name="{{ formset_name }}-{{ numero_fila }}-destrezas"
+            value="{{ destreza.pk }}"
+            id="id_{{ formset_name }}-{{ numero_fila }}-destrezas_{{ forloop.counter0 }}">
+        <label class="check-label" for="id_{{ formset_name }}-{{ numero_fila }}-destrezas_{{ forloop.counter0 }}">
+            {{ destreza.codigo }} - {{ destreza.description }}
+        </label>
+    </li>
+{% endfor %}

@@ -1,110 +1,144 @@
 import pytest
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory
 from django.contrib.auth.models import AnonymousUser
-from mixer.backend.django import mixer
 from planificaciones import views
-from planificaciones.models.asignatura import Asignatura
-from planificaciones.models.curso import Curso
-from planificaciones.models.objetivo import Objetivo
-from planificaciones.models.objetivo_general import ObjetivoGeneral
-from planificaciones.models.indicador import Indicador
-from planificaciones.models.destreza import Destreza
-from planificaciones.models.unidad import Unidad
-from planificaciones.models.subnivel import Subnivel
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
-from django.contrib.auth import get_user_model
-User = get_user_model()
+from planificaciones.tests.planificaciones_testcase import \
+    PlanificacionesTestCase
 
 pytestmark = pytest.mark.django_db
 
 
-class AjaxTestCase(TestCase):
-    def setUp(self):
-        """Creates data for testing Ajax views"""
-        subnivel = mixer.blend(Subnivel)
-        self.curso_1 = mixer.blend(Curso, subnivel=subnivel)
-        self.curso_2 = mixer.blend(Curso, subnivel=subnivel)
-        self.asignatura = mixer.blend(Asignatura)
-        self.asignatura.cursos.add(self.curso_1, self.curso_2)
-        unidad_1 = mixer.blend(Unidad, curso=self.curso_1,
-                               asignatura=self.asignatura)
-        unidad_2 = mixer.blend(Unidad, curso=self.curso_2,
-                               asignatura=self.asignatura)
-        self.objetivo_1 = mixer.blend(Objetivo, asignatura=self.asignatura)
-        self.objetivo_2 = mixer.blend(Objetivo, asignatura=self.asignatura)
-        self.objetivo_general = mixer.blend(ObjetivoGeneral,
-                                            area=self.asignatura.area)
-        unidad_1.objetivos.add(self.objetivo_1)
-        unidad_2.objetivos.add(self.objetivo_2)
-        unidad_1.objetivos_generales.add(self.objetivo_general)
-        self.destreza = mixer.blend(Destreza, asignatura=self.asignatura,
-                                    subnivel=subnivel)
-        criterio = mixer.blend(CriterioEvaluacion, asignatura=self.asignatura,
-                               subnivel=subnivel)
-        criterio.destrezas.add(self.destreza)
-        self.indicador_1 = mixer.blend(Indicador, criterio_evaluacion=criterio)
-        self.indicador_2 = mixer.blend(Indicador, criterio_evaluacion=criterio)
-
-
-class TestLoadCursosView(AjaxTestCase):
-
-    def setUp(self):
-        """Creates data for testing and user"""
-        super().setUp()
-        self.user = mixer.blend(User)
+class TestLoadCursosView(PlanificacionesTestCase):
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/',
                                        HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         request.user = AnonymousUser()
-        response = views.load_cursos(request)
+        response = views.LoadCursosView.as_view()(request,
+                                                  template='checklist')
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_not_ajax(self):
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.load_cursos(request)
+        response = views.LoadCursosView.as_view()(request,
+                                                  template='checklist')
         assert response.status_code == 200, 'Authenticated user can access'
+        assert response.content == b'', 'Response should be empty'
 
-    def test_auth_user(self):
-        """Tests that an authenticated user can access the view"""
+    def test_failed_when_bad_template_name(self):
+        """
+        Tests that when there is a bad template name
+        will return an empty response
+        """
         request = RequestFactory().get('/',
                                        {'asignatura': self.asignatura.id},
                                        HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         request.user = self.user
-        response = views.load_cursos(request)
+        response = views.LoadCursosView.as_view()(request, template='bad')
         assert response.status_code == 200, 'Authenticated user can access'
+        assert response.content == b'', 'Response should be empty'
+
+    def test_success_when_checklist_template(self):
+        """
+        Tests that an authenticated user can access the view and
+        the inputs are checkboxes
+        """
+        request = RequestFactory().get('/',
+                                       {'asignatura': self.asignatura.id},
+                                       HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        request.user = self.user
+        response = views.LoadCursosView.as_view()(request,
+                                                  template='checklist')
+        assert response.status_code == 200, 'Authenticated user can access'
+        # The template should contain checkboxes
+        self.assertContains(response, '<input type="checkbox" name="cursos"')
+        self.assertContains(
+            response, 'value="{}"'.format(self.curso_1.id))
+        self.assertContains(
+            response, 'value="{}"'.format(self.curso_2.id))
+
+    def test_success_when_select_template(self):
+        """
+        Tests that an authenticated user can access the view and
+        the field is a select input
+        """
+        request = RequestFactory().get('/',
+                                       {'asignatura': self.asignatura.id},
+                                       HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        request.user = self.user
+        response = views.LoadCursosView.as_view()(request, template='select')
+        assert response.status_code == 200, 'Authenticated user can access'
+        # The template should contain the options
+        self.assertContains(response,
+                            '<option value="{}"'.format(self.curso_1.id))
+        self.assertContains(response,
+                            '<option value="{}"'.format(self.curso_2.id))
         self.assertContains(
             response, 'value="{}"'.format(self.curso_1.id))
         self.assertContains(
             response, 'value="{}"'.format(self.curso_2.id))
 
 
-class TestLoadObjetivosView(AjaxTestCase):
-
-    def setUp(self):
-        """Creates data for testing and user"""
-        super().setUp()
-        self.user = mixer.blend(User)
+class TestLoadUnidadesView(PlanificacionesTestCase):
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/',
                                        HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         request.user = AnonymousUser()
-        response = views.load_objetivos(request)
+        response = views.LoadUnidadesView.as_view()(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_not_ajax(self):
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.load_objetivos(request)
+        response = views.LoadUnidadesView.as_view()(request)
+        assert response.status_code == 200, 'Authenticated user can access'
+        assert response.content == b'', 'Response should be empty'
+
+    def test_success(self):
+        """
+        Tests that an authenticated user can access the view
+        """
+        request = RequestFactory().get(
+            '/',
+            {
+                'asignatura': self.asignatura.id,
+                'curso': self.curso_1.id
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        request.user = self.user
+        response = views.LoadUnidadesView.as_view()(request)
+        assert response.status_code == 200, 'Authenticated user can access'
+        self.assertContains(
+            response, 'value="{}"'.format(self.unidad_1.id))
+
+
+class TestLoadObjetivosView(PlanificacionesTestCase):
+
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/',
+                                       HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        request.user = AnonymousUser()
+        response = views.LoadObjetivosView.as_view()(request, option='curso')
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_not_ajax(self):
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.LoadObjetivosView.as_view()(request, option='curso')
         assert response.status_code == 200, 'Authenticated user can access'
         self.assertContains(response, '{\\"allowed\\": false}')
 
-    def test_auth_user(self):
-        """Tests that an authenticated user can access the view"""
+    def test_failed_when_bad_option(self):
+        """
+        Tests that when there is a bad option
+        will return an empty response
+        """
         request = RequestFactory().get(
             '/',
             {
@@ -114,89 +148,303 @@ class TestLoadObjetivosView(AjaxTestCase):
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         request.user = self.user
-        response = views.load_objetivos(request)
+        response = views.LoadObjetivosView.as_view()(request, option='bad')
+        assert response.status_code == 200, 'Authenticated user can access'
+        self.assertContains(response, '{\\"allowed\\": false}')
+
+    def test_success_when_option_is_area(self):
+        """
+        Tests when the option is area, should search objectives by area
+        """
+        request = RequestFactory().get(
+            '/',
+            {
+                'asignatura': self.asignatura.id,
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        request.user = self.user
+        response = views.LoadObjetivosView.as_view()(request, option='area')
+        assert response.status_code == 200, 'Authenticated user can access'
+        self.assertContains(
+            response, self.general_1.codigo)
+
+    def test_success_when_option_is_curso(self):
+        """
+        Tests when the option is curso, should search objectives by course
+        """
+        request = RequestFactory().get(
+            '/',
+            {
+                'asignatura': self.asignatura.id,
+                'cursos[]': [self.curso_1.id, self.curso_2.id]
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        request.user = self.user
+        response = views.LoadObjetivosView.as_view()(request, option='curso')
         assert response.status_code == 200, 'Authenticated user can access'
         self.assertContains(
             response, self.objetivo_1.codigo)
         self.assertContains(
             response, self.objetivo_2.codigo)
         self.assertContains(
-            response, self.objetivo_general.codigo)
+            response, self.general_1.codigo)
 
-
-class TestLoadDestrezasView(AjaxTestCase):
-
-    def setUp(self):
-        """Creates data for testing and user"""
-        super().setUp()
-        self.user = mixer.blend(User)
-
-    def test_anonymous(self):
-        """Tests that an anonymous user can't access the view"""
-        request = RequestFactory().get('/',
-                                       HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        request.user = AnonymousUser()
-        response = views.load_destrezas(request)
-        assert 'login' in response.url, 'Should not be callable by anonymous'
-
-    def test_not_ajax(self):
-        request = RequestFactory().get('/')
-        request.user = self.user
-        response = views.load_destrezas(request)
-        assert response.status_code == 200, 'Authenticated user can access'
-        assert str(response.content) == "b'<option>---------</option>'"
-
-    def test_auth_user(self):
-        """Tests that an authenticated user can access the view"""
+    def test_success_when_option_is_unidad(self):
+        """
+        Tests when the option is unidad, should search objectives by unit
+        """
         request = RequestFactory().get(
             '/',
             {
-                'asignatura': self.asignatura.id,
-                'cursos[]': [self.curso_1.id, self.curso_2.id]
+                'unidad': self.unidad_1.id,
             },
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         request.user = self.user
-        response = views.load_destrezas(request)
+        response = views.LoadObjetivosView.as_view()(request, option='unidad')
         assert response.status_code == 200, 'Authenticated user can access'
         self.assertContains(
-            response, self.destreza.codigo)
+            response, self.objetivo_1.codigo)
+        self.assertContains(
+            response, self.objetivo_2.codigo)
+        self.assertContains(
+            response, self.general_1.codigo)
 
 
-class TestLoadIndicadoresView(AjaxTestCase):
-
-    def setUp(self):
-        """Creates data for testing and user"""
-        super().setUp()
-        self.user = mixer.blend(User)
+class TestLoadDestrezasView(PlanificacionesTestCase):
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/',
                                        HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         request.user = AnonymousUser()
-        response = views.load_indicadores(request)
+        response = views.LoadDestrezasView.as_view()(request,
+                                                     template='checklist',
+                                                     formset='somename')
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_not_ajax(self):
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.load_indicadores(request)
+        response = views.LoadDestrezasView.as_view()(request,
+                                                     template='checklist',
+                                                     formset='somename')
         assert response.status_code == 200, 'Authenticated user can access'
+        assert response.content == b'', 'Response should be empty'
 
-    def test_auth_user(self):
-        """Tests that an authenticated user can access the view"""
+    def test_failed_when_bad_template(self):
+        """
+        Tests that when there is a bad template name
+        will return an empty response
+        """
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.LoadDestrezasView.as_view()(request,
+                                                     template='checklist',
+                                                     formset='somename')
+        assert response.status_code == 200, 'Authenticated user can access'
+        assert response.content == b'', 'Response should be empty'
+
+    def test_success_when_template_is_checklist(self):
+        """
+        Tests that an authenticated user can access the view and
+        the inputs are checkboxes
+        """
         request = RequestFactory().get(
             '/',
             {
-                'destreza': self.destreza.id,
+                'asignatura': self.asignatura.id,
+                'cursos[]': self.curso_1.id,
                 'numero_fila': 0
             },
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         request.user = self.user
-        response = views.load_indicadores(request)
+        response = views.LoadDestrezasView.as_view()(request,
+                                                     template='checklist',
+                                                     formset='somename')
         assert response.status_code == 200, 'Authenticated user can access'
+        # The template should contain checkboxes
+        self.assertContains(response,
+                            '<input type="checkbox"')
+        self.assertContains(response,
+                            ' name="somename-0-destrezas"')
+        self.assertContains(
+            response, self.destreza_1.codigo)
+
+    def test_success_when_template_is_select(self):
+        """
+        Tests that an authenticated user can access the view and
+        the inputs are checkboxes
+        """
+        request = RequestFactory().get(
+            '/',
+            {
+                'asignatura': self.asignatura.id,
+                'curso': self.curso_1.id
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        request.user = self.user
+        response = views.LoadDestrezasView.as_view()(request,
+                                                     template='select',
+                                                     formset='somename')
+        assert response.status_code == 200, 'Authenticated user can access'
+        # The template should contain the options
+        self.assertContains(response,
+                            '<option value="{}"'.format(self.destreza_1.id))
+        self.assertContains(response,
+                            '<option value="{}"'.format(self.destreza_2.id))
+        self.assertContains(
+            response, self.destreza_1.codigo)
+        self.assertContains(
+            response, self.destreza_2.codigo)
+
+
+class TestLoadCriteriosView(PlanificacionesTestCase):
+
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/',
+                                       HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        request.user = AnonymousUser()
+        response = views.LoadCriteriosView.as_view()(request)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_not_ajax(self):
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.LoadCriteriosView.as_view()(request)
+        assert response.status_code == 200, 'Authenticated user can access'
+        assert response.content == b'', 'Response should be empty'
+
+    def test_success_with_formset_name(self):
+        """
+        Tests that an authenticated user can obtain the "criterios
+        de evaluacion" inside a formset
+        """
+        request = RequestFactory().get(
+            '/',
+            {
+                'destrezas[]': [self.destreza_1.id, self.destreza_2.id],
+                'formset_name': 'somename',
+                'numero_fila': 0
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        request.user = self.user
+        response = views.LoadCriteriosView.as_view()(request)
+        assert response.status_code == 200, 'Authenticated user can access'
+        self.assertContains(
+            response, self.criterio_1.codigo)
+        self.assertContains(
+            response, self.criterio_2.codigo)
+        self.assertContains(
+            response, 'name="somename-0-criterios"')
+
+    def test_success_without_formset_name(self):
+        """
+        Tests that an authenticated user can obtain the "criterios
+        de evaluacion" outside a formset
+        """
+        request = RequestFactory().get(
+            '/',
+            {
+                'destrezas[]': [self.destreza_1.id, self.destreza_2.id],
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        request.user = self.user
+        response = views.LoadCriteriosView.as_view()(request)
+        assert response.status_code == 200, 'Authenticated user can access'
+        self.assertContains(
+            response, self.criterio_1.codigo)
+        self.assertContains(
+            response, self.criterio_2.codigo)
+        assert 'somename' not in str(response.content), \
+            'Should be outside the formset'
+
+
+class TestLoadIndicadoresView(PlanificacionesTestCase):
+
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/',
+                                       HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        request.user = AnonymousUser()
+        response = views.LoadIndicadoresView.as_view()(request,
+                                                       option='destreza',
+                                                       formset='somename')
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_not_ajax(self):
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.LoadIndicadoresView.as_view()(request,
+                                                       option='destreza',
+                                                       formset='somename')
+        assert response.status_code == 200, 'Authenticated user can access'
+        assert response.content == b'', 'Response should be empty'
+
+    def test_failed_when_bad_option(self):
+        """
+        Tests that when there is a bad option
+        will return an empty response
+        """
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.LoadIndicadoresView.as_view()(request,
+                                                       option='bad',
+                                                       formset='somename')
+        assert response.status_code == 200, 'Authenticated user can access'
+        assert response.content == b'', 'Response should be empty'
+
+    def test_success_when_option_is_destreza(self):
+        """
+        Tests when the option is destreza, should search indicators by skill
+        """
+        request = RequestFactory().get(
+            '/',
+            {
+                'destreza': self.destreza_1.id,
+                'numero_fila': 0
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        request.user = self.user
+        response = views.LoadIndicadoresView.as_view()(request,
+                                                       option='destreza',
+                                                       formset='somename')
+        assert response.status_code == 200, 'Authenticated user can access'
+        self.assertContains(
+            response, 'name="somename-0-indicadores"')
+        self.assertContains(
+            response, self.indicador_1.codigo)
+        self.assertContains(
+            response, self.indicador_2.codigo)
+
+    def test_success_when_option_is_criterio(self):
+        """
+        Tests when the option is criterio,
+        should search indicators by criterion
+        """
+        request = RequestFactory().get(
+            '/',
+            {
+                'criterios[]': [self.criterio_1.id, self.criterio_2.id],
+                'numero_fila': 0
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        request.user = self.user
+        response = views.LoadIndicadoresView.as_view()(request,
+                                                       option='criterio',
+                                                       formset='somename')
+        assert response.status_code == 200, 'Authenticated user can access'
+        self.assertContains(
+            response, 'name="somename-0-indicadores"')
         self.assertContains(
             response, self.indicador_1.codigo)
         self.assertContains(

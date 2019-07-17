@@ -18,10 +18,12 @@ from planificaciones.forms.elemento_curricular_formset import \
     ElementoCurricularFormset
 from .models.asignatura import Asignatura
 from .models.destreza import Destreza
+from .models.unidad import Unidad
 from .models.elemento_curricular import ElementoCurricular
 from .models.indicador import Indicador
 from .models.objetivo import Objetivo
 from .models.objetivo_general import ObjetivoGeneral
+from .models.criterio_evaluacion import CriterioEvaluacion
 from .models.plan_clase import PlanClase
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,9 @@ logger = logging.getLogger(__name__)
 class PlanificacionesTemplateView(LoginRequiredMixin, TemplateView):
     """Vista para elegir el tipo de planificación"""
     template_name = 'planificaciones/planificaciones.html'
+
+
+""" PLANES DE CLASE"""
 
 
 class PlanClaseListView(LoginRequiredMixin, ListView):
@@ -160,18 +165,21 @@ class PlanClaseDuplicateView(LoginRequiredMixin, View):
             plan_clase.cursos.set(cursos_old)
 
             for elemento in elementos:
-                indicadores = elemento.indicadores_logro.all()
+                indicadores = elemento.indicadores.all()
                 procesos = elemento.procesos_didacticos.all()
                 elemento.pk = None
                 elemento.plan_clase = plan_clase
                 elemento.save()
-                elemento.indicadores_logro.set(indicadores)
+                elemento.indicadores.set(indicadores)
                 for proceso in procesos:
                     proceso.pk = None
                     proceso.elemento_curricular = elemento
                     proceso.save()
         messages.success(request, 'Plan de clase duplicado exitosamente.')
         return redirect('plan_clase_list')
+
+
+""" PLANES ANUALES"""
 
 
 class PlanAnualListView(ListView):
@@ -194,6 +202,9 @@ class PlanAnualDuplicateView(View):
     pass
 
 
+""" PLANES DE UNIDAD"""
+
+
 class PlanUnidadListView(ListView):
     pass
 
@@ -212,6 +223,9 @@ class PlanUnidadDeleteView(DeleteView):
 
 class PlanUnidadDuplicateView(View):
     pass
+
+
+""" PLANES DE DESTREZAS"""
 
 
 class PlanDestrezasListView(ListView):
@@ -234,91 +248,228 @@ class PlanDestrezasDuplicateView(View):
     pass
 
 
-@login_required
-def load_cursos(request):
-    """Regresa los cursos por asignatura si la solicitud fue via ajax"""
-    asignatura_id = request.GET.get('asignatura')
-    if request.is_ajax():
-        asignatura = Asignatura.objects.get(pk=asignatura_id)
-        cursos = asignatura.cursos.all()
-        context = {'cursos': cursos}
-        return render(
-            request, 'planificaciones/ajax/cursos_checklist_options.html',
-            context)
-    else:
-        return HttpResponse('')
+""" VISTAS AJAX """
 
 
-def load_unidades(request):
-    pass
+class LoadCursosView(LoginRequiredMixin, View):
+    """
+    Regresa todos los cursos por asignatura
+    """
+    def get(self, request, *args, **kwargs):
+        template = kwargs['template']
+        asignatura_id = request.GET.get('asignatura')
+        if request.is_ajax():
+            asignatura = Asignatura.objects.get(pk=asignatura_id)
+            cursos = asignatura.cursos.all()
+            context = {'cursos': cursos}
+            if template == 'checklist':
+                return render(
+                    request,
+                    'planificaciones/ajax/cursos_checklist_options.html',
+                    context)
+            elif template == 'select':
+                return render(
+                    request, 'planificaciones/ajax/cursos_select_options.html',
+                    context)
+            else:
+                return HttpResponse('')
+
+        else:
+            return HttpResponse('')
 
 
-@login_required
-def load_objetivos(request):
-    """Regresa los objetivos por asignatura y cursos si la solicitud
-    fue via ajax"""
-    response = {}
-    asignatura_id = request.GET.get('asignatura')
-    cursos_id = request.GET.getlist('cursos[]')
+class LoadUnidadesView(LoginRequiredMixin, View):
+    """
+    Regresa las unidades por curso y asignatura
+    """
+    def get(self, request, *args, **kwargs):
+        asignatura_id = request.GET.get('asignatura')
+        curso_id = request.GET.get('curso')
+        if request.is_ajax():
+            unidades = Unidad.objects.filter(curso__id=curso_id,
+                                             asignatura__id=asignatura_id)
+            context = {'unidades': unidades}
+            return render(
+                request, 'planificaciones/ajax/unidades_select_options.html',
+                context)
+        else:
+            return HttpResponse('')
 
-    if asignatura_id and cursos_id and request.is_ajax():
-        objetivos = Objetivo.objects.get_objetivos_by_asignatura_cursos(
-            asignatura_id, cursos_id)
-        objetivos_generales = ObjetivoGeneral.objects\
-            .get_objetivos_generales_by_asignatura_cursos(
+
+class LoadObjetivosView(LoginRequiredMixin, View):
+    """
+    Regresa los objetivos por curso y asignatura
+    si se lo llama con el parámetro curso
+    """
+    def get(self, request, *args, **kwargs):
+        option = kwargs['option']
+        response = {}
+        asignatura_id = request.GET.get('asignatura')
+        cursos_id = request.GET.getlist('cursos[]')
+        curso_id = request.GET.get('curso')
+        unidad_id = request.GET.get('unidad')
+
+        if request.is_ajax():
+            if curso_id and not cursos_id:
+                cursos_id = [curso_id, ]
+
+            if option == 'area' and asignatura_id:
+                # Only general objectives
+                asignatura = Asignatura.objects.get(pk=asignatura_id)
+                objetivos_generales = ObjetivoGeneral.objects\
+                    .filter(area=asignatura.area)
+
+                response['objetivos_generales'] = [
+                    model_to_dict(objetivo)
+                    for objetivo in objetivos_generales]
+
+                return JsonResponse(json.dumps(response),
+                                    status=200, safe=False)
+
+            elif option == 'curso' and asignatura_id and \
+                    (curso_id or cursos_id):
+                # only objectives based on signature and course
+                objetivos = Objetivo.objects.\
+                    get_objetivos_by_asignatura_cursos(asignatura_id,
+                                                       cursos_id)
+                objetivos_generales = ObjetivoGeneral.objects\
+                    .get_objetivos_generales_by_asignatura_cursos(
+                        asignatura_id, cursos_id)
+
+                response['objetivos'] = [
+                    model_to_dict(objetivo)
+                    for objetivo in objetivos]
+                response['objetivos_generales'] = [
+                    model_to_dict(objetivo)
+                    for objetivo in objetivos_generales]
+
+                return JsonResponse(json.dumps(response),
+                                    status=200, safe=False)
+
+            elif option == 'unidad' and unidad_id:
+                # return unit objectives
+                unidad = Unidad.objects.get(pk=unidad_id)
+
+                objetivos = unidad.objetivos.all()
+                objetivos_generales = unidad.objetivos_generales.all()
+
+                response['objetivos'] = [
+                    model_to_dict(objetivo)
+                    for objetivo in objetivos]
+                response['objetivos_generales'] = [
+                    model_to_dict(objetivo)
+                    for objetivo in objetivos_generales]
+
+                return JsonResponse(json.dumps(response),
+                                    status=200, safe=False)
+
+            else:
+                return JsonResponse(json.dumps({'allowed': False}), status=200,
+                                    safe=False)
+        else:
+            return JsonResponse(json.dumps({'allowed': False}), status=200,
+                                safe=False)
+
+
+class LoadDestrezasView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        template = kwargs['template']
+        formset_name = kwargs['formset']
+
+        if request.is_ajax():
+            asignatura_id = request.GET.get('asignatura')
+            cursos_id = request.GET.getlist('cursos[]')
+            curso_id = request.GET.get('curso')
+            numero_fila = request.GET.get('numero_fila')
+
+            if curso_id and not cursos_id:
+                cursos_id = [curso_id, ]
+
+            destrezas = Destreza.objects.get_destrezas_by_asignatura_cursos(
                 asignatura_id, cursos_id)
+            context = {'destrezas': destrezas,
+                       'formset_name': formset_name,
+                       'numero_fila': numero_fila}
 
-        list_objetivos = []
-        list_objetivos_generales = []
-        for objetivo in objetivos:
-            list_objetivos.append(model_to_dict(objetivo))
+            if template == 'checklist':
+                return render(
+                    request,
+                    'planificaciones/ajax/destrezas_checklist_options.html',
+                    context)
+            elif template == 'select':
+                return render(
+                    request,
+                    'planificaciones/ajax/destrezas_select_options.html',
+                    context)
+            else:
+                return HttpResponse('')
 
-        for objetivo_general in objetivos_generales:
-            list_objetivos_generales.append(model_to_dict(objetivo_general))
-
-        response['objetivos'] = list_objetivos
-        response['objetivos_generales'] = list_objetivos_generales
-
-        return JsonResponse(json.dumps(response), status=200, safe=False)
-    else:
-        return JsonResponse(json.dumps({'allowed': False}), status=200,
-                            safe=False)
-
-
-@login_required
-def load_destrezas(request):
-    """Regresa las destrezas por asignatura y cursos si la solicitud
-    fue via ajax"""
-    asignatura_id = request.GET.get('asignatura')
-    cursos_id = request.GET.getlist('cursos[]')
-
-    if asignatura_id and cursos_id and request.is_ajax():
-        destrezas = Destreza.objects.get_destrezas_by_asignatura_cursos(
-            asignatura_id, cursos_id)
-        context = {'destrezas': destrezas}
-        return render(
-            request, 'planificaciones/ajax/destrezas_select_options.html',
-            context)
-    else:
-        return HttpResponse('<option>---------</option>')
+        else:
+            return HttpResponse('')
 
 
-def load_criterios(request):
-    pass
+class LoadCriteriosView(LoginRequiredMixin, View):
+    """
+    Regresa los criterios de evaluación por destrezas
+    """
+
+    def get(self, request, *args, **kwargs):
+        destrezas_id = request.GET.getlist('destrezas[]')
+        formset_name = request.GET.get('formset_name')
+        numero_fila = request.GET.get('numero_fila')
+
+        if request.is_ajax():
+            criterios = CriterioEvaluacion.objects.\
+                get_criterios_by_destrezas(destrezas_id)
+            context = {'criterios': criterios,
+                       'formset_name': formset_name,
+                       'numero_fila': numero_fila}
+            return render(
+                request,
+                'planificaciones/ajax/criterios_checklist_options.html',
+                context)
+        else:
+            return HttpResponse('')
 
 
-@login_required
-def load_indicadores(request):
-    """Regresa los indicadores por destreza si la solicitud fue via ajax"""
-    destreza_id = request.GET.get('destreza')
-    numero_fila = request.GET.get('numero_fila')
+class LoadIndicadoresView(LoginRequiredMixin, View):
+    """
+    Regresa los objetivos por curso y asignatura
+    si se lo llama con el parámetro curso
+    """
 
-    if destreza_id and request.is_ajax():
-        indicadores = Indicador.objects.get_indicadores_by_destreza(
-            destreza_id)
-        context = {'indicadores': indicadores, 'numero_fila': numero_fila}
-        return render(
-            request, 'planificaciones/ajax/indicadores_checklist_options.html',
-            context)
-    else:
-        return HttpResponse('')
+    def get(self, request, *args, **kwargs):
+        option = kwargs['option']
+        formset_name = kwargs['formset']
+        destreza_id = request.GET.get('destreza')
+        criterios_id = request.GET.getlist('criterios[]')
+        numero_fila = request.GET.get('numero_fila')
+
+        if request.is_ajax():
+            if option == 'destreza' and destreza_id:
+                # Indicadores por destrezas
+                indicadores = Indicador.objects.get_indicadores_by_destreza(
+                    destreza_id)
+                context = {'indicadores': indicadores,
+                           'numero_fila': numero_fila,
+                           'formset_name': formset_name}
+                return render(
+                    request,
+                    'planificaciones/ajax/indicadores_checklist_options.html',
+                    context)
+
+            elif option == 'criterio' and criterios_id:
+                # Indicadores por criterios
+                indicadores = Indicador.objects.get_indicadores_by_criterios(
+                    criterios_id)
+                context = {'indicadores': indicadores,
+                           'numero_fila': numero_fila,
+                           'formset_name': formset_name}
+                return render(
+                    request,
+                    'planificaciones/ajax/indicadores_checklist_options.html',
+                    context)
+            else:
+                return HttpResponse('')
+        else:
+            return HttpResponse('')

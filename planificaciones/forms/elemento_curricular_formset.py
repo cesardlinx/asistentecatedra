@@ -75,7 +75,7 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
             form.fields['destreza'].queryset = Destreza.objects.none()
             form.fields['destreza'].empty_label = 'Elija una destreza.'
 
-            form.fields['indicadores_logro'].queryset = Indicador.objects\
+            form.fields['indicadores'].queryset = Indicador.objects\
                 .none()
 
             # Para convertir el id de destreza en una instancia de
@@ -110,14 +110,14 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
                 try:
                     destreza_id = int(form.data.get(
                         'elementos_curriculares-{}-destreza'.format(idx)))
-                    form.fields['indicadores_logro'].queryset = Indicador\
+                    form.fields['indicadores'].queryset = Indicador\
                         .objects.get_indicadores_by_destreza(destreza_id)
                 except (ValueError, TypeError):
                     pass
             elif form.instance.pk:
                 destreza_id = form.instance.destreza.pk
 
-                form.fields['indicadores_logro'].queryset = Indicador.objects\
+                form.fields['indicadores'].queryset = Indicador.objects\
                     .get_indicadores_by_destreza(destreza_id)
 
     def add_fields(self, form, index):
@@ -187,10 +187,10 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
 ElementoCurricularFormset = inlineformset_factory(
     PlanClase,
     ElementoCurricular,
-    fields=('destreza', 'conocimientos_asociados', 'indicadores_logro',
+    fields=('destreza', 'conocimientos_asociados', 'indicadores',
             'actividades_evaluacion'),
     widgets={
-        'indicadores_logro': EnhancedCheckboxSelectMultiple,
+        'indicadores': EnhancedCheckboxSelectMultiple,
     },
     formset=BaseElementoCurricularFormset,
     max_num=10,

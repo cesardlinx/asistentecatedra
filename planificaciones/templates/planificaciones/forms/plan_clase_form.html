@@ -13,10 +13,10 @@
             <h3 class="main-title">Nuevo Plan de Clase</h3>
         </div>
         <form method="post" id="planClaseForm"
-            load-cursos-url={% url 'ajax_load_cursos' template='checkbox' %}
+            load-cursos-url={% url 'ajax_load_cursos' template='checklist' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='curso' %}
-            load-destrezas-url={% url 'ajax_load_destrezas' template='select' %}
-            load-indicadores-url={% url 'ajax_load_indicadores' option='destreza' %}
+            load-destrezas-url={% url 'ajax_load_destrezas' template='select' formset='elementos_curriculares' %}
+            load-indicadores-url={% url 'ajax_load_indicadores' option='destreza' formset='elementos_curriculares' %}
             novalidate>
             {% csrf_token %}
             {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
@@ -135,7 +135,7 @@
                                 {# Fin de Formset Anidado de procesos didácticos #}
 
                                 <td class="indicadores elementos-form" rowspan="{{ elementos_form.nested.total_form_count }}">
-                                    {% with field=elementos_form.indicadores_logro %}
+                                    {% with field=elementos_form.indicadores %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
                                             {% include 'forms/field_errors.html'%}

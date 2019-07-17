@@ -96,12 +96,12 @@ class PlanClaseTestCase(TestCase):
             'elementos_curriculares-MAX_NUM_FORMS': '1000',
             'elementos_curriculares-0-destreza': self.destreza.id,
             'elementos_curriculares-0-conocimientos_asociados': 'lorem ipsum',
-            'elementos_curriculares-0-indicadores_logro': [
+            'elementos_curriculares-0-indicadores': [
                 self.indicador_1.id, self.indicador_2.id],
             'elementos_curriculares-0-actividades_evaluacion': 'lorem ipsum',
             'elementos_curriculares-1-destreza': self.destreza.id,
             'elementos_curriculares-1-conocimientos_asociados': 'lorem ipsum',
-            'elementos_curriculares-1-indicadores_logro': [
+            'elementos_curriculares-1-indicadores': [
                 self.indicador_1.id, self.indicador_2.id],
             'elementos_curriculares-1-actividades_evaluacion': 'lorem ipsum',
 
@@ -454,11 +454,11 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         elemento_curricular_1 = mixer.blend(ElementoCurricular,
                                             plan_clase=plan_clase,
                                             destreza=destreza_1)
-        elemento_curricular_1.indicadores_logro.set([indicador_1, indicador_2])
+        elemento_curricular_1.indicadores.set([indicador_1, indicador_2])
 
         elemento_curricular_2 = mixer.blend(ElementoCurricular,
                                             plan_clase=plan_clase)
-        elemento_curricular_2.indicadores_logro.set([indicador_1, ])
+        elemento_curricular_2.indicadores.set([indicador_1, ])
 
         proceso_didactico_1 = mixer.blend(
             ProcesoDidactico,
@@ -512,8 +512,8 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
 
         # Debe tener igual todos los campos many to many al elemento curricular
         # original
-        assert elemento_curricular_new.indicadores_logro.first() == indicador_1
-        assert elemento_curricular_new.indicadores_logro.last() == indicador_2
+        assert elemento_curricular_new.indicadores.first() == indicador_1
+        assert elemento_curricular_new.indicadores.last() == indicador_2
 
         proceso_didactico_new = elemento_curricular_new.procesos_didacticos\
             .first()

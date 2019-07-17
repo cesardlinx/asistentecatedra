@@ -18,7 +18,7 @@ class ElementoCurricular(models.Model):
         blank=False
     )
     conocimientos_asociados = models.TextField(max_length=200)
-    indicadores_logro = models.ManyToManyField(
+    indicadores = models.ManyToManyField(
         Indicador,
         related_name='elementos_curriculares'
     )

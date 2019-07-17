@@ -1,10 +1,10 @@
 {% for indicador in indicadores %}
     <li>
         <input type="checkbox" class="custom-checkbox"
-            name="elementos_curriculares-{{ numero_fila }}-indicadores_logro"
+            name="{{ formset_name }}-{{ numero_fila }}-indicadores"
             value="{{ indicador.pk }}"
-            id="id_elementos_curriculares-{{ numero_fila }}-indicadores_logro_{{ forloop.counter0 }}">
-        <label class="check-label" for="id_elementos_curriculares-{{ numero_fila }}-indicadores_logro_{{ forloop.counter0 }}">
+            id="id_{{ formset_name }}-{{ numero_fila }}-indicadores_{{ forloop.counter0 }}">
+        <label class="check-label" for="id_{{ formset_name }}-{{ numero_fila }}-indicadores_{{ forloop.counter0 }}">
             {{ indicador.codigo }} - {{ indicador.description }}
         </label>
     </li>
