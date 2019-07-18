@@ -206,7 +206,7 @@ class TestDesarrolloUnidadFormset(PlanificacionesTestCase):
                                                            self.criterio_2.id],
             'desarrollo_unidades-0-indicadores': [self.indicador_1.id,
                                                   self.indicador_2.id],
-            'desarrollo_unidades-0-semanas': 10,
+            'desarrollo_unidades-0-semanas': 7,
 
             # Formset Desarrollo Unidad 2
             'desarrollo_unidades-1-unidad': self.unidad_1.id,
@@ -221,7 +221,7 @@ class TestDesarrolloUnidadFormset(PlanificacionesTestCase):
                                                            self.criterio_2.id],
             'desarrollo_unidades-1-indicadores': [self.indicador_3.id,
                                                   self.indicador_4.id],
-            'desarrollo_unidades-1-semanas': 20,
+            'desarrollo_unidades-1-semanas': 8,
         }
 
     def test_valid_data(self):

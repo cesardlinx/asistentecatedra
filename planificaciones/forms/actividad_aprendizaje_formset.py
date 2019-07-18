@@ -79,7 +79,7 @@ class BaseActividadAprendizajeFormset(BaseInlineFormSet):
                 except (ValueError, TypeError):
                     pass
             elif form.instance.pk:
-                destrezas = self.instance.destrezas.all()
+                destrezas = form.instance.destrezas.all()
                 destrezas_id = [destreza.pk for destreza in destrezas]
                 form.fields['criterios_evaluacion'].queryset = \
                     CriterioEvaluacion.objects.get_criterios_by_destrezas(
@@ -107,7 +107,7 @@ class BaseActividadAprendizajeFormset(BaseInlineFormSet):
                 except (ValueError, TypeError):
                     pass
             elif form.instance.pk:
-                criterios = self.instance.criterios_evaluacion.all()
+                criterios = form.instance.criterios_evaluacion.all()
 
                 criterios_id = [criterio.pk for criterio in criterios]
 

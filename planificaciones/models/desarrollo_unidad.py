@@ -46,10 +46,10 @@ class DesarrolloUnidad(models.Model):
         related_name='desarrollo_unidades',
     )
     semanas = models.PositiveIntegerField(
-        choices=[(x, str(x)) for x in range(1, 41)],
+        choices=[(x, str(x)) for x in range(1, 9)],
         default=1,
         validators=[
-            MaxValueValidator(40)]
+            MaxValueValidator(8)]
     )
 
     class Meta:

@@ -215,10 +215,19 @@ class TestPlanClaseCreateView(PlanClaseTestCase):
 
     def test_post_success(self):
         """Prueba la creación de planes de clase"""
-        request = RequestFactory().post('/', data=self.data)
-        request.user = self.user
-        response = views.plan_clase_create(request)
-        assert response.status_code == 302, 'Should redirect to success view'
+        self.client.login(username='tester@tester.com',
+                          password='P455w0rd_testing',)
+        url = reverse('plan_clase_create')
+        response = self.client.post(url, self.data, follow=True)
+        assert response.status_code == 200, 'Should return a success response'
+        messages = list(response.context.get('messages'))
+        assert len(messages) == 1, 'Should return one message'
+        assert messages[0].message == 'Plan de clase creado exitosamente.', \
+            'Should return a success message'
+        assert messages[0].tags == 'alert-success', \
+            'Should return a success message'
+        self.assertRedirects(response, reverse('plan_clase_list'))
+
         plan = PlanClase.objects.last()
         elemento = ElementoCurricular.objects.last()
         proceso = ProcesoDidactico.objects.last()
@@ -470,6 +479,8 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         response = self.client.post(url, {}, follow=True)
 
         assert response.status_code == 200, 'Should return a success code'
+
+        # Test success message
         messages = list(response.context.get('messages'))
         assert len(messages) == 1, 'Should return one message'
         assert messages[0].message == 'Plan de clase duplicado exitosamente.',\
@@ -477,8 +488,6 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         assert messages[0].tags == 'alert-success', \
             'Should return a success message'
         self.assertRedirects(response, reverse('plan_clase_list'))
-
-        # Test success message
 
         # Test plan de clase
         plan_clase_new = PlanClase.objects.last()

@@ -14,17 +14,22 @@ from django.views.generic import DeleteView
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 from planificaciones.forms.plan_clase_form import PlanClaseForm
+from planificaciones.forms.plan_anual_form import PlanAnualForm
 from planificaciones.forms.elemento_curricular_formset import \
     ElementoCurricularFormset
+from planificaciones.forms.desarrollo_unidad_formset import \
+    DesarrolloUnidadFormset
 from .models.asignatura import Asignatura
 from .models.destreza import Destreza
 from .models.unidad import Unidad
 from .models.elemento_curricular import ElementoCurricular
+from .models.desarrollo_unidad import DesarrolloUnidad
 from .models.indicador import Indicador
 from .models.objetivo import Objetivo
 from .models.objetivo_general import ObjetivoGeneral
 from .models.criterio_evaluacion import CriterioEvaluacion
 from .models.plan_clase import PlanClase
+from .models.plan_anual import PlanAnual
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +82,8 @@ def plan_clase_create(request):
                 elementos_formset.save()
                 logger.info('Plan de clase created for the user: {}.'
                             .format(request.user.email))
+                messages.success(request,
+                                 'Plan de clase creado exitosamente.')
                 return redirect('plan_clase_list')
         messages.error(request,
                        'Por favor corrija los campos resaltados en rojo.')
@@ -182,24 +189,151 @@ class PlanClaseDuplicateView(LoginRequiredMixin, View):
 """ PLANES ANUALES"""
 
 
-class PlanAnualListView(ListView):
-    pass
+class PlanAnualListView(LoginRequiredMixin, ListView):
+    """Vista para listado de planes anuales"""
+    template_name = 'planificaciones/planificacion_list.html'
+    ordering = '-updated_at'
+    context_object_name = 'planes'
+
+    def get_queryset(self):
+        queryset = PlanAnual.objects.filter(elaborado_por=self.request.user)
+        ordering = self.get_ordering()
+        if ordering:
+            if isinstance(ordering, str):
+                ordering = (ordering,)
+            queryset = queryset.order_by(*ordering)
+
+        return queryset
 
 
+@login_required
 def plan_anual_create(request):
-    pass
+    """Vista para la creación de planes anuales"""
+    if request.method == 'GET':
+        form = PlanAnualForm()
+        unidades_formset = DesarrolloUnidadFormset(
+            prefix='desarrollo_unidades')
+    elif request.method == 'POST':
+        form = PlanAnualForm(request.POST)
+        unidades_formset = DesarrolloUnidadFormset(
+            request.POST, prefix='desarrollo_unidades')
+
+        if form.is_valid() and unidades_formset.is_valid():
+
+            with transaction.atomic():
+                plan_anual = form.save(commit=False)
+                plan_anual.elaborado_por = request.user
+                plan_anual.save()
+                form._save_m2m()
+                # Almacenado del formset
+                unidades_formset.instance = plan_anual
+                unidades_formset.save()
+                logger.info('Plan anual created for the user: {}.'
+                            .format(request.user.email))
+                messages.success(request,
+                                 'Plan Anual creado exitosamente.')
+                return redirect('plan_anual_list')
+        messages.error(request,
+                       'Por favor corrija los campos resaltados en rojo.')
+
+    context = {
+        'form': form,
+        'unidades_formset': unidades_formset,
+    }
+    return render(request, 'planificaciones/forms/plan_anual_form.html',
+                  context)
 
 
-def plan_anual_update(request):
-    pass
+@login_required
+def plan_anual_update(request, pk, slug):
+    """Vista para la edición de planes anuales"""
+    plan_anual = get_object_or_404(PlanAnual, pk=pk, slug=slug)
+
+    if request.method == 'GET':
+        form = PlanAnualForm(instance=plan_anual)
+        unidades_formset = DesarrolloUnidadFormset(
+            instance=plan_anual)
+    elif request.method == 'POST':
+        form = PlanAnualForm(request.POST, instance=plan_anual)
+        unidades_formset = DesarrolloUnidadFormset(
+            request.POST, instance=plan_anual)
+        if form.is_valid() and unidades_formset.is_valid():
+
+            with transaction.atomic():
+                plan_anual = form.save(commit=False)
+                plan_anual.updated_at = timezone.now()
+                plan_anual.save()
+                unidades_formset.save()
+                form._save_m2m()
+                logger.info('Plan Anual updated for the user: {}.'
+                            .format(request.user.email))
+                messages.success(
+                    request, 'Plan Anual actualizado exitosamente.')
+                return redirect('plan_anual_list')
+
+        messages.error(request,
+                       'Por favor corrija los campos resaltados en rojo.')
+
+    context = {
+        'form': form,
+        'unidades_formset': unidades_formset,
+    }
+    return render(request, 'planificaciones/forms/plan_anual_form.html',
+                  context)
 
 
-class PlanAnualDeleteView(DeleteView):
-    pass
+class PlanAnualDeleteView(LoginRequiredMixin, DeleteView):
+    """Vista para borrar un plan de anual"""
+    model = PlanAnual
+    success_url = reverse_lazy('plan_anual_list')
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponse(status=405)
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Plan Anual eliminado exitosamente.')
+        return super().delete(request, *args, **kwargs)
 
 
-class PlanAnualDuplicateView(View):
-    pass
+class PlanAnualDuplicateView(LoginRequiredMixin, View):
+    """Vista para realizar una copia de un plan de anual"""
+
+    def post(self, request, *args, **kwargs):
+        with transaction.atomic():
+            plan_anual = PlanAnual.objects.get(pk=kwargs['pk'])
+            desarrollo_unidades = DesarrolloUnidad.objects.filter(
+                plan_anual=plan_anual
+            )
+            objetivos_old = plan_anual.objetivos_curso.all()
+            objetivos_generales_old = plan_anual\
+                .objetivos_generales_curso.all()
+            objetivos_area_old = plan_anual.objetivos_generales.all()
+            plan_anual.pk = None
+            plan_anual.id = None
+            new_name = '{} (copia)'.format(plan_anual.name)
+            counter = 1
+            while PlanAnual.objects.filter(name=new_name).exists():
+                counter += 1
+                new_name = '{0} (copia {1})'.format(plan_anual.name, counter)
+            plan_anual.name = new_name
+            plan_anual.save()
+            plan_anual.objetivos_curso.set(objetivos_old)
+            plan_anual.objetivos_generales_curso.set(objetivos_generales_old)
+            plan_anual.objetivos_generales.set(objetivos_area_old)
+
+            for desarrollo_unidad in desarrollo_unidades:
+                destrezas = desarrollo_unidad.destrezas.all()
+                criterios = desarrollo_unidad.criterios_evaluacion.all()
+                indicadores = desarrollo_unidad.indicadores.all()
+                desarrollo_unidad.pk = None
+                desarrollo_unidad.plan_anual = plan_anual
+                desarrollo_unidad.save()
+                desarrollo_unidad.destrezas.set(destrezas)
+                desarrollo_unidad.criterios_evaluacion.set(criterios)
+                desarrollo_unidad.indicadores.set(indicadores)
+
+        messages.success(request, 'Plan Anual duplicado exitosamente.')
+        return redirect('plan_anual_list')
 
 
 """ PLANES DE UNIDAD"""

@@ -4,13 +4,13 @@
 {% load widget_tweaks %}
 
 {% block titulo %}
-    Nuevo Plan de Clase
+    Nuevo Plan Anual
 {% endblock titulo %}
 
 {% block content %}
     <section class="detail">
         <div class="planification-title">
-            <h3 class="main-title">Nuevo Plan de Clase</h3>
+            <h3 class="main-title">Nuevo Plan Anual</h3>
         </div>
         <form method="post" id="planClaseForm"
             load-cursos-url={% url 'ajax_load_cursos' template='checklist' %}
@@ -27,55 +27,56 @@
                 <h5 class="form-label">Datos Informativos:</h5>
 
                 <div class="form-group-2">
-                    {% include "forms/floating_input.html" with field=form.numero_plan %}
                     {% include "forms/floating_input.html" with field=form.name %}
+                    {% include "forms/floating_input.html" with field=form.ano_lectivo %}
                 </div>
 
                 <div class="form-group-2">
-                    {% include "forms/floating_input.html" with field=form.fecha %}
+                    {% include "forms/floating_input.html" with field=form.docentes %}
                     {% include "forms/select_field.html" with field=form.asignatura %}
                 </div>
 
                 <div class="form-group-2">
+                    {% include "forms/select_field.html" with field=form.curso %}
                     {% include "forms/floating_input.html" with field=form.paralelos %}
-                    {% include "forms/floating_input.html" with field=form.numero_estudiantes %}
                 </div>
 
-                <div class="form-group-2">
-                    {% include "forms/floating_input.html" with field=form.tema %}
-                    {% include "forms/floating_input.html" with field=form.periodos %}
-                </div>
+                <h5 class="form-label">Tiempo:</h5>
 
                 <div class="form-group-2">
-                    {% include "forms/floating_input.html" with field=form.metodologia %}
-                    {% include "forms/floating_input.html" with field=form.tecnica %}
+                    {% include "forms/floating_input.html" with field=form.carga_horaria %}
+                    {% include "forms/floating_input.html" with field=form.semanas_trabajo %}
                 </div>
 
                 <div class="form-group">
-                    {{ form.cursos|add_label_class:"form-label" }}
+                    {% include "forms/floating_input.html" with field=form.semanas_imprevistos %}
+                </div>
 
-                    {% if field.errors %}
-                        {% render_field form.cursos class="checkbox-list error" %}
-                        {% include 'forms/field_errors.html'%}
-                    {% else %}
-                        {% render_field form.cursos class="checkbox-list" %}
-                    {% endif %}
+                <h5 class="form-label">Objetivos:</h5>
 
-
+                <div class="form-group">
+                    {{ form.objetivos_curso|add_label_class:"form-label" }}
+                    {{ form.objetivos_curso }}
+                    {{ form.objetivos_generales_curso }}
                 </div>
 
                 <div class="form-group">
-                    {{ form.objetivos|add_label_class:"form-label" }}
-                    {{ form.objetivos }}
+                    {{ form.objetivos_generales|add_label_class:"form-label" }}
                     {{ form.objetivos_generales }}
                 </div>
 
-                <h5 class="form-label">Relación de Elementos Curriculares:</h5>
+                <h5 class="form-label">Ejes Transversales:</h5>
+
+                <div class="form-group">
+                    {% include "forms/floating_input.html" with field=form.ejes_transversales %}
+                </div>
+
             </section>
 
 
             <section class="table-responsive elem-curric-container">
-                <table class="elementos-curriculares" id="elementos-curriculares">
+                <h5 class="form-label">Desarrollo de Unidades de Planificación:</h5>
+                <table class="desarrollo-unidad" id="desarrollo-unidad">
                     <thead>
                         <tr>
                             <th class="col-title col-lg" rowspan="2">Destreza con Criterio de Desempeño</th>
@@ -93,33 +94,33 @@
                     </thead>
 
                     <tbody>
-                        {{ elementos_formset.management_form }}
-                        {{ elementos_formset.non_form_errors }}
-                        {% for elementos_form in elementos_formset %}
+                        {{ unidades_formset.management_form }}
+                        {{ unidades_formset.non_form_errors }}
+                        {% for unidades_form in unidades_formset %}
 
                             {% if form.instance.pk %} {% comment %}  Solo para update {% endcomment %}
-                                {{ elementos_form.id }}
+                                {{ unidades_form.id }}
                             {% endif %}
 
                             <tr>
-                                <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
+                                <td rowspan="{{ unidades_form.nested.total_form_count }}" class="elementos-form">
                                     <div class="cell-wrapper-select">
-                                        {% include "forms/select_field.html" with field=elementos_form.destreza destreza=True %}
+                                        {% include "forms/select_field.html" with field=unidades_form.destreza destreza=True %}
                                     </div>
                                 </td>
-                                <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
+                                <td rowspan="{{ unidades_form.nested.total_form_count }}" class="elementos-form">
                                     <div class="cell-wrapper-lg">
-                                        {% include "forms/table_textarea.html" with field=elementos_form.conocimientos_asociados placeholder="Conocimientos Asociados" %}
+                                        {% include "forms/table_textarea.html" with field=unidades_form.conocimientos_asociados placeholder="Conocimientos Asociados" %}
                                     </div>
                                 </td>
 
                                 {# Formset Anidado de procesos didácticos (Primera fila) #}
-                                {% if elementos_form.nested %}
-                                    {{ elementos_form.nested.management_form }}
-                                    {{ elementos_form.nested.non_form_errors }}
+                                {% if unidades_form.nested %}
+                                    {{ unidades_form.nested.management_form }}
+                                    {{ unidades_form.nested.non_form_errors }}
 
 
-                                    {% for procesos_form in elementos_form.nested.forms %}
+                                    {% for procesos_form in unidades_form.nested.forms %}
 
                                         {% if form.instance.pk %} {% comment %}  Solo para update {% endcomment %}
                                             {{ procesos_form.id }}
@@ -134,8 +135,8 @@
                                 {% endif %}
                                 {# Fin de Formset Anidado de procesos didácticos #}
 
-                                <td class="indicadores elementos-form" rowspan="{{ elementos_form.nested.total_form_count }}">
-                                    {% with field=elementos_form.indicadores %}
+                                <td class="indicadores elementos-form" rowspan="{{ unidades_form.nested.total_form_count }}">
+                                    {% with field=unidades_form.indicadores %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
                                             {% include 'forms/field_errors.html'%}
@@ -145,16 +146,16 @@
                                     {% endwith %}
                                 </td>
 
-                                <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
+                                <td rowspan="{{ unidades_form.nested.total_form_count }}" class="elementos-form">
                                     <div class="cell-wrapper-md">
-                                        {% include "forms/table_textarea.html" with field=elementos_form.actividades_evaluacion placeholder="Actividades de Evaluación" %}
+                                        {% include "forms/table_textarea.html" with field=unidades_form.actividades_evaluacion placeholder="Actividades de Evaluación" %}
                                     </div>
                                 </td>
                             </tr>
 
                             {# Formset Anidado de procesos didácticos (filas restantes) #}
                             {# Esto es para que estén en otra fila independiente #}
-                            {% for procesos_form in elementos_form.nested.forms %}
+                            {% for procesos_form in unidades_form.nested.forms %}
 
                                 {% if not forloop.first %}
                                     <tr rowspan="1">
@@ -176,7 +177,7 @@
                     <span class="fas fa-plus"></span> Agregar Destreza
                 </button>
 
-                {% if elementos_formset.total_form_count > 1 %}
+                {% if unidades_formset.total_form_count > 1 %}
                     <button class="secondary-button delete-btn" type="button" id="eliminar-destreza">
                         <span class="fas fa-minus"></span> Eliminar Destreza
                     </button>
@@ -220,5 +221,5 @@
 {% block scripts %}
     <script src="{% static 'js/helpers/special_fields.js' %}"></script>
     <script src="{% static 'autosize/dist/autosize.min.js' %}"></script>
-    <script src="{% static 'js/planificaciones/plan_clase.js' %}"></script>
+    <script src="{% static 'js/planificaciones/plan_anual.js' %}"></script>
 {% endblock scripts %}
