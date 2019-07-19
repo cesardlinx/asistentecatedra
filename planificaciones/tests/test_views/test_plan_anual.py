@@ -93,7 +93,10 @@ class PlanAnualTestCase(PlanificacionesTestCase):
             'desarrollo_unidades-1-semanas': 2,
         }
 
-        self.plan_anual = mixer.blend(PlanAnual)
+        self.plan_anual = mixer.blend(PlanAnual, elaborado_por=self.user)
+
+        another_user = mixer.blend(User)
+        self.another_plan = mixer.blend(PlanAnual, elaborado_por=another_user)
 
     def tearDown(self):
         self.logger.uninstall()
@@ -117,6 +120,10 @@ class TestPlanAnualListView(PlanAnualTestCase):
         assert 'planificaciones/planificacion_list.html' in \
             response.template_name, \
             'Template should be the one for listing planning'
+        assert self.plan_anual.name in response.rendered_content, \
+            'Should contain the yearly plan name'
+        assert self.another_plan.name not in response.rendered_content, \
+            'Should not contain others users plans'
 
 
 class TestPlanAnualCreateView(PlanAnualTestCase):
@@ -212,6 +219,23 @@ class TestPlanAnualUpdateView(PlanAnualTestCase):
         response = views.plan_anual_update(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
+    def test_get_when_user_doesnt_own_plan(self):
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.plan_anual_update(
+            request, pk=self.another_plan.pk, slug=self.another_plan.slug)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_anual_list')
+
+    def test_post_when_user_doesnt_own_plan(self):
+        request = RequestFactory().post('/', self.data)
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.plan_anual_update(
+            request, pk=self.another_plan.pk, slug=self.another_plan.slug)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_anual_list')
+
     def test_get(self):
         """Tests that an authenticated user can access the view"""
         mixer.blend(DesarrolloUnidad, plan_anual=self.plan_anual)
@@ -293,9 +317,9 @@ class TestPlanAnualUpdateView(PlanAnualTestCase):
         plan = mixer.blend(PlanAnual)
         request = RequestFactory().post('/', data={})
         request.user = self.user
-        # Invalid data raises ValidationError
-        with pytest.raises(ValidationError):
-            views.plan_anual_update(request, pk=plan.pk, slug=plan.slug)
+        response = views.plan_anual_update(request, pk=plan.pk, slug=plan.slug)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_anual_list')
 
 
 class TestPlanAnualDeleteView(PlanAnualTestCase):
@@ -306,6 +330,17 @@ class TestPlanAnualDeleteView(PlanAnualTestCase):
         response = views.PlanAnualDeleteView.as_view()(request,
                                                        pk=self.plan_anual.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_post_when_user_doesnt_own_plan(self):
+        request = RequestFactory().post('/', self.data)
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.PlanAnualDeleteView.as_view()(request,
+                                                       pk=self.another_plan.pk)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_anual_list')
+        # It should still exist
+        self.plan_anual.refresh_from_db()
 
     def test_get(self):
         """Tests that an authenticated user can't access by get method"""
@@ -318,13 +353,12 @@ class TestPlanAnualDeleteView(PlanAnualTestCase):
 
     def test_delete_success(self):
         """Tests when a successful class plan is deleted"""
-        plan_anual = mixer.blend(PlanAnual)
         desarrollo_unidad = mixer.blend(DesarrolloUnidad,
-                                        plan_anual=plan_anual)
+                                        plan_anual=self.plan_anual)
 
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
-        url = reverse('plan_anual_delete', kwargs={'pk': plan_anual.pk})
+        url = reverse('plan_anual_delete', kwargs={'pk': self.plan_anual.pk})
         response = self.client.post(url, {}, follow=True)
 
         assert response.status_code == 200, 'Should return a success code'
@@ -338,7 +372,7 @@ class TestPlanAnualDeleteView(PlanAnualTestCase):
 
         # The instances should no longer exist in database
         with pytest.raises(PlanAnual.DoesNotExist):
-            PlanAnual.objects.get(pk=plan_anual.pk)
+            PlanAnual.objects.get(pk=self.plan_anual.pk)
         with pytest.raises(DesarrolloUnidad.DoesNotExist):
             DesarrolloUnidad.objects.get(pk=desarrollo_unidad.pk)
 
@@ -348,31 +382,42 @@ class TestPlanAnualDuplicateView(PlanAnualTestCase):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanAnualDuplicateView.as_view()(request,
-                                                          pk=self.user.pk)
+        response = views.PlanAnualDuplicateView.as_view()(
+            request, pk=self.plan_anual.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get(self):
         """Tests that an authenticated user can't access by get method"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanAnualDuplicateView.as_view()(request,
-                                                          pk=self.user.pk)
+        response = views.PlanAnualDuplicateView.as_view()(
+            request, pk=self.plan_anual.pk)
         assert response.status_code == 405, \
             'Should return a not allowed response'
+
+    def test_post_when_user_doesnt_own_plan(self):
+        request = RequestFactory().post('/', self.data)
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.PlanAnualDuplicateView.as_view()(
+            request, pk=self.another_plan.pk)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_anual_list')
+        copias = PlanAnual.objects.filter(name='{} (copia)'.format(
+            self.another_plan.name))
+        assert len(copias) == 0, 'Should be no copies'
 
     def test_success_plan_duplication(self):
         """Tests a plan has been successfuly duplicated"""
 
-        plan_anual = mixer.blend(PlanAnual)
-        plan_anual.objetivos_curso.set([self.objetivo_1, self.objetivo_2])
-        plan_anual.objetivos_generales_curso.set(
+        self.plan_anual.objetivos_curso.set([self.objetivo_1, self.objetivo_2])
+        self.plan_anual.objetivos_generales_curso.set(
             [self.general_1, self.general_2])
-        plan_anual.objetivos_generales.set(
+        self.plan_anual.objetivos_generales.set(
             [self.general_1, self.general_2])
 
         desarrollo_unidad_1 = mixer.blend(DesarrolloUnidad,
-                                          plan_anual=plan_anual,
+                                          plan_anual=self.plan_anual,
                                           unidad=self.unidad_1)
         desarrollo_unidad_1.destrezas.set(
             [self.destreza_1, self.destreza_2])
@@ -382,7 +427,7 @@ class TestPlanAnualDuplicateView(PlanAnualTestCase):
             [self.indicador_1, self.indicador_2])
 
         desarrollo_unidad_2 = mixer.blend(DesarrolloUnidad,
-                                          plan_anual=plan_anual,
+                                          plan_anual=self.plan_anual,
                                           unidad=self.unidad_2)
         desarrollo_unidad_2.destrezas.set(
             [self.destreza_1, self.destreza_2])
@@ -393,7 +438,8 @@ class TestPlanAnualDuplicateView(PlanAnualTestCase):
 
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
-        url = reverse('plan_anual_duplicate', kwargs={'pk': plan_anual.pk})
+        url = reverse('plan_anual_duplicate',
+                      kwargs={'pk': self.plan_anual.pk})
         response = self.client.post(url, {}, follow=True)
 
         assert response.status_code == 200, 'Should return a success code'
@@ -410,11 +456,11 @@ class TestPlanAnualDuplicateView(PlanAnualTestCase):
         # Test plan de anual
         plan_anual_new = PlanAnual.objects.last()
         desarrollo_unidad_new = DesarrolloUnidad.objects.last()
-        assert plan_anual.pk != plan_anual_new.pk, \
+        assert self.plan_anual.pk != plan_anual_new.pk, \
             'Should be another instance'
-        assert plan_anual_new.name == '{} (copia)'.format(plan_anual.name), \
-            'Should have a new name'
-        assert plan_anual_new.curso == plan_anual.curso, \
+        assert plan_anual_new.name == '{} (copia)'.format(
+            self.plan_anual.name), 'Should have a new name'
+        assert plan_anual_new.curso == self.plan_anual.curso, \
             'Should have the same property values'
         # Debe tener igual todos los campos many to many al original
         assert plan_anual_new.objetivos_curso.first() == self.objetivo_1
@@ -426,7 +472,7 @@ class TestPlanAnualDuplicateView(PlanAnualTestCase):
         assert plan_anual_new.objetivos_generales.first() == self.general_1
         assert plan_anual_new.objetivos_generales.last() == self.general_2
 
-        assert plan_anual.updated_at != plan_anual_new.updated_at, \
+        assert self.plan_anual.updated_at != plan_anual_new.updated_at, \
             'The updated_at field should not be copied'
 
         # Tests elemento curricular
@@ -450,17 +496,19 @@ class TestPlanAnualDuplicateView(PlanAnualTestCase):
         request = add_middleware_to_request(request)
 
         views.PlanAnualDuplicateView.as_view()(request,
-                                               pk=plan_anual.pk)
+                                               pk=self.plan_anual.pk)
 
         plan_anual_new = PlanAnual.objects.last()
-        assert plan_anual_new.name == '{} (copia 2)'.format(plan_anual.name)
-        assert plan_anual_new.curso == plan_anual.curso
+        assert plan_anual_new.name == '{} (copia 2)'.format(
+            self.plan_anual.name)
+        assert plan_anual_new.curso == self.plan_anual.curso
 
         # Test third duplication
 
         views.PlanAnualDuplicateView.as_view()(request,
-                                               pk=plan_anual.pk)
+                                               pk=self.plan_anual.pk)
 
         plan_anual_new = PlanAnual.objects.last()
-        assert plan_anual_new.name == '{} (copia 3)'.format(plan_anual.name)
-        assert plan_anual_new.curso == plan_anual.curso
+        assert plan_anual_new.name == '{} (copia 3)'.format(
+            self.plan_anual.name)
+        assert plan_anual_new.curso == self.plan_anual.curso

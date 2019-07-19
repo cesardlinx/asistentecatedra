@@ -101,6 +101,10 @@ def plan_clase_update(request, pk, slug):
     """Vista para la edición de planes de clase"""
     plan_clase = get_object_or_404(PlanClase, pk=pk, slug=slug)
 
+    # Checks if the plan belongs to the user
+    if plan_clase.elaborado_por != request.user:
+        return redirect('plan_clase_list')
+
     if request.method == 'GET':
         form = PlanClaseForm(instance=plan_clase)
         elementos_formset = ElementoCurricularFormset(
@@ -143,6 +147,12 @@ class PlanClaseDeleteView(LoginRequiredMixin, DeleteView):
         return HttpResponse(status=405)
 
     def delete(self, request, *args, **kwargs):
+        plan_clase = get_object_or_404(PlanClase, pk=kwargs['pk'])
+
+        # Checks if the plan belongs to the user
+        if plan_clase.elaborado_por != request.user:
+            return redirect('plan_clase_list')
+
         messages.success(request, 'Plan de clase eliminado exitosamente.')
         return super().delete(request, *args, **kwargs)
 
@@ -150,8 +160,12 @@ class PlanClaseDeleteView(LoginRequiredMixin, DeleteView):
 class PlanClaseDuplicateView(LoginRequiredMixin, View):
     """Vista para realizar una copia de un plan de clase"""
     def post(self, request, *args, **kwargs):
+        plan_clase = get_object_or_404(PlanClase, pk=kwargs['pk'])
+        # Checks if the plan belongs to the user
+        if plan_clase.elaborado_por != request.user:
+            return redirect('plan_clase_list')
+
         with transaction.atomic():
-            plan_clase = PlanClase.objects.get(pk=kwargs['pk'])
             elementos = ElementoCurricular.objects.filter(
                 plan_clase=plan_clase
             )
@@ -249,6 +263,10 @@ def plan_anual_update(request, pk, slug):
     """Vista para la edición de planes anuales"""
     plan_anual = get_object_or_404(PlanAnual, pk=pk, slug=slug)
 
+    # Checks if the plan belongs to the user
+    if plan_anual.elaborado_por != request.user:
+        return redirect('plan_anual_list')
+
     if request.method == 'GET':
         form = PlanAnualForm(instance=plan_anual)
         unidades_formset = DesarrolloUnidadFormset(
@@ -291,6 +309,12 @@ class PlanAnualDeleteView(LoginRequiredMixin, DeleteView):
         return HttpResponse(status=405)
 
     def delete(self, request, *args, **kwargs):
+        plan_anual = get_object_or_404(PlanAnual, pk=kwargs['pk'])
+
+        # Checks if the plan belongs to the user
+        if plan_anual.elaborado_por != request.user:
+            return redirect('plan_anual_list')
+
         messages.success(request, 'Plan Anual eliminado exitosamente.')
         return super().delete(request, *args, **kwargs)
 
@@ -299,8 +323,12 @@ class PlanAnualDuplicateView(LoginRequiredMixin, View):
     """Vista para realizar una copia de un plan de anual"""
 
     def post(self, request, *args, **kwargs):
+        plan_anual = get_object_or_404(PlanAnual, pk=kwargs['pk'])
+        # Checks if the plan belongs to the user
+        if plan_anual.elaborado_por != request.user:
+            return redirect('plan_anual_list')
+
         with transaction.atomic():
-            plan_anual = PlanAnual.objects.get(pk=kwargs['pk'])
             desarrollo_unidades = DesarrolloUnidad.objects.filter(
                 plan_anual=plan_anual
             )

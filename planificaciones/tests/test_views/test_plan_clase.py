@@ -5,33 +5,27 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.http.response import Http404
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory
 from django.urls import reverse
 from mixer.backend.django import mixer
 from testfixtures import LogCapture
 
 from accounts.tests.conftest import add_middleware_to_request
 from planificaciones import views
-from planificaciones.models.asignatura import Asignatura
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
-from planificaciones.models.curso import Curso
-from planificaciones.models.destreza import Destreza
+from planificaciones.tests.planificaciones_testcase import \
+    PlanificacionesTestCase
 from planificaciones.models.elemento_curricular import ElementoCurricular
-from planificaciones.models.indicador import Indicador
-from planificaciones.models.objetivo import Objetivo
-from planificaciones.models.objetivo_general import ObjetivoGeneral
 from planificaciones.models.plan_clase import PlanClase
 from planificaciones.models.proceso_didactico import ProcesoDidactico
-from planificaciones.models.subnivel import Subnivel
-from planificaciones.models.unidad import Unidad
 
 User = get_user_model()
 pytestmark = pytest.mark.django_db
 
 
-class PlanClaseTestCase(TestCase):
+class PlanClaseTestCase(PlanificacionesTestCase):
     def setUp(self):
         """Creates data for testing Planes de Clase"""
+        super().setUp()
 
         self.mock_stripe = patch('accounts.models.stripe')
         stripe = self.mock_stripe.start()
@@ -46,30 +40,6 @@ class PlanClaseTestCase(TestCase):
             last_name='Padilla',
             institution='Colegio Benalcazar'
         )
-
-        subnivel = mixer.blend(Subnivel)
-        self.curso_1 = mixer.blend(Curso, subnivel=subnivel)
-        self.curso_2 = mixer.blend(Curso, subnivel=subnivel)
-        self.asignatura = mixer.blend(Asignatura)
-        self.asignatura.cursos.add(self.curso_1, self.curso_2)
-        unidad_1 = mixer.blend(Unidad, curso=self.curso_1,
-                               asignatura=self.asignatura)
-        unidad_2 = mixer.blend(Unidad, curso=self.curso_2,
-                               asignatura=self.asignatura)
-        self.objetivo_1 = mixer.blend(Objetivo, asignatura=self.asignatura)
-        self.objetivo_2 = mixer.blend(Objetivo, asignatura=self.asignatura)
-        self.objetivo_general = mixer.blend(ObjetivoGeneral,
-                                            area=self.asignatura.area)
-        unidad_1.objetivos.add(self.objetivo_1)
-        unidad_2.objetivos.add(self.objetivo_2)
-        unidad_1.objetivos_generales.add(self.objetivo_general)
-        self.destreza = mixer.blend(Destreza, asignatura=self.asignatura,
-                                    subnivel=subnivel)
-        criterio = mixer.blend(CriterioEvaluacion, asignatura=self.asignatura,
-                               subnivel=subnivel)
-        criterio.destrezas.add(self.destreza)
-        self.indicador_1 = mixer.blend(Indicador, criterio_evaluacion=criterio)
-        self.indicador_2 = mixer.blend(Indicador, criterio_evaluacion=criterio)
 
         self.data = {
             'name': 'Plan de Clase1',
@@ -94,15 +64,15 @@ class PlanClaseTestCase(TestCase):
             'elementos_curriculares-INITIAL_FORMS': '0',
             'elementos_curriculares-MIN_NUM_FORMS': '0',
             'elementos_curriculares-MAX_NUM_FORMS': '1000',
-            'elementos_curriculares-0-destreza': self.destreza.id,
+            'elementos_curriculares-0-destreza': self.destreza_1.id,
             'elementos_curriculares-0-conocimientos_asociados': 'lorem ipsum',
             'elementos_curriculares-0-indicadores': [
                 self.indicador_1.id, self.indicador_2.id],
             'elementos_curriculares-0-actividades_evaluacion': 'lorem ipsum',
-            'elementos_curriculares-1-destreza': self.destreza.id,
+            'elementos_curriculares-1-destreza': self.destreza_2.id,
             'elementos_curriculares-1-conocimientos_asociados': 'lorem ipsum',
             'elementos_curriculares-1-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
+                self.indicador_3.id, self.indicador_4.id],
             'elementos_curriculares-1-actividades_evaluacion': 'lorem ipsum',
 
             # Formset Procesos didacticos
@@ -150,7 +120,10 @@ class PlanClaseTestCase(TestCase):
             'recursos': 'lorem ipsum',
         }
 
-        self.plan_clase = mixer.blend(PlanClase)
+        self.plan_clase = mixer.blend(PlanClase, elaborado_por=self.user)
+
+        another_user = mixer.blend(User)
+        self.another_plan = mixer.blend(PlanClase, elaborado_por=another_user)
 
     def tearDown(self):
         self.logger.uninstall()
@@ -174,6 +147,10 @@ class TestPlanClaseListView(PlanClaseTestCase):
         assert 'planificaciones/planificacion_list.html' in \
             response.template_name, \
             'Template should be the one for listing planning'
+        assert self.plan_clase.name in response.rendered_content, \
+            'Should contain the classroom plan name'
+        assert self.another_plan.name not in response.rendered_content, \
+            'Should not contain others users plans'
 
 
 class TestPlanClaseCreateView(PlanClaseTestCase):
@@ -273,6 +250,23 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         response = views.plan_clase_update(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
+    def test_get_when_user_doesnt_own_plan(self):
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = views.plan_clase_update(
+            request, pk=self.another_plan.pk, slug=self.another_plan.slug)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_clase_list')
+
+    def test_post_when_user_doesnt_own_plan(self):
+        request = RequestFactory().post('/', self.data)
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.plan_clase_update(
+            request, pk=self.another_plan.pk, slug=self.another_plan.slug)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_clase_list')
+
     def test_get(self):
         """Tests that an authenticated user can access the view"""
         elemento = mixer.blend(ElementoCurricular, plan_clase=self.plan_clase)
@@ -321,12 +315,6 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
             'Should return a success message'
         self.assertRedirects(response, reverse('plan_clase_list'))
 
-        # request = RequestFactory().post('/', data=self.data)
-        # request.user = self.user
-        # response = views.plan_clase_update(
-        #     request, pk=self.plan_clase.pk, slug=self.plan_clase.slug)
-        # assert response.status_code == 302, 'Should redirect to success view'
-
         self.plan_clase.refresh_from_db()
         assert self.plan_clase.name == 'Plan de Clase1', \
             'Debe actualizar el plan de clase'
@@ -364,9 +352,9 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         plan = mixer.blend(PlanClase)
         request = RequestFactory().post('/', data={})
         request.user = self.user
-        # Invalid data raises ValidationError
-        with pytest.raises(ValidationError):
-            views.plan_clase_update(request, pk=plan.pk, slug=plan.slug)
+        response = views.plan_clase_update(request, pk=plan.pk, slug=plan.slug)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_clase_list')
 
 
 class TestPlanClaseDeleteView(PlanClaseTestCase):
@@ -377,6 +365,17 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
         response = views.PlanClaseDeleteView.as_view()(request,
                                                        pk=self.plan_clase.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_post_when_user_doesnt_own_plan(self):
+        request = RequestFactory().post('/', self.data)
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.PlanClaseDeleteView.as_view()(request,
+                                                       pk=self.another_plan.pk)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_clase_list')
+        # It should still exist
+        self.plan_clase.refresh_from_db()
 
     def test_get(self):
         """Tests that an authenticated user can't access by get method"""
@@ -389,9 +388,8 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
 
     def test_delete_success(self):
         """Tests when a successful class plan is deleted"""
-        plan_clase = mixer.blend(PlanClase)
         elemento_curricular = mixer.blend(ElementoCurricular,
-                                          plan_clase=plan_clase)
+                                          plan_clase=self.plan_clase)
         proceso_didactico = mixer.blend(
             ProcesoDidactico,
             elemento_curricular=elemento_curricular
@@ -399,7 +397,7 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
 
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
-        url = reverse('plan_clase_delete', kwargs={'pk': plan_clase.pk})
+        url = reverse('plan_clase_delete', kwargs={'pk': self.plan_clase.pk})
         response = self.client.post(url, {}, follow=True)
 
         assert response.status_code == 200, 'Should return a success code'
@@ -413,7 +411,7 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
 
         # The instances should no longer exist in database
         with pytest.raises(PlanClase.DoesNotExist):
-            PlanClase.objects.get(pk=plan_clase.pk)
+            PlanClase.objects.get(pk=self.plan_clase.pk)
         with pytest.raises(ElementoCurricular.DoesNotExist):
             ElementoCurricular.objects.get(pk=elemento_curricular.pk)
         with pytest.raises(ProcesoDidactico.DoesNotExist):
@@ -425,49 +423,48 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanClaseDuplicateView.as_view()(request,
-                                                          pk=self.user.pk)
+        response = views.PlanClaseDuplicateView.as_view()(
+            request, pk=self.plan_clase.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get(self):
         """Tests that an authenticated user can't access by get method"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanClaseDuplicateView.as_view()(request,
-                                                          pk=self.user.pk)
+        response = views.PlanClaseDuplicateView.as_view()(
+            request, pk=self.plan_clase.pk)
         assert response.status_code == 405, \
             'Should return a not allowed response'
+
+    def test_post_when_user_doesnt_own_plan(self):
+        request = RequestFactory().post('/', self.data)
+        request.user = self.user
+        request = add_middleware_to_request(request)
+        response = views.PlanClaseDuplicateView.as_view()(
+            request, pk=self.another_plan.pk)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert response.url == reverse('plan_clase_list')
+        copias = PlanClase.objects.filter(name='{} (copia)'.format(
+            self.another_plan.name))
+        assert len(copias) == 0, 'Should be no copies'
 
     def test_success_plan_duplication(self):
         """Tests a plan has been successfuly duplicated"""
 
-        objetivo_1 = mixer.blend('planificaciones.Objetivo')
-        objetivo_2 = mixer.blend('planificaciones.Objetivo')
-        objetivo_general_1 = mixer.blend('planificaciones.ObjetivoGeneral')
-        objetivo_general_2 = mixer.blend('planificaciones.ObjetivoGeneral')
-
-        curso_1 = mixer.blend('planificaciones.Curso')
-        curso_2 = mixer.blend('planificaciones.Curso')
-
-        plan_clase = mixer.blend(PlanClase)
-        plan_clase.objetivos.set([objetivo_1, objetivo_2])
-        plan_clase.objetivos_generales.set(
-            [objetivo_general_1, objetivo_general_2])
-        plan_clase.cursos.set([curso_1, curso_2])
-
-        indicador_1 = mixer.blend('planificaciones.Indicador')
-        indicador_2 = mixer.blend('planificaciones.Indicador')
-
-        destreza_1 = mixer.blend('planificaciones.Destreza')
+        self.plan_clase.objetivos.set([self.objetivo_1, self.objetivo_2])
+        self.plan_clase.objetivos_generales.set(
+            [self.general_1, self.general_2])
+        self.plan_clase.cursos.set([self.curso_1, self.curso_2])
 
         elemento_curricular_1 = mixer.blend(ElementoCurricular,
-                                            plan_clase=plan_clase,
-                                            destreza=destreza_1)
-        elemento_curricular_1.indicadores.set([indicador_1, indicador_2])
+                                            plan_clase=self.plan_clase,
+                                            destreza=self.destreza_1)
+        elemento_curricular_1.indicadores.set(
+            [self.indicador_1, self.indicador_2])
 
         elemento_curricular_2 = mixer.blend(ElementoCurricular,
-                                            plan_clase=plan_clase)
-        elemento_curricular_2.indicadores.set([indicador_1, ])
+                                            plan_clase=self.plan_clase)
+        elemento_curricular_2.indicadores.set([self.indicador_1, ])
 
         proceso_didactico_1 = mixer.blend(
             ProcesoDidactico,
@@ -475,7 +472,8 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         )
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
-        url = reverse('plan_clase_duplicate', kwargs={'pk': plan_clase.pk})
+        url = reverse('plan_clase_duplicate',
+                      kwargs={'pk': self.plan_clase.pk})
         response = self.client.post(url, {}, follow=True)
 
         assert response.status_code == 200, 'Should return a success code'
@@ -493,20 +491,20 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         plan_clase_new = PlanClase.objects.last()
         elemento_curricular_new = ElementoCurricular.objects.last()
         proceso_didactico_new = ProcesoDidactico.objects.last()
-        assert plan_clase.pk != plan_clase_new.pk, \
+        assert self.plan_clase.pk != plan_clase_new.pk, \
             'Should be another instance'
-        assert plan_clase_new.name == '{} (copia)'.format(plan_clase.name), \
-            'Should have a new name'
-        assert plan_clase_new.tema == plan_clase.tema, \
+        assert plan_clase_new.name == '{} (copia)'.format(
+            self.plan_clase.name), 'Should have a new name'
+        assert plan_clase_new.tema == self.plan_clase.tema, \
             'Should have the same property values'
         # Debe tener igual todos los campos many to many al original
-        assert plan_clase_new.objetivos.first() == objetivo_1
-        assert plan_clase_new.objetivos.last() == objetivo_2
-        assert plan_clase_new.objetivos_generales.first() == objetivo_general_1
-        assert plan_clase_new.objetivos_generales.last() == objetivo_general_2
-        assert plan_clase_new.cursos.first() == curso_1
-        assert plan_clase_new.cursos.last() == curso_2
-        assert plan_clase.updated_at != plan_clase_new.updated_at, \
+        assert plan_clase_new.objetivos.first() == self.objetivo_1
+        assert plan_clase_new.objetivos.last() == self.objetivo_2
+        assert plan_clase_new.objetivos_generales.first() == self.general_1
+        assert plan_clase_new.objetivos_generales.last() == self.general_2
+        assert plan_clase_new.cursos.first() == self.curso_1
+        assert plan_clase_new.cursos.last() == self.curso_2
+        assert self.plan_clase.updated_at != plan_clase_new.updated_at, \
             'The updated_at field should not be copied'
 
         # Tests elemento curricular
@@ -517,12 +515,12 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         assert elemento_curricular_new.plan_clase == plan_clase_new
         assert elemento_curricular_new.conocimientos_asociados == \
             elemento_curricular_1.conocimientos_asociados
-        assert elemento_curricular_new.destreza == destreza_1
+        assert elemento_curricular_new.destreza == self.destreza_1
 
         # Debe tener igual todos los campos many to many al elemento curricular
         # original
-        assert elemento_curricular_new.indicadores.first() == indicador_1
-        assert elemento_curricular_new.indicadores.last() == indicador_2
+        assert elemento_curricular_new.indicadores.first() == self.indicador_1
+        assert elemento_curricular_new.indicadores.last() == self.indicador_2
 
         proceso_didactico_new = elemento_curricular_new.procesos_didacticos\
             .first()
@@ -541,17 +539,19 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         request = add_middleware_to_request(request)
 
         views.PlanClaseDuplicateView.as_view()(request,
-                                               pk=plan_clase.pk)
+                                               pk=self.plan_clase.pk)
 
         plan_clase_new = PlanClase.objects.last()
-        assert plan_clase_new.name == '{} (copia 2)'.format(plan_clase.name)
-        assert plan_clase_new.tema == plan_clase.tema
+        assert plan_clase_new.name == '{} (copia 2)'.format(
+            self.plan_clase.name)
+        assert plan_clase_new.tema == self.plan_clase.tema
 
         # Test third duplication
 
         views.PlanClaseDuplicateView.as_view()(request,
-                                               pk=plan_clase.pk)
+                                               pk=self.plan_clase.pk)
 
         plan_clase_new = PlanClase.objects.last()
-        assert plan_clase_new.name == '{} (copia 3)'.format(plan_clase.name)
-        assert plan_clase_new.tema == plan_clase.tema
+        assert plan_clase_new.name == '{} (copia 3)'.format(
+            self.plan_clase.name)
+        assert plan_clase_new.tema == self.plan_clase.tema
