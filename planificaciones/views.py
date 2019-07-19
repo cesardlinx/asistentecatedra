@@ -1,5 +1,6 @@
 import json
 import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,23 +14,26 @@ from django.views import View
 from django.views.generic import DeleteView
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
-from planificaciones.forms.plan_clase_form import PlanClaseForm
-from planificaciones.forms.plan_anual_form import PlanAnualForm
-from planificaciones.forms.elemento_curricular_formset import \
-    ElementoCurricularFormset
+
 from planificaciones.forms.desarrollo_unidad_formset import \
     DesarrolloUnidadFormset
+from planificaciones.forms.elemento_curricular_formset import \
+    ElementoCurricularFormset
+from planificaciones.forms.plan_anual_form import PlanAnualForm
+from planificaciones.forms.plan_clase_form import PlanClaseForm
+from planificaciones.mixins import UserIsPremiumMixin
+
 from .models.asignatura import Asignatura
-from .models.destreza import Destreza
-from .models.unidad import Unidad
-from .models.elemento_curricular import ElementoCurricular
+from .models.criterio_evaluacion import CriterioEvaluacion
 from .models.desarrollo_unidad import DesarrolloUnidad
+from .models.destreza import Destreza
+from .models.elemento_curricular import ElementoCurricular
 from .models.indicador import Indicador
 from .models.objetivo import Objetivo
 from .models.objetivo_general import ObjetivoGeneral
-from .models.criterio_evaluacion import CriterioEvaluacion
-from .models.plan_clase import PlanClase
 from .models.plan_anual import PlanAnual
+from .models.plan_clase import PlanClase
+from .models.unidad import Unidad
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +207,7 @@ class PlanClaseDuplicateView(LoginRequiredMixin, View):
 """ PLANES ANUALES"""
 
 
-class PlanAnualListView(LoginRequiredMixin, ListView):
+class PlanAnualListView(UserIsPremiumMixin, ListView):
     """Vista para listado de planes anuales"""
     template_name = 'planificaciones/planificacion_list.html'
     ordering = '-updated_at'
@@ -220,14 +224,21 @@ class PlanAnualListView(LoginRequiredMixin, ListView):
         return queryset
 
 
-@login_required
-def plan_anual_create(request):
+class PlanAnualCreateView(UserIsPremiumMixin, View):
     """Vista para la creación de planes anuales"""
-    if request.method == 'GET':
+    def get(self, request, *args, **kwargs):
         form = PlanAnualForm()
         unidades_formset = DesarrolloUnidadFormset(
             prefix='desarrollo_unidades')
-    elif request.method == 'POST':
+
+        context = {
+            'form': form,
+            'unidades_formset': unidades_formset,
+        }
+        return render(request, 'planificaciones/forms/plan_anual_form.html',
+                      context)
+
+    def post(self, request, *args, **kwargs):
         form = PlanAnualForm(request.POST)
         unidades_formset = DesarrolloUnidadFormset(
             request.POST, prefix='desarrollo_unidades')
@@ -250,28 +261,42 @@ def plan_anual_create(request):
         messages.error(request,
                        'Por favor corrija los campos resaltados en rojo.')
 
-    context = {
-        'form': form,
-        'unidades_formset': unidades_formset,
-    }
-    return render(request, 'planificaciones/forms/plan_anual_form.html',
-                  context)
+        context = {
+            'form': form,
+            'unidades_formset': unidades_formset,
+        }
+        return render(request, 'planificaciones/forms/plan_anual_form.html',
+                      context)
 
 
-@login_required
-def plan_anual_update(request, pk, slug):
+class PlanAnualUpdateView(UserIsPremiumMixin, View):
     """Vista para la edición de planes anuales"""
-    plan_anual = get_object_or_404(PlanAnual, pk=pk, slug=slug)
 
-    # Checks if the plan belongs to the user
-    if plan_anual.elaborado_por != request.user:
-        return redirect('plan_anual_list')
+    def get(self, request, *args, **kwargs):
+        plan_anual = get_object_or_404(PlanAnual, pk=kwargs['pk'],
+                                       slug=kwargs['slug'])
+        # Checks if the plan belongs to the user
+        if plan_anual.elaborado_por != request.user:
+            return redirect('plan_anual_list')
 
-    if request.method == 'GET':
         form = PlanAnualForm(instance=plan_anual)
         unidades_formset = DesarrolloUnidadFormset(
             instance=plan_anual)
-    elif request.method == 'POST':
+
+        context = {
+            'form': form,
+            'unidades_formset': unidades_formset,
+        }
+        return render(request, 'planificaciones/forms/plan_anual_form.html',
+                      context)
+
+    def post(self, request, *args, **kwargs):
+        plan_anual = get_object_or_404(PlanAnual, pk=kwargs['pk'],
+                                       slug=kwargs['slug'])
+        # Checks if the plan belongs to the user
+        if plan_anual.elaborado_por != request.user:
+            return redirect('plan_anual_list')
+
         form = PlanAnualForm(request.POST, instance=plan_anual)
         unidades_formset = DesarrolloUnidadFormset(
             request.POST, instance=plan_anual)
@@ -292,15 +317,15 @@ def plan_anual_update(request, pk, slug):
         messages.error(request,
                        'Por favor corrija los campos resaltados en rojo.')
 
-    context = {
-        'form': form,
-        'unidades_formset': unidades_formset,
-    }
-    return render(request, 'planificaciones/forms/plan_anual_form.html',
-                  context)
+        context = {
+            'form': form,
+            'unidades_formset': unidades_formset,
+        }
+        return render(request, 'planificaciones/forms/plan_anual_form.html',
+                      context)
 
 
-class PlanAnualDeleteView(LoginRequiredMixin, DeleteView):
+class PlanAnualDeleteView(UserIsPremiumMixin, DeleteView):
     """Vista para borrar un plan de anual"""
     model = PlanAnual
     success_url = reverse_lazy('plan_anual_list')
@@ -319,7 +344,7 @@ class PlanAnualDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class PlanAnualDuplicateView(LoginRequiredMixin, View):
+class PlanAnualDuplicateView(UserIsPremiumMixin, View):
     """Vista para realizar una copia de un plan de anual"""
 
     def post(self, request, *args, **kwargs):
@@ -371,11 +396,11 @@ class PlanUnidadListView(ListView):
     pass
 
 
-def plan_unidad_create(request):
+class PlanUnidadCreateView(DeleteView):
     pass
 
 
-def plan_unidad_update(request):
+class PlanUnidadUpdateView(DeleteView):
     pass
 
 
@@ -394,11 +419,11 @@ class PlanDestrezasListView(ListView):
     pass
 
 
-def plan_destrezas_create(request):
+class PlanDestrezasCreateView(DeleteView):
     pass
 
 
-def plan_destrezas_update(request):
+class PlanDestrezasUpdateView(DeleteView):
     pass
 
 
