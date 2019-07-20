@@ -55,7 +55,7 @@ urlpatterns = [
           name="plan_destrezas_duplicate"),
 
      # Ajax urls
-     # templates: select, checkbox
+     # templates: select, checklist
      path('ajax/cursos/<str:template>/', views.LoadCursosView.as_view(),
           name="ajax_load_cursos"),
      path('ajax/unidades/', views.LoadUnidadesView.as_view(),
@@ -63,7 +63,7 @@ urlpatterns = [
      # options: area, curso, unidad
      path('ajax/objetivos/<str:option>/', views.LoadObjetivosView.as_view(),
           name="ajax_load_objetivos"),
-     # templates: select, checkbox
+     # templates: select, checklist
      path('ajax/destrezas/<str:template>/<str:formset>/',
           views.LoadDestrezasView.as_view(),
           name="ajax_load_destrezas"),

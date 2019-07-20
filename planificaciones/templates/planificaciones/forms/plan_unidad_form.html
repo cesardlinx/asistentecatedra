@@ -4,19 +4,18 @@
 {% load widget_tweaks %}
 
 {% block titulo %}
-    Nuevo Plan Anual
+    Nuevo Plan de Unidad
 {% endblock titulo %}
 
 {% block content %}
     <section class="detail">
         <div class="planification-title">
-            <h3 class="main-title">Nuevo Plan Anual</h3>
+            <h3 class="main-title">Nuevo Plan de Unidad</h3>
         </div>
         <form method="post" id="planClaseForm"
             load-cursos-url={% url 'ajax_load_cursos' template='select' %}
             load-unidades-url={% url 'ajax_load_unidades' %}
-            load-objetivos-url={% url 'ajax_load_objetivos' option='curso' %}
-            load-objetivos-area-url={% url 'ajax_load_objetivos' option='area' %}
+            load-objetivos-url={% url 'ajax_load_objetivos' option='unidad' %}
             load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' formset='desarrollo_unidades' %}
             load-criterios-url={% url 'ajax_load_criterios' %}
             load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' formset='desarrollo_unidades' %}
@@ -44,41 +43,26 @@
                     {% include "forms/floating_input.html" with field=form.paralelos %}
                 </div>
 
-                <h5 class="form-label">Tiempo:</h5>
-
                 <div class="form-group-2">
-                    {% include "forms/floating_input.html" with field=form.carga_horaria %}
-                    {% include "forms/floating_input.html" with field=form.semanas_trabajo %}
+                    {% include "forms/select_field.html" with field=form.periodos %}
+                    {% include "forms/select_field.html" with field=form.tiempo %}
                 </div>
 
                 <div class="form-group">
-                    {% include "forms/floating_input.html" with field=form.semanas_imprevistos %}
-                </div>
-
-                <h5 class="form-label">Objetivos:</h5>
-
-                <div class="form-group">
-                    {{ form.objetivos_curso|add_label_class:"form-label" }}
-                    {{ form.objetivos_curso }}
-                    {{ form.objetivos_generales_curso }}
-                </div>
-
-                <div class="form-group">
-                    {{ form.objetivos_generales|add_label_class:"form-label" }}
+                    {{ form.objetivos }}
                     {{ form.objetivos_generales }}
                 </div>
 
-                <h5 class="form-label">Ejes Transversales:</h5>
-
                 <div class="form-group">
-                    {% include "forms/floating_input.html" with field=form.ejes_transversales %}
+                    {{ form.unidad|add_label_class:"form-label" }}
+                    {{ form.unidad }}
                 </div>
 
             </section>
 
 
             <section class="table-responsive elem-curric-container">
-                <h5 class="form-label">Desarrollo de Unidades de Planificación:</h5>
+                <h5 class="form-label">Actividades de Aprendizaje:</h5>
                 <table class="desarrollo-unidad" id="desarrollo-unidad">
                     <thead>
                         <tr>
@@ -177,12 +161,12 @@
 
             <div class="destrezas-buttons">
                 <button type="button" class="btn primary-button common-btn" id="agregar-destreza">
-                    <span class="fas fa-plus"></span> Agregar Unidad
+                    <span class="fas fa-plus"></span> Agregar Actividad
                 </button>
 
                 {% if unidades_formset.total_form_count > 1 %}
                     <button class="secondary-button delete-btn" type="button" id="eliminar-destreza">
-                        <span class="fas fa-minus"></span> Eliminar Unidad
+                        <span class="fas fa-minus"></span> Eliminar Actividad
                     </button>
                 {% endif %}
             </div>
@@ -190,25 +174,23 @@
             <section class="form-footer">
 
                 <div class="form-group">
-                    {{ form.bibliografia|add_label_class:"form-label" }}
-                    {% if form.bibliografia.errors %}
-                        <div class="error">
-                        {{ form.bibliografia }}
-                        {% include 'forms/field_errors.html'%}
-                        </div>
-                    {% else %}
-                        {{ form.bibliografia }}
-                    {% endif %}
+                    {{ form.necesidad_adaptacion|add_label_class:"form-label" }}
+                    {% render_field form.necesidad_adaptacion class="textarea-full" %}
                 </div>
 
                 <div class="form-group">
-                    {{ form.observaciones|add_label_class:"form-label" }}
-                    {% render_field form.observaciones class="textarea-full" placeholder="Escriba sus observaciones." %}
+                    {{ form.adaptacion_curricular|add_label_class:"form-label" }}
+                    {% render_field form.adaptacion_curricular class="textarea-full" %}
                 </div>
 
                 <div class="form-group">
                     {{ form.aprobado_por|add_label_class:"form-label" }}
                     {{ form.aprobado_por }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.revisado_por|add_label_class:"form-label" }}
+                    {{ form.revisado_por }}
                 </div>
 
                 <input type="submit" value="Guardar Planificación" class="btn primary-button submit-btn">
@@ -220,5 +202,5 @@
 
 {% block scripts %}
     <script src="{% static 'autosize/dist/autosize.min.js' %}"></script>
-    <script src="{% static 'js/planificaciones/plan_anual.js' %}"></script>
+    <script src="{% static 'js/planificaciones/plan_unidad.js' %}"></script>
 {% endblock scripts %}
