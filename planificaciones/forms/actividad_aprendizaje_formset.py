@@ -50,8 +50,8 @@ class BaseActividadAprendizajeFormset(BaseInlineFormSet):
                 except (ValueError, TypeError):
                     pass
             elif form.instance.pk:
-                asignatura_id = form.instance.plan_anual.asignatura.pk
-                curso_id = form.instance.plan_anual.curso.pk
+                asignatura_id = form.instance.plan_unidad.asignatura.pk
+                curso_id = form.instance.plan_unidad.curso.pk
 
                 cursos_id = [curso_id, ]
 

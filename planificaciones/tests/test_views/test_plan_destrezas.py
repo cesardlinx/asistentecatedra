@@ -12,8 +12,7 @@ from testfixtures import LogCapture
 
 from accounts.tests.conftest import add_middleware_to_request
 from planificaciones import views
-from planificaciones.models.plan_unidad import PlanUnidad
-from planificaciones.models.actividad_aprendizaje import ActividadAprendizaje
+from planificaciones.models.plan_destrezas import PlanDestrezas
 from planificaciones.tests.planificaciones_testcase import \
     PlanificacionesTestCase
 
@@ -21,9 +20,9 @@ User = get_user_model()
 pytestmark = pytest.mark.django_db
 
 
-class PlanUnidadTestCase(PlanificacionesTestCase):
+class PlanDestrezasTestCase(PlanificacionesTestCase):
     def setUp(self):
-        """Creates data for testing Planes de Unidad"""
+        """Creates data for testing Planes de Destrezas"""
         super().setUp()
 
         self.mock_stripe = patch('accounts.models.stripe')
@@ -42,7 +41,7 @@ class PlanUnidadTestCase(PlanificacionesTestCase):
         )
 
         self.data = {
-            'name': 'Plan de Unidad1',
+            'name': 'Plan de Destrezas1',
             'ano_lectivo': '2019-2020',
             'docentes': 'David Padilla',
             'asignatura': self.asignatura.id,
@@ -51,41 +50,23 @@ class PlanUnidadTestCase(PlanificacionesTestCase):
             'unidad': self.unidad_1.id,
             'objetivos': [self.objetivo_1.id, self.objetivo_2.id],
             'objetivos_generales': [self.general_1.id, self.general_2.id],
+            'destrezas': [self.destreza_1.id, self.destreza_2.id],
+            'criterios_evaluacion': [self.criterio_1.id, self.criterio_2.id],
             'periodos': 20,
-            'tiempo': 20,
-
-            # Formset Elementos curriculares 1
-            'actividades_aprendizaje-TOTAL_FORMS': '2',
-            'actividades_aprendizaje-INITIAL_FORMS': '0',
-            'actividades_aprendizaje-MIN_NUM_FORMS': '0',
-            'actividades_aprendizaje-MAX_NUM_FORMS': '1000',
-            'actividades_aprendizaje-0-destrezas': [
-                self.destreza_1.id, self.destreza_2.id],
-            'actividades_aprendizaje-0-criterios_evaluacion': [
-                self.criterio_1.id, self.criterio_2.id],
-            'actividades_aprendizaje-0-estrategias_metodologicas':
-            'lorem ipsum',
-            'actividades_aprendizaje-0-recursos': 'lorem ipsum',
-            'actividades_aprendizaje-0-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
-            'actividades_aprendizaje-0-instrumentos_evaluacion': 'lorem ipsum',
-
-            'actividades_aprendizaje-1-destrezas': [
-                self.destreza_1.id, self.destreza_2.id],
-            'actividades_aprendizaje-1-criterios_evaluacion': [
-                self.criterio_1.id, self.criterio_2.id],
-            'actividades_aprendizaje-1-estrategias_metodologicas':
-            'lorem ipsum',
-            'actividades_aprendizaje-1-recursos': 'lorem ipsum',
-            'actividades_aprendizaje-1-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
-            'actividades_aprendizaje-1-instrumentos_evaluacion': 'lorem ipsum',
+            'semana_inicio': 'lorem ipsum dolor sit amet',
+            'ejes_transversales': 'Lorem ipsum dolor sit amet.',
+            'estrategias_metodologicas': 'Lorem ipsum dolor sit amet.',
+            'recursos': 'Lorem ipsum dolor sit amet.',
+            'indicadores': [self.indicador_1.id, self.indicador_2.id],
+            'actividades_evaluacion': 'Lorem ipsum dolor sit amet.',
         }
 
-        self.plan_unidad = mixer.blend(PlanUnidad, elaborado_por=self.user)
+        self.plan_destrezas = mixer.blend(PlanDestrezas,
+                                          elaborado_por=self.user)
 
         another_user = mixer.blend(User, is_premium=True)
-        self.another_plan = mixer.blend(PlanUnidad, elaborado_por=another_user)
+        self.another_plan = mixer.blend(PlanDestrezas,
+                                        elaborado_por=another_user)
 
         self.common_user = mixer.blend(User)
 
@@ -93,20 +74,20 @@ class PlanUnidadTestCase(PlanificacionesTestCase):
         self.logger.uninstall()
 
 
-class TestPlanUnidadListView(PlanUnidadTestCase):
+class TestPlanDestrezasListView(PlanDestrezasTestCase):
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanUnidadListView.as_view()(request)
+        response = views.PlanDestrezasListView.as_view()(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_premium(self):
         """Tests that only premium users can access"""
         request = RequestFactory().get('/')
         request.user = self.common_user
-        response = views.PlanUnidadListView.as_view()(request)
+        response = views.PlanDestrezasListView.as_view()(request)
         assert response.status_code == 302, 'Should return a redirection'
         assert reverse('planificaciones') == response.url, \
             'Should not be callable by a normal user'
@@ -115,32 +96,32 @@ class TestPlanUnidadListView(PlanUnidadTestCase):
         """Tests that an authenticated user can access the view"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanUnidadListView.as_view()(request)
+        response = views.PlanDestrezasListView.as_view()(request)
         assert response.status_code == 200, 'Authenticated user can access'
         assert 'planificaciones/planificacion_list.html' in \
             response.template_name, \
             'Template should be the one for listing planning'
-        assert self.plan_unidad.name in response.rendered_content, \
+        assert self.plan_destrezas.name in response.rendered_content, \
             'Should contain the unit plan name'
         assert self.another_plan.name not in response.rendered_content, \
             'Should not contain others users plans'
 
 
-class TestPlanUnidadCreateView(PlanUnidadTestCase):
-    """Prueba la vista para la creación de planes de unidad"""
+class TestPlanDestrezasCreateView(PlanDestrezasTestCase):
+    """Prueba la vista para la creación de planes de destreza"""
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanUnidadCreateView.as_view()(request)
+        response = views.PlanDestrezasCreateView.as_view()(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_premium(self):
         """Tests that only premium users can access"""
         request = RequestFactory().get('/')
         request.user = self.common_user
-        response = views.PlanUnidadCreateView.as_view()(request)
+        response = views.PlanDestrezasCreateView.as_view()(request)
         assert response.status_code == 302, 'Should return a redirection'
         assert reverse('planificaciones') == response.url, \
             'Should not be callable by a normal user'
@@ -149,7 +130,7 @@ class TestPlanUnidadCreateView(PlanUnidadTestCase):
         """Tests that an authenticated user can access the view"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanUnidadCreateView.as_view()(request)
+        response = views.PlanDestrezasCreateView.as_view()(request)
         assert response.status_code == 200, 'Authenticated user can access'
         # Tempĺate Testing
         self.assertContains(response, 'name="name"')
@@ -161,40 +142,45 @@ class TestPlanUnidadCreateView(PlanUnidadTestCase):
         self.assertContains(response, 'name="unidad"')
         self.assertContains(response, 'id="id_objetivos"')
         self.assertContains(response, 'id="id_objetivos_generales"')
+        self.assertContains(response, 'id="id_destrezas"')
+        self.assertContains(response, 'id="id_criterios_evaluacion"')
+        self.assertContains(response, 'id="id_indicadores"')
         self.assertContains(response, 'name="periodos"')
-        self.assertContains(response, 'name="tiempo"')
+        self.assertContains(response, 'name="semana_inicio"')
+        self.assertContains(response, 'name="ejes_transversales"')
+        self.assertContains(response, 'name="estrategias_metodologicas"')
+        self.assertContains(response, 'name="recursos"')
+        self.assertContains(response, 'name="actividades_evaluacion"')
         self.assertContains(response, 'name="necesidad_adaptacion"')
         self.assertContains(response, 'name="adaptacion_curricular"')
         self.assertContains(response, 'name="aprobado_por"')
         self.assertContains(response, 'name="revisado_por"')
 
     def test_post_success(self):
-        """Prueba la creación de planes de unidad"""
+        """Prueba la creación de planes de destreza"""
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
-        url = reverse('plan_unidad_create')
+        url = reverse('plan_destrezas_create')
         response = self.client.post(url, self.data, follow=True)
         assert response.status_code == 200, 'Should return a success response'
         messages = list(response.context.get('messages'))
         assert len(messages) == 1, 'Should return one message'
-        assert messages[0].message == 'Plan de Unidad creado exitosamente.', \
-            'Should return a success message'
+        assert messages[0].message == 'Plan de Destrezas creado '\
+            'exitosamente.', 'Should return a success message'
         assert messages[0].tags == 'alert-success', \
             'Should return a success message'
-        self.assertRedirects(response, reverse('plan_unidad_list'))
+        self.assertRedirects(response, reverse('plan_destrezas_list'))
 
-        self.plan_unidad.refresh_from_db()
+        self.plan_destrezas.refresh_from_db()
 
-        plan = PlanUnidad.objects.last()
-        actividad_aprendizaje = ActividadAprendizaje.objects.last()
-        assert plan.name == 'Plan de Unidad1', 'Should create a Plan de Unidad'
-        assert actividad_aprendizaje.plan_unidad == plan, \
-            'el elemento curricular debe pertenecer al plan de unidad'
+        plan = PlanDestrezas.objects.last()
+        assert plan.name == 'Plan de Destrezas1', 'Should create a Plan de '\
+            'Destrezas'
 
         assert 'INFO' in str(self.logger), 'Should return an info log'
-        assert 'Plan de unidad created for the user: {}.'.format(
+        assert 'Plan de destrezas created for the user: {}.'.format(
             self.user.email) in str(self.logger), \
-            'Log when a Plan de Unidad is created.'
+            'Log when a Plan de Destrezas is created.'
 
     def test_invalid_data(self):
         """Tests the view when sending invalid data"""
@@ -203,37 +189,43 @@ class TestPlanUnidadCreateView(PlanUnidadTestCase):
         request = RequestFactory().post('/', data=self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.PlanUnidadCreateView.as_view()(request)
+        response = views.PlanDestrezasCreateView.as_view()(request)
 
-        assert response.status_code == 200, 'Should get a success response'
+        assert response.status_code == 200, 'Should return a success response'
         assert 'Por favor corrija los campos resaltados en rojo.' \
             in str(response.content), 'Should have an error message'
+        assert 'alert-danger' in str(response.content), \
+            'Should return an error message'
 
     def test_empty_data(self):
         """Tests the view when sending empty data"""
         request = RequestFactory().post('/', data={})
         request.user = self.user
-        # Invalid data raises ValidationError
-        with pytest.raises(ValidationError):
-            views.PlanUnidadCreateView.as_view()(request)
+        request = add_middleware_to_request(request)
+        response = views.PlanDestrezasCreateView.as_view()(request)
+        assert response.status_code == 200, 'Should return a success response'
+        assert 'Por favor corrija los campos resaltados en rojo.' \
+            in str(response.content), 'Should have an error message'
+        assert 'alert-danger' in str(response.content), \
+            'Should return an error message'
 
 
-class TestPlanUnidadUpdateView(PlanUnidadTestCase):
+class TestPlanDestrezasUpdateView(PlanDestrezasTestCase):
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanUnidadUpdateView.as_view()(
-            request, pk=self.plan_unidad.pk, slug=self.plan_unidad.slug)
+        response = views.PlanDestrezasUpdateView.as_view()(
+            request, pk=self.plan_destrezas.pk, slug=self.plan_destrezas.slug)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_premium(self):
         """Tests that only premium users can access"""
         request = RequestFactory().get('/')
         request.user = self.common_user
-        response = views.PlanUnidadUpdateView.as_view()(
-            request, pk=self.plan_unidad.pk, slug=self.plan_unidad.slug)
+        response = views.PlanDestrezasUpdateView.as_view()(
+            request, pk=self.plan_destrezas.pk, slug=self.plan_destrezas.slug)
         assert response.status_code == 302, 'Should return a redirection'
         assert reverse('planificaciones') == response.url, \
             'Should not be callable by a normal user'
@@ -241,27 +233,26 @@ class TestPlanUnidadUpdateView(PlanUnidadTestCase):
     def test_get_when_user_doesnt_own_plan(self):
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanUnidadUpdateView.as_view()(
+        response = views.PlanDestrezasUpdateView.as_view()(
             request, pk=self.another_plan.pk, slug=self.another_plan.slug)
         assert response.status_code == 302, 'Should return a redirection'
-        assert response.url == reverse('plan_unidad_list')
+        assert response.url == reverse('plan_destrezas_list')
 
     def test_post_when_user_doesnt_own_plan(self):
         request = RequestFactory().post('/', self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.PlanUnidadUpdateView.as_view()(
+        response = views.PlanDestrezasUpdateView.as_view()(
             request, pk=self.another_plan.pk, slug=self.another_plan.slug)
         assert response.status_code == 302, 'Should return a redirection'
-        assert response.url == reverse('plan_unidad_list')
+        assert response.url == reverse('plan_destrezas_list')
 
     def test_get(self):
         """Tests that an authenticated user can access the view"""
-        mixer.blend(ActividadAprendizaje, plan_unidad=self.plan_unidad)
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanUnidadUpdateView.as_view()(
-            request, pk=self.plan_unidad.pk, slug=self.plan_unidad.slug)
+        response = views.PlanDestrezasUpdateView.as_view()(
+            request, pk=self.plan_destrezas.pk, slug=self.plan_destrezas.slug)
         assert response.status_code == 200, 'Authenticated user can access'
         # Tempĺate Testing
         self.assertContains(response, 'name="name"')
@@ -273,39 +264,46 @@ class TestPlanUnidadUpdateView(PlanUnidadTestCase):
         self.assertContains(response, 'name="unidad"')
         self.assertContains(response, 'id="id_objetivos"')
         self.assertContains(response, 'id="id_objetivos_generales"')
+        self.assertContains(response, 'id="id_destrezas"')
+        self.assertContains(response, 'id="id_criterios_evaluacion"')
+        self.assertContains(response, 'id="id_indicadores"')
         self.assertContains(response, 'name="periodos"')
-        self.assertContains(response, 'name="tiempo"')
+        self.assertContains(response, 'name="semana_inicio"')
+        self.assertContains(response, 'name="ejes_transversales"')
+        self.assertContains(response, 'name="estrategias_metodologicas"')
+        self.assertContains(response, 'name="recursos"')
+        self.assertContains(response, 'name="actividades_evaluacion"')
         self.assertContains(response, 'name="necesidad_adaptacion"')
         self.assertContains(response, 'name="adaptacion_curricular"')
         self.assertContains(response, 'name="aprobado_por"')
         self.assertContains(response, 'name="revisado_por"')
 
     def test_post_success(self):
-        """Prueba la actualización de planes de unidad"""
-        assert self.plan_unidad.name != 'Plan de Unidad1', \
+        """Prueba la actualización de planes de destreza"""
+        assert self.plan_destrezas.name != 'Plan de Destrezas1', \
             'El plan inicialmente tiene un nombre diferente'
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
-        url = reverse('plan_unidad_update', kwargs={
-            'pk': self.plan_unidad.pk, 'slug': self.plan_unidad.slug})
+        url = reverse('plan_destrezas_update', kwargs={
+            'pk': self.plan_destrezas.pk, 'slug': self.plan_destrezas.slug})
         response = self.client.post(url, self.data, follow=True)
         assert response.status_code == 200, 'Should return a success response'
         messages = list(response.context.get('messages'))
         assert len(messages) == 1, 'Should return one message'
-        assert messages[0].message == 'Plan de Unidad actualizado '\
+        assert messages[0].message == 'Plan de Destrezas actualizado '\
             'exitosamente.', 'Should return a success message'
         assert messages[0].tags == 'alert-success', \
             'Should return a success message'
-        self.assertRedirects(response, reverse('plan_unidad_list'))
+        self.assertRedirects(response, reverse('plan_destrezas_list'))
 
-        self.plan_unidad.refresh_from_db()
-        assert self.plan_unidad.name == 'Plan de Unidad1', \
-            'Debe actualizar el plan de unidad'
+        self.plan_destrezas.refresh_from_db()
+        assert self.plan_destrezas.name == 'Plan de Destrezas1', \
+            'Debe actualizar el plan de destreza'
 
         assert 'INFO' in str(self.logger), 'Should return an info log'
-        assert 'Plan de unidad updated for the user: {}.'.format(
+        assert 'Plan de destrezas updated for the user: {}.'.format(
             self.user.email) in str(self.logger), \
-            'Log when a Plan de Unidad is updated.'
+            'Log when a Plan de Destrezas is updated.'
 
     def test_invalid_plan(self):
         """Tests the view when sending invalid data about a plan"""
@@ -313,7 +311,7 @@ class TestPlanUnidadUpdateView(PlanUnidadTestCase):
         request.user = self.user
         # Invalid data raises 404 Error
         with pytest.raises(Http404):
-            views.PlanUnidadUpdateView.as_view()(request, pk=1, slug='test')
+            views.PlanDestrezasUpdateView.as_view()(request, pk=1, slug='test')
 
     def test_invalid_data(self):
         """Tests the view when sending invalid data"""
@@ -323,39 +321,45 @@ class TestPlanUnidadUpdateView(PlanUnidadTestCase):
         request = RequestFactory().post('/', data=self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.PlanUnidadUpdateView.as_view()(
-            request, pk=self.plan_unidad.pk, slug=self.plan_unidad.slug)
+        response = views.PlanDestrezasUpdateView.as_view()(
+            request, pk=self.plan_destrezas.pk, slug=self.plan_destrezas.slug)
 
-        assert response.status_code == 200, 'Should get a success response'
+        assert response.status_code == 200, 'Should return a success response'
         assert 'Por favor corrija los campos resaltados en rojo.' \
             in str(response.content), 'Should have an error message'
+        assert 'alert-danger' in str(response.content), \
+            'Should return an error message'
 
     def test_empty_data(self):
         """Tests the view when sending empty data"""
-        plan = mixer.blend(PlanUnidad)
+        plan = mixer.blend(PlanDestrezas)
         request = RequestFactory().post('/', data={})
         request.user = self.user
-        response = views.PlanUnidadUpdateView.as_view()(
+        response = views.PlanDestrezasUpdateView.as_view()(
             request, pk=plan.pk, slug=plan.slug)
         assert response.status_code == 302, 'Should return a redirection'
-        assert response.url == reverse('plan_unidad_list')
+        assert response.url == reverse('plan_destrezas_list')
 
 
-class TestPlanUnidadDeleteView(PlanUnidadTestCase):
+class TestPlanDestrezasDeleteView(PlanDestrezasTestCase):
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanUnidadDeleteView.as_view()(request,
-                                                        pk=self.plan_unidad.pk)
+        response = views.PlanDestrezasDeleteView.as_view()(
+            request,
+            pk=self.plan_destrezas.pk
+        )
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_premium(self):
         """Tests that only premium users can access"""
         request = RequestFactory().get('/')
         request.user = self.common_user
-        response = views.PlanUnidadDeleteView.as_view()(request,
-                                                        pk=self.plan_unidad.pk)
+        response = views.PlanDestrezasDeleteView.as_view()(
+            request,
+            pk=self.plan_destrezas.pk
+        )
         assert response.status_code == 302, 'Should return a redirection'
         assert reverse('planificaciones') == response.url, \
             'Should not be callable by a normal user'
@@ -364,65 +368,63 @@ class TestPlanUnidadDeleteView(PlanUnidadTestCase):
         request = RequestFactory().post('/', self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.PlanUnidadDeleteView.as_view()(
+        response = views.PlanDestrezasDeleteView.as_view()(
             request,
             pk=self.another_plan.pk
         )
         assert response.status_code == 302, 'Should return a redirection'
-        assert response.url == reverse('plan_unidad_list')
+        assert response.url == reverse('plan_destrezas_list')
         # It should still exist
-        self.plan_unidad.refresh_from_db()
+        self.plan_destrezas.refresh_from_db()
 
     def test_get(self):
         """Tests that an authenticated user can't access by get method"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanUnidadDeleteView.as_view()(request,
-                                                        pk=self.plan_unidad.pk)
+        response = views.PlanDestrezasDeleteView.as_view()(
+            request,
+            pk=self.plan_destrezas.pk
+        )
         assert response.status_code == 405, \
             'Should return a not allowed response'
 
     def test_delete_success(self):
         """Tests when a successful class plan is deleted"""
-        actividad_aprendizaje = mixer.blend(ActividadAprendizaje,
-                                            plan_unidad=self.plan_unidad)
-
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
-        url = reverse('plan_unidad_delete', kwargs={'pk': self.plan_unidad.pk})
+        url = reverse('plan_destrezas_delete', kwargs={'pk':
+                      self.plan_destrezas.pk})
         response = self.client.post(url, {}, follow=True)
 
         assert response.status_code == 200, 'Should return a success code'
         messages = list(response.context.get('messages'))
         assert len(messages) == 1, 'Should return one message'
-        assert messages[0].message == 'Plan de Unidad eliminado '\
+        assert messages[0].message == 'Plan de Destrezas eliminado '\
             'exitosamente.', 'Should return a success message'
         assert messages[0].tags == 'alert-success', \
             'Should return a success message'
-        self.assertRedirects(response, reverse('plan_unidad_list'))
+        self.assertRedirects(response, reverse('plan_destrezas_list'))
 
         # The instances should no longer exist in database
-        with pytest.raises(PlanUnidad.DoesNotExist):
-            PlanUnidad.objects.get(pk=self.plan_unidad.pk)
-        with pytest.raises(ActividadAprendizaje.DoesNotExist):
-            ActividadAprendizaje.objects.get(pk=actividad_aprendizaje.pk)
+        with pytest.raises(PlanDestrezas.DoesNotExist):
+            PlanDestrezas.objects.get(pk=self.plan_destrezas.pk)
 
 
-class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
+class TestPlanDestrezasDuplicateView(PlanDestrezasTestCase):
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanUnidadDuplicateView.as_view()(
-            request, pk=self.plan_unidad.pk)
+        response = views.PlanDestrezasDuplicateView.as_view()(
+            request, pk=self.plan_destrezas.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_premium(self):
         """Tests that only premium users can access"""
         request = RequestFactory().get('/')
         request.user = self.common_user
-        response = views.PlanUnidadDuplicateView.as_view()(
-            request, pk=self.plan_unidad.pk)
+        response = views.PlanDestrezasDuplicateView.as_view()(
+            request, pk=self.plan_destrezas.pk)
         assert response.status_code == 302, 'Should return a redirection'
         assert reverse('planificaciones') == response.url, \
             'Should not be callable by a normal user'
@@ -431,8 +433,8 @@ class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
         """Tests that an authenticated user can't access by get method"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanUnidadDuplicateView.as_view()(
-            request, pk=self.plan_unidad.pk)
+        response = views.PlanDestrezasDuplicateView.as_view()(
+            request, pk=self.plan_destrezas.pk)
         assert response.status_code == 405, \
             'Should return a not allowed response'
 
@@ -440,44 +442,32 @@ class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
         request = RequestFactory().post('/', self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.PlanUnidadDuplicateView.as_view()(
+        response = views.PlanDestrezasDuplicateView.as_view()(
             request, pk=self.another_plan.pk)
         assert response.status_code == 302, 'Should return a redirection'
-        assert response.url == reverse('plan_unidad_list')
-        copias = PlanUnidad.objects.filter(name='{} (copia)'.format(
+        assert response.url == reverse('plan_destrezas_list')
+        copias = PlanDestrezas.objects.filter(name='{} (copia)'.format(
             self.another_plan.name))
         assert len(copias) == 0, 'Should be no copies'
 
     def test_success_plan_duplication(self):
         """Tests a plan has been successfuly duplicated"""
 
-        self.plan_unidad.objetivos.set(
+        self.plan_destrezas.objetivos.set(
             [self.objetivo_1, self.objetivo_2])
-        self.plan_unidad.objetivos_generales.set(
+        self.plan_destrezas.objetivos_generales.set(
             [self.general_1, self.general_2])
-
-        actividad_aprendizaje_1 = mixer.blend(ActividadAprendizaje,
-                                              plan_unidad=self.plan_unidad)
-        actividad_aprendizaje_1.destrezas.set(
+        self.plan_destrezas.destrezas.set(
             [self.destreza_1, self.destreza_2])
-        actividad_aprendizaje_1.criterios_evaluacion.set(
+        self.plan_destrezas.criterios_evaluacion.set(
             [self.criterio_1, self.criterio_2])
-        actividad_aprendizaje_1.indicadores.set(
-            [self.indicador_1, self.indicador_2])
-
-        actividad_aprendizaje_2 = mixer.blend(ActividadAprendizaje,
-                                              plan_unidad=self.plan_unidad)
-        actividad_aprendizaje_2.destrezas.set(
-            [self.destreza_1, self.destreza_2])
-        actividad_aprendizaje_2.criterios_evaluacion.set(
-            [self.criterio_1, self.criterio_2])
-        actividad_aprendizaje_2.indicadores.set(
+        self.plan_destrezas.indicadores.set(
             [self.indicador_1, self.indicador_2])
 
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
-        url = reverse('plan_unidad_duplicate',
-                      kwargs={'pk': self.plan_unidad.pk})
+        url = reverse('plan_destrezas_duplicate',
+                      kwargs={'pk': self.plan_destrezas.pk})
         response = self.client.post(url, {}, follow=True)
 
         assert response.status_code == 200, 'Should return a success code'
@@ -485,43 +475,36 @@ class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
         # Test success message
         messages = list(response.context.get('messages'))
         assert len(messages) == 1, 'Should return one message'
-        assert messages[0].message == 'Plan de Unidad duplicado '\
+        assert messages[0].message == 'Plan de Destrezas duplicado '\
             'exitosamente.', 'Should return a success message'
         assert messages[0].tags == 'alert-success', \
             'Should return a success message'
-        self.assertRedirects(response, reverse('plan_unidad_list'))
+        self.assertRedirects(response, reverse('plan_destrezas_list'))
 
-        # Test plan de unidad
-        plan_unidad_new = PlanUnidad.objects.last()
-        actividad_aprendizaje_new = ActividadAprendizaje.objects.last()
-        assert self.plan_unidad.pk != plan_unidad_new.pk, \
+        # Test plan de destreza
+        plan_destrezas_new = PlanDestrezas.objects.last()
+
+        assert self.plan_destrezas.pk != plan_destrezas_new.pk, \
             'Should be another instance'
-        assert plan_unidad_new.name == '{} (copia)'.format(
-            self.plan_unidad.name), 'Should have a new name'
-        assert plan_unidad_new.curso == self.plan_unidad.curso, \
+        assert plan_destrezas_new.name == '{} (copia)'.format(
+            self.plan_destrezas.name), 'Should have a new name'
+        assert plan_destrezas_new.curso == self.plan_destrezas.curso, \
             'Should have the same property values'
         # Debe tener igual todos los campos many to many al original
-        assert plan_unidad_new.objetivos.first() == self.objetivo_1
-        assert plan_unidad_new.objetivos.last() == self.objetivo_2
-        assert plan_unidad_new.objetivos_generales.first() == self.general_1
-        assert plan_unidad_new.objetivos_generales.last() == self.general_2
+        assert plan_destrezas_new.objetivos.first() == self.objetivo_1
+        assert plan_destrezas_new.objetivos.last() == self.objetivo_2
+        assert plan_destrezas_new.objetivos_generales.first() == self.general_1
+        assert plan_destrezas_new.objetivos_generales.last() == self.general_2
+        assert plan_destrezas_new.destrezas.first() == self.destreza_1
+        assert plan_destrezas_new.destrezas.last() == self.destreza_2
+        assert plan_destrezas_new.criterios_evaluacion.first() == self.criterio_1
+        assert plan_destrezas_new.criterios_evaluacion.last() == self.criterio_2
+        assert plan_destrezas_new.indicadores.first() == self.indicador_1
+        assert plan_destrezas_new.indicadores.last() == self.indicador_2
 
-        assert self.plan_unidad.updated_at != plan_unidad_new.updated_at, \
+        assert self.plan_destrezas.updated_at != \
+            plan_destrezas_new.updated_at, \
             'The updated_at field should not be copied'
-
-        # Tests elemento curricular
-        actividad_aprendizaje_new = plan_unidad_new.actividades_aprendizaje.\
-            first()
-
-        assert actividad_aprendizaje_new.pk != actividad_aprendizaje_1.pk, \
-            'Should be another instance'
-        assert actividad_aprendizaje_new.plan_unidad == plan_unidad_new
-
-        # Debe tener igual todos los campos many to many
-        # al desarrollo de unidad original
-        assert actividad_aprendizaje_new.indicadores.first() == \
-            self.indicador_1
-        assert actividad_aprendizaje_new.indicadores.last() == self.indicador_2
 
         # Test second duplication
 
@@ -529,20 +512,24 @@ class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
         request.user = self.user
         request = add_middleware_to_request(request)
 
-        views.PlanUnidadDuplicateView.as_view()(request,
-                                                pk=self.plan_unidad.pk)
+        views.PlanDestrezasDuplicateView.as_view()(
+            request,
+            pk=self.plan_destrezas.pk
+        )
 
-        plan_unidad_new = PlanUnidad.objects.last()
-        assert plan_unidad_new.name == '{} (copia 2)'.format(
-            self.plan_unidad.name)
-        assert plan_unidad_new.curso == self.plan_unidad.curso
+        plan_destrezas_new = PlanDestrezas.objects.last()
+        assert plan_destrezas_new.name == '{} (copia 2)'.format(
+            self.plan_destrezas.name)
+        assert plan_destrezas_new.curso == self.plan_destrezas.curso
 
         # Test third duplication
 
-        views.PlanUnidadDuplicateView.as_view()(request,
-                                                pk=self.plan_unidad.pk)
+        views.PlanDestrezasDuplicateView.as_view()(
+            request,
+            pk=self.plan_destrezas.pk
+        )
 
-        plan_unidad_new = PlanUnidad.objects.last()
-        assert plan_unidad_new.name == '{} (copia 3)'.format(
-            self.plan_unidad.name)
-        assert plan_unidad_new.curso == self.plan_unidad.curso
+        plan_destrezas_new = PlanDestrezas.objects.last()
+        assert plan_destrezas_new.name == '{} (copia 3)'.format(
+            self.plan_destrezas.name)
+        assert plan_destrezas_new.curso == self.plan_destrezas.curso

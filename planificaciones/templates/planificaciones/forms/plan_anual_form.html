@@ -211,6 +211,11 @@
                     {{ form.aprobado_por }}
                 </div>
 
+                <div class="form-group">
+                    {{ form.revisado_por|add_label_class:"form-label" }}
+                    {{ form.revisado_por }}
+                </div>
+
                 <input type="submit" value="Guardar Planificación" class="btn primary-button submit-btn">
 
             </section>

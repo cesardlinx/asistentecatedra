@@ -28,7 +28,6 @@ class PlanDestrezasForm(forms.ModelForm):
             'objetivos_generales',
             'destrezas',
             'criterios_evaluacion',
-            'indicadores',
             'periodos',
             'semana_inicio',
             'ejes_transversales',

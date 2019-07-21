@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block titulo %}
+    Nuevo Plan de Destrezas
+{% endblock titulo %}
+
+{% block content %}
+    <section class="detail">
+        <div class="planification-title">
+            <h3 class="main-title">Nuevo Plan de Destrezas</h3>
+        </div>
+        <form method="post" id="planClaseForm"
+            load-cursos-url={% url 'ajax_load_cursos' template='select' %}
+            load-unidades-url={% url 'ajax_load_unidades' %}
+            load-objetivos-url={% url 'ajax_load_objetivos' option='unidad' %}
+            load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' formset='desarrollo_unidades' %}
+            load-criterios-url={% url 'ajax_load_criterios' %}
+            load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' formset='desarrollo_unidades' %}
+            novalidate>
+            {% csrf_token %}
+            {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
+
+            {{ form.non_field_errors }}
+
+            <section class="datos-informativos">
+                <h5 class="form-label">Datos Informativos:</h5>
+
+                <div class="form-group-2">
+                    {% include "forms/floating_input.html" with field=form.name %}
+                    {% include "forms/floating_input.html" with field=form.ano_lectivo %}
+                </div>
+
+                <div class="form-group-2">
+                    {% include "forms/floating_input.html" with field=form.docentes %}
+                    {% include "forms/select_field.html" with field=form.asignatura %}
+                </div>
+
+                <div class="form-group-2">
+                    {% include "forms/select_field.html" with field=form.curso %}
+                    {% include "forms/floating_input.html" with field=form.paralelos %}
+                </div>
+
+                <div class="form-group-2">
+                    {% include "forms/select_field.html" with field=form.periodos %}
+                    {% include "forms/select_field.html" with field=form.tiempo %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.objetivos }}
+                    {{ form.objetivos_generales }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.unidad|add_label_class:"form-label" }}
+                    {{ form.unidad }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.periodos|add_label_class:"form-label" }}
+                    {{ form.periodos }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.semana_inicio|add_label_class:"form-label" }}
+                    {{ form.semana_inicio }}
+                </div>
+
+                <h5 class="form-label">Planificación:</h5>
+
+                <div class="form-group">
+                    {{ form.destrezas|add_label_class:"form-label" }}
+                    {{ form.destrezas }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.criterios_evaluacion|add_label_class:"form-label" }}
+                    {{ form.criterios_evaluacion }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.indicadores|add_label_class:"form-label" }}
+                    {{ form.indicadores }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.estrategias_metodologicas|add_label_class:"form-label" }}
+                    {{ form.estrategias_metodologicas }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.recursos|add_label_class:"form-label" }}
+                    {{ form.recursos }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.actividades_evaluacion|add_label_class:"form-label" }}
+                    {{ form.actividades_evaluacion }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.ejes_transversales|add_label_class:"form-label" }}
+                    {{ form.ejes_transversales }}
+                </div>
+
+                 <h5 class="form-label">Adaptaciones Curriculares:</h5>
+
+                <div class="form-group">
+                    {{ form.necesidad_adaptacion|add_label_class:"form-label" }}
+                    {% render_field form.necesidad_adaptacion class="textarea-full" %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.adaptacion_curricular|add_label_class:"form-label" }}
+                    {% render_field form.adaptacion_curricular class="textarea-full" %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.aprobado_por|add_label_class:"form-label" }}
+                    {{ form.aprobado_por }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.revisado_por|add_label_class:"form-label" }}
+                    {{ form.revisado_por }}
+                </div>
+
+                <input type="submit" value="Guardar Planificación" class="btn primary-button submit-btn">
+
+            </section>
+
+        </form>
+    </section>
+{% endblock content%}
+
+{% block scripts %}
+    <script src="{% static 'autosize/dist/autosize.min.js' %}"></script>
+    <script src="{% static 'js/planificaciones/plan_destrezas.js' %}"></script>
+{% endblock scripts %}
