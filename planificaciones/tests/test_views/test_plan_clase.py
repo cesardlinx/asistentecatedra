@@ -11,12 +11,16 @@ from mixer.backend.django import mixer
 from testfixtures import LogCapture
 
 from accounts.tests.conftest import add_middleware_to_request
-from planificaciones import views
 from planificaciones.tests.planificaciones_testcase import \
     PlanificacionesTestCase
 from planificaciones.models.elemento_curricular import ElementoCurricular
 from planificaciones.models.plan_clase import PlanClase
 from planificaciones.models.proceso_didactico import ProcesoDidactico
+
+from planificaciones.views.plan_clase_views import (
+    PlanClaseListView, plan_clase_create, plan_clase_update,
+    PlanClaseDeleteView, PlanClaseDuplicateView)
+
 
 User = get_user_model()
 pytestmark = pytest.mark.django_db
@@ -135,14 +139,14 @@ class TestPlanClaseListView(PlanClaseTestCase):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanClaseListView.as_view()(request)
+        response = PlanClaseListView.as_view()(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get(self):
         """Tests that an authenticated user can access the view"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanClaseListView.as_view()(request)
+        response = PlanClaseListView.as_view()(request)
         assert response.status_code == 200, 'Authenticated user can access'
         assert 'planificaciones/planificacion_list.html' in \
             response.template_name, \
@@ -160,14 +164,14 @@ class TestPlanClaseCreateView(PlanClaseTestCase):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.plan_clase_create(request)
+        response = plan_clase_create(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get(self):
         """Tests that an authenticated user can access the view"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.plan_clase_create(request)
+        response = plan_clase_create(request)
         assert response.status_code == 200, 'Authenticated user can access'
         # Tempĺate Testing
         self.assertContains(response, 'name="name"')
@@ -226,7 +230,7 @@ class TestPlanClaseCreateView(PlanClaseTestCase):
         request = RequestFactory().post('/', data=self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.plan_clase_create(request)
+        response = plan_clase_create(request)
 
         assert response.status_code == 200, 'Should get a success response'
         assert 'Por favor corrija los campos resaltados en rojo.' \
@@ -238,7 +242,7 @@ class TestPlanClaseCreateView(PlanClaseTestCase):
         request.user = self.user
         # Invalid data raises ValidationError
         with pytest.raises(ValidationError):
-            views.plan_clase_create(request)
+            plan_clase_create(request)
 
 
 class TestPlanClaseUpdateView(PlanClaseTestCase):
@@ -247,13 +251,13 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.plan_clase_update(request)
+        response = plan_clase_update(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_get_when_user_doesnt_own_plan(self):
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.plan_clase_update(
+        response = plan_clase_update(
             request, pk=self.another_plan.pk, slug=self.another_plan.slug)
         assert response.status_code == 302, 'Should return a redirection'
         assert response.url == reverse('plan_clase_list')
@@ -262,7 +266,7 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         request = RequestFactory().post('/', self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.plan_clase_update(
+        response = plan_clase_update(
             request, pk=self.another_plan.pk, slug=self.another_plan.slug)
         assert response.status_code == 302, 'Should return a redirection'
         assert response.url == reverse('plan_clase_list')
@@ -273,7 +277,7 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         mixer.blend(ProcesoDidactico, elemento_curricular=elemento)
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.plan_clase_update(
+        response = plan_clase_update(
             request, pk=self.plan_clase.pk, slug=self.plan_clase.slug)
         assert response.status_code == 200, 'Authenticated user can access'
         # Tempĺate Testing
@@ -330,7 +334,7 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         request.user = self.user
         # Invalid data raises 404 Error
         with pytest.raises(Http404):
-            views.plan_clase_update(request, pk=1, slug='test')
+            plan_clase_update(request, pk=1, slug='test')
 
     def test_invalid_data(self):
         """Tests the view when sending invalid data"""
@@ -340,7 +344,7 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         request = RequestFactory().post('/', data=self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.plan_clase_update(
+        response = plan_clase_update(
             request, pk=self.plan_clase.pk, slug=self.plan_clase.slug)
 
         assert response.status_code == 200, 'Should get a success response'
@@ -352,7 +356,7 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         plan = mixer.blend(PlanClase)
         request = RequestFactory().post('/', data={})
         request.user = self.user
-        response = views.plan_clase_update(request, pk=plan.pk, slug=plan.slug)
+        response = plan_clase_update(request, pk=plan.pk, slug=plan.slug)
         assert response.status_code == 302, 'Should return a redirection'
         assert response.url == reverse('plan_clase_list')
 
@@ -362,16 +366,16 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanClaseDeleteView.as_view()(request,
-                                                       pk=self.plan_clase.pk)
+        response = PlanClaseDeleteView.as_view()(request,
+                                                 pk=self.plan_clase.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_post_when_user_doesnt_own_plan(self):
         request = RequestFactory().post('/', self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.PlanClaseDeleteView.as_view()(request,
-                                                       pk=self.another_plan.pk)
+        response = PlanClaseDeleteView.as_view()(request,
+                                                 pk=self.another_plan.pk)
         assert response.status_code == 302, 'Should return a redirection'
         assert response.url == reverse('plan_clase_list')
         # It should still exist
@@ -381,8 +385,8 @@ class TestPlanClaseDeleteView(PlanClaseTestCase):
         """Tests that an authenticated user can't access by get method"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanClaseDeleteView.as_view()(request,
-                                                       pk=self.plan_clase.pk)
+        response = PlanClaseDeleteView.as_view()(request,
+                                                 pk=self.plan_clase.pk)
         assert response.status_code == 405, \
             'Should return a not allowed response'
 
@@ -423,7 +427,7 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         """Tests that an anonymous user can't access the view"""
         request = RequestFactory().get('/')
         request.user = AnonymousUser()
-        response = views.PlanClaseDuplicateView.as_view()(
+        response = PlanClaseDuplicateView.as_view()(
             request, pk=self.plan_clase.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
@@ -431,7 +435,7 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         """Tests that an authenticated user can't access by get method"""
         request = RequestFactory().get('/')
         request.user = self.user
-        response = views.PlanClaseDuplicateView.as_view()(
+        response = PlanClaseDuplicateView.as_view()(
             request, pk=self.plan_clase.pk)
         assert response.status_code == 405, \
             'Should return a not allowed response'
@@ -440,7 +444,7 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         request = RequestFactory().post('/', self.data)
         request.user = self.user
         request = add_middleware_to_request(request)
-        response = views.PlanClaseDuplicateView.as_view()(
+        response = PlanClaseDuplicateView.as_view()(
             request, pk=self.another_plan.pk)
         assert response.status_code == 302, 'Should return a redirection'
         assert response.url == reverse('plan_clase_list')
@@ -538,8 +542,8 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         request.user = self.user
         request = add_middleware_to_request(request)
 
-        views.PlanClaseDuplicateView.as_view()(request,
-                                               pk=self.plan_clase.pk)
+        PlanClaseDuplicateView.as_view()(request,
+                                         pk=self.plan_clase.pk)
 
         plan_clase_new = PlanClase.objects.last()
         assert plan_clase_new.name == '{} (copia 2)'.format(
@@ -548,8 +552,8 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
 
         # Test third duplication
 
-        views.PlanClaseDuplicateView.as_view()(request,
-                                               pk=self.plan_clase.pk)
+        PlanClaseDuplicateView.as_view()(request,
+                                         pk=self.plan_clase.pk)
 
         plan_clase_new = PlanClase.objects.last()
         assert plan_clase_new.name == '{} (copia 3)'.format(

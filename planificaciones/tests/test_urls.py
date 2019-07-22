@@ -1,11 +1,30 @@
 import pytest
 from django.urls import reverse, resolve
-from planificaciones import views
 from mixer.backend.django import mixer
+
 from planificaciones.models.plan_clase import PlanClase
 from planificaciones.models.plan_anual import PlanAnual
 from planificaciones.models.plan_unidad import PlanUnidad
 from planificaciones.models.plan_destrezas import PlanDestrezas
+
+from planificaciones.views.planificaciones_view import \
+    PlanificacionesTemplateView
+from planificaciones.views.plan_clase_views import (
+    PlanClaseListView, plan_clase_create, plan_clase_update,
+    PlanClaseDeleteView, PlanClaseDuplicateView)
+from planificaciones.views.plan_anual_views import (
+    PlanAnualListView, PlanAnualCreateView, PlanAnualUpdateView,
+    PlanAnualDeleteView, PlanAnualDuplicateView)
+from planificaciones.views.plan_unidad_views import (
+    PlanUnidadListView, PlanUnidadCreateView, PlanUnidadUpdateView,
+    PlanUnidadDeleteView, PlanUnidadDuplicateView)
+from planificaciones.views.plan_destrezas_views import (
+    PlanDestrezasListView, PlanDestrezasCreateView, PlanDestrezasUpdateView,
+    PlanDestrezasDeleteView, PlanDestrezasDuplicateView)
+from planificaciones.views.ajax_views import (
+    LoadCriteriosView, LoadCursosView, LoadDestrezasView, LoadIndicadoresView,
+    LoadObjetivosView, LoadUnidadesView)
+
 pytestmark = pytest.mark.django_db
 
 
@@ -13,7 +32,7 @@ class TestPlanificacionesUrls:
     def test_planificaciones(self):
         path = reverse('planificaciones')
         view = resolve(path)
-        assert view.func.view_class == views.PlanificacionesTemplateView, \
+        assert view.func.view_class == PlanificacionesTemplateView, \
             'Should resolve to the view PlanificacionesTemplateView'
 
 
@@ -21,13 +40,13 @@ class TestPlanClaseUrls:
     def test_plan_clase_list(self):
         path = reverse('plan_clase_list')
         view = resolve(path)
-        assert view.func.view_class == views.PlanClaseListView, \
+        assert view.func.view_class == PlanClaseListView, \
             'Should resolve to the view PlanClaseListView'
 
     def test_plan_clase_create(self):
         path = reverse('plan_clase_create')
         view = resolve(path)
-        assert view.func == views.plan_clase_create, \
+        assert view.func == plan_clase_create, \
             'Should resolve to the view plan_clase_create'
 
     def test_plan_clase_update(self):
@@ -37,7 +56,7 @@ class TestPlanClaseUrls:
             'slug': plan.slug
         })
         view = resolve(path)
-        assert view.func == views.plan_clase_update, \
+        assert view.func == plan_clase_update, \
             'Should resolve to the view plan_clase_update'
 
     def test_plan_clase_delete(self):
@@ -46,7 +65,7 @@ class TestPlanClaseUrls:
             'pk': plan.id
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanClaseDeleteView, \
+        assert view.func.view_class == PlanClaseDeleteView, \
             'Should resolve to the view PlanClaseDeleteView'
 
     def test_plan_clase_duplicate(self):
@@ -55,7 +74,7 @@ class TestPlanClaseUrls:
             'pk': plan.id
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanClaseDuplicateView, \
+        assert view.func.view_class == PlanClaseDuplicateView, \
             'Should resolve to the view PlanClaseDuplicateView'
 
 
@@ -63,13 +82,13 @@ class TestPlanAnualUrls:
     def test_plan_anual_list(self):
         path = reverse('plan_anual_list')
         view = resolve(path)
-        assert view.func.view_class == views.PlanAnualListView, \
+        assert view.func.view_class == PlanAnualListView, \
             'Should resolve to the view PlanAnualListView'
 
     def test_plan_anual_create(self):
         path = reverse('plan_anual_create')
         view = resolve(path)
-        assert view.func.view_class == views.PlanAnualCreateView, \
+        assert view.func.view_class == PlanAnualCreateView, \
             'Should resolve to the view plan_anual_create'
 
     def test_plan_anual_update(self):
@@ -79,7 +98,7 @@ class TestPlanAnualUrls:
             'slug': plan.slug
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanAnualUpdateView, \
+        assert view.func.view_class == PlanAnualUpdateView, \
             'Should resolve to the view plan_anual_update'
 
     def test_plan_anual_delete(self):
@@ -88,7 +107,7 @@ class TestPlanAnualUrls:
             'pk': plan.id
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanAnualDeleteView, \
+        assert view.func.view_class == PlanAnualDeleteView, \
             'Should resolve to the view PlanAnualDeleteView'
 
     def test_plan_anual_duplicate(self):
@@ -97,7 +116,7 @@ class TestPlanAnualUrls:
             'pk': plan.id
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanAnualDuplicateView, \
+        assert view.func.view_class == PlanAnualDuplicateView, \
             'Should resolve to the view PlanAnualDuplicateView'
 
 
@@ -105,13 +124,13 @@ class TestPlanUnidadUrls:
     def test_plan_unidad_list(self):
         path = reverse('plan_unidad_list')
         view = resolve(path)
-        assert view.func.view_class == views.PlanUnidadListView, \
+        assert view.func.view_class == PlanUnidadListView, \
             'Should resolve to the view PlanUnidadListView'
 
     def test_plan_unidad_create(self):
         path = reverse('plan_unidad_create')
         view = resolve(path)
-        assert view.func.view_class == views.PlanUnidadCreateView, \
+        assert view.func.view_class == PlanUnidadCreateView, \
             'Should resolve to the view plan_unidad_create'
 
     def test_plan_unidad_update(self):
@@ -121,7 +140,7 @@ class TestPlanUnidadUrls:
             'slug': plan.slug
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanUnidadUpdateView, \
+        assert view.func.view_class == PlanUnidadUpdateView, \
             'Should resolve to the view plan_unidad_update'
 
     def test_plan_unidad_delete(self):
@@ -130,7 +149,7 @@ class TestPlanUnidadUrls:
             'pk': plan.id
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanUnidadDeleteView, \
+        assert view.func.view_class == PlanUnidadDeleteView, \
             'Should resolve to the view PlanUnidadDeleteView'
 
     def test_plan_unidad_duplicate(self):
@@ -139,7 +158,7 @@ class TestPlanUnidadUrls:
             'pk': plan.id
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanUnidadDuplicateView, \
+        assert view.func.view_class == PlanUnidadDuplicateView, \
             'Should resolve to the view PlanUnidadDuplicateView'
 
 
@@ -147,13 +166,13 @@ class TestPlanDestrezasUrls:
     def test_plan_destrezas_list(self):
         path = reverse('plan_destrezas_list')
         view = resolve(path)
-        assert view.func.view_class == views.PlanDestrezasListView, \
+        assert view.func.view_class == PlanDestrezasListView, \
             'Should resolve to the view PlanDestrezasListView'
 
     def test_plan_destrezas_create(self):
         path = reverse('plan_destrezas_create')
         view = resolve(path)
-        assert view.func.view_class == views.PlanDestrezasCreateView, \
+        assert view.func.view_class == PlanDestrezasCreateView, \
             'Should resolve to the view plan_destrezas_create'
 
     def test_plan_destrezas_update(self):
@@ -163,7 +182,7 @@ class TestPlanDestrezasUrls:
             'slug': plan.slug
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanDestrezasUpdateView, \
+        assert view.func.view_class == PlanDestrezasUpdateView, \
             'Should resolve to the view plan_destrezas_update'
 
     def test_plan_destrezas_delete(self):
@@ -172,7 +191,7 @@ class TestPlanDestrezasUrls:
             'pk': plan.id
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanDestrezasDeleteView, \
+        assert view.func.view_class == PlanDestrezasDeleteView, \
             'Should resolve to the view PlanDestrezasDeleteView'
 
     def test_plan_destrezas_duplicate(self):
@@ -181,7 +200,7 @@ class TestPlanDestrezasUrls:
             'pk': plan.id
         })
         view = resolve(path)
-        assert view.func.view_class == views.PlanDestrezasDuplicateView, \
+        assert view.func.view_class == PlanDestrezasDuplicateView, \
             'Should resolve to the view PlanDestrezasDuplicateView'
 
 
@@ -189,37 +208,37 @@ class TestAjaxUrls:
     def test_ajax_load_cursos(self):
         path = reverse('ajax_load_cursos', kwargs={'template': 'select'})
         view = resolve(path)
-        assert view.func.view_class == views.LoadCursosView, \
+        assert view.func.view_class == LoadCursosView, \
             'Should resolve to the view load_cursos'
 
     def test_ajax_load_unidades(self):
         path = reverse('ajax_load_unidades')
         view = resolve(path)
-        assert view.func.view_class == views.LoadUnidadesView, \
+        assert view.func.view_class == LoadUnidadesView, \
             'Should resolve to the view load_unidades'
 
     def test_ajax_load_objetivos(self):
         path = reverse('ajax_load_objetivos', kwargs={'option': 'area'})
         view = resolve(path)
-        assert view.func.view_class == views.LoadObjetivosView, \
+        assert view.func.view_class == LoadObjetivosView, \
             'Should resolve to the view load_objetivos'
 
     def test_ajax_load_destrezas(self):
         path = reverse('ajax_load_destrezas',
                        kwargs={'template': 'select', 'formset': 'somename'})
         view = resolve(path)
-        assert view.func.view_class == views.LoadDestrezasView, \
+        assert view.func.view_class == LoadDestrezasView, \
             'Should resolve to the view load_destrezas'
 
     def test_ajax_load_criterios(self):
         path = reverse('ajax_load_criterios')
         view = resolve(path)
-        assert view.func.view_class == views.LoadCriteriosView, \
+        assert view.func.view_class == LoadCriteriosView, \
             'Should resolve to the view load_criterios'
 
     def test_ajax_load_indicadores(self):
         path = reverse('ajax_load_indicadores',
                        kwargs={'option': 'destreza', 'formset': 'somename'})
         view = resolve(path)
-        assert view.func.view_class == views.LoadIndicadoresView, \
+        assert view.func.view_class == LoadIndicadoresView, \
             'Should resolve to the view load_indicadores'
