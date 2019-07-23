@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import DeleteView
 from django.views.generic.list import ListView
+from django.views.generic.edit import CreateView
 
 from planificaciones.forms.plan_destrezas_form import PlanDestrezasForm
 from planificaciones.mixins import UserIsPremiumMixin
@@ -39,43 +40,28 @@ class PlanDestrezasListView(UserIsPremiumMixin, ListView):
         return queryset
 
 
-class PlanDestrezasCreateView(UserIsPremiumMixin, View):
-    """Vista para la creación de planes de destrezas"""
+class PlanDestrezasCreateView(UserIsPremiumMixin, CreateView):
+    template_name = 'planificaciones/forms/plan_destrezas_form.html'
+    form_class = PlanDestrezasForm
 
-    def get(self, request, *args, **kwargs):
-        form = PlanDestrezasForm()
-        context = {
-            'form': form,
-        }
-        return render(request,
-                      'planificaciones/forms/plan_destrezas_form.html',
-                      context)
+    def form_valid(self, form):
+        with transaction.atomic():
+            plan_destrezas = form.save(commit=False)
+            plan_destrezas.elaborado_por = self.request.user
+            plan_destrezas.save()
+            form._save_m2m()
 
-    def post(self, request, *args, **kwargs):
-        form = PlanDestrezasForm(request.POST)
+        logger.info('Plan de destrezas created for the user: {}.'
+                    .format(self.request.user.email))
+        messages.success(self.request,
+                         'Plan de Destrezas creado exitosamente.')
+        return redirect('plan_destrezas_list')
 
-        if form.is_valid():
-
-            with transaction.atomic():
-                plan_destrezas = form.save(commit=False)
-                plan_destrezas.elaborado_por = request.user
-                plan_destrezas.save()
-                form._save_m2m()
-
-                logger.info('Plan de destrezas created for the user: {}.'
-                            .format(request.user.email))
-                messages.success(request,
-                                 'Plan de Destrezas creado exitosamente.')
-                return redirect('plan_destrezas_list')
-        messages.error(request,
+    def form_invalid(self, form):
+        messages.error(self.request,
                        'Por favor corrija los campos resaltados en rojo.')
 
-        context = {
-            'form': form,
-        }
-        return render(request,
-                      'planificaciones/forms/plan_destrezas_form.html',
-                      context)
+        return super().form_invalid(form)
 
 
 class PlanDestrezasUpdateView(UserIsPremiumMixin, View):

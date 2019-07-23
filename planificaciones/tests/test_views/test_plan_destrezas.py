@@ -195,8 +195,8 @@ class TestPlanDestrezasCreateView(PlanDestrezasTestCase):
 
         assert response.status_code == 200, 'Should return a success response'
         assert 'Por favor corrija los campos resaltados en rojo.' \
-            in str(response.content), 'Should have an error message'
-        assert 'alert-danger' in str(response.content), \
+            in response.rendered_content, 'Should have an error message'
+        assert 'alert-danger' in response.rendered_content, \
             'Should return an error message'
 
     def test_empty_data(self):
@@ -207,8 +207,8 @@ class TestPlanDestrezasCreateView(PlanDestrezasTestCase):
         response = PlanDestrezasCreateView.as_view()(request)
         assert response.status_code == 200, 'Should return a success response'
         assert 'Por favor corrija los campos resaltados en rojo.' \
-            in str(response.content), 'Should have an error message'
-        assert 'alert-danger' in str(response.content), \
+            in response.rendered_content, 'Should have an error message'
+        assert 'alert-danger' in response.rendered_content, \
             'Should return an error message'
 
 
