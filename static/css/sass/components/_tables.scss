@@ -5,6 +5,14 @@
 }
 
 .formset-container {
+  @include responsive(medium) {
+    max-width: 700px;
+  }
+
+  @include responsive(large) {
+    max-width: $plan-width;
+  }
+
   margin: 0 auto;
   width: 90%;
 }

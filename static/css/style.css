@@ -621,6 +621,18 @@ h3.main-title {
   width: 90%;
 }
 
+@media only screen and (min-width: 768px) {
+  .formset-container {
+    max-width: 700px;
+  }
+}
+
+@media only screen and (min-width: 976px) {
+  .formset-container {
+    max-width: 800px;
+  }
+}
+
 .formset {
   margin-top: 1em;
   text-align: center;
@@ -1551,9 +1563,21 @@ footer {
   }
 }
 
-.destrezas-buttons {
-  margin: 0 auto 2em;
+.formset-buttons {
+  margin: 0 auto 1em;
   width: 90%;
+}
+
+@media only screen and (min-width: 768px) {
+  .formset-buttons {
+    max-width: 700px;
+  }
+}
+
+@media only screen and (min-width: 976px) {
+  .formset-buttons {
+    max-width: 800px;
+  }
 }
 
 .datos-informativos,
