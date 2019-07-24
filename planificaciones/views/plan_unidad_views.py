@@ -40,6 +40,12 @@ class PlanUnidadListView(UserIsPremiumMixin, ListView):
 
         return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Planificaciones de Unidad Didáctica'
+        context['type'] = 'unidad'
+        return context
+
 
 class PlanUnidadCreateView(UserIsPremiumMixin, View):
     """Vista para la creación de planes de unidad"""

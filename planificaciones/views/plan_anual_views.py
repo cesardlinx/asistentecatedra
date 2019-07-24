@@ -40,6 +40,12 @@ class PlanAnualListView(UserIsPremiumMixin, ListView):
 
         return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Planificaciones Curriculares Anuales'
+        context['type'] = 'anual'
+        return context
+
 
 class PlanAnualCreateView(UserIsPremiumMixin, View):
     """Vista para la creación de planes anuales"""

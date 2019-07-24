@@ -5,11 +5,25 @@
 {% block content %}
     <section class="container">
         <section class="planificaciones list">
-            <h2>Planes de Clase</h2>
+            <h2>{{ titulo }}</h2>
             <div class="list-buttons">
-                <a href="{% url 'plan_clase_create' %}" class="primary-button list-btn">
-                    <span class="fas fa-file"></span> Nueva Planficación
-                </a>
+                {% if type == 'clase' %}
+                    <a href="{% url 'plan_clase_create' %}" class="primary-button list-btn">
+                        <span class="fas fa-file"></span> Nuevo Plan de Clase
+                    </a>
+                {% elif type == 'anual' %}
+                    <a href="{% url 'plan_anual_create' %}" class="primary-button list-btn">
+                        <span class="fas fa-file"></span> Nuevo Plan Anual
+                    </a>
+                {% elif type == 'unidad' %}
+                    <a href="{% url 'plan_unidad_create' %}" class="primary-button list-btn">
+                        <span class="fas fa-file"></span> Nuevo Plan de Unidad
+                    </a>
+                {% elif type == 'destrezas' %}
+                    <a href="{% url 'plan_destrezas_create' %}" class="primary-button list-btn">
+                        <span class="fas fa-file"></span> Nuevo Plan de Destrezas
+                    </a>
+                {% endif %}
                 <a href="{% url 'planificaciones' %}" class="primary-button list-btn back-menu">
                     <span class="fas fa-bars"></span> Ir al Menú
                 </a>

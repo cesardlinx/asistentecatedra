@@ -41,6 +41,12 @@ class PlanClaseListView(LoginRequiredMixin, ListView):
 
         return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Planes de Clase'
+        context['type'] = 'clase'
+        return context
+
 
 @login_required
 def plan_clase_create(request):

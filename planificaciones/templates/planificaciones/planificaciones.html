@@ -17,7 +17,7 @@
                     <a class="choice-text" href="{% url 'plan_clase_list' %}">Plan de Clase</a>
                 </div>
                 <div class="choice-card">
-                    <a href="#" class="plan-choice plan-unidad">
+                    <a href="{% url 'plan_unidad_list' %}" class="plan-choice plan-unidad">
                         <div class="plan-img unidad-img vertically-center">
                             <img class="imagen" src="{% static 'img/plan_unidad.png' %}" alt="Plan de Unidad">
                         </div>
@@ -27,10 +27,10 @@
                         {% endif %}
 
                     </a>
-                    <a class="choice-text" href="#">Planificación de Unidad Didáctica</a>
+                    <a class="choice-text" href="{% url 'plan_unidad_list' %}">Planificación de Unidad Didáctica</a>
                 </div>
                 <div class="choice-card">
-                    <a href="#" class="plan-choice plan-destrezas">
+                    <a href="{% url 'plan_destrezas_list' %}" class="plan-choice plan-destrezas">
                         <div class="plan-img destrezas-img vertically-center">
                             <img class="imagen" src="{% static 'img/plan_destrezas.png' %}" alt="Plan de Destrezas">
                         </div>
@@ -40,10 +40,10 @@
                         {% endif %}
 
                     </a>
-                    <a class="choice-text" href="#">Planificación de Destrezas</a>
+                    <a class="choice-text" href="{% url 'plan_destrezas_list' %}">Planificación de Destrezas</a>
                 </div>
                 <div class="choice-card">
-                    <a href="#" class="plan-choice plan-anual">
+                    <a href="{% url 'plan_anual_list' %}" class="plan-choice plan-anual">
                         <div class="plan-img anual-img vertically-center">
                             <img class="imagen" src="{% static 'img/plan_anual.png' %}" alt="Plan Anual">
                         </div>
@@ -53,7 +53,7 @@
                         {% endif %}
 
                     </a>
-                    <a class="choice-text" href="#">Planificación Curricular Anual</a>
+                    <a class="choice-text" href="{% url 'plan_anual_list' %}">Planificación Curricular Anual</a>
                 </div>
             </div>
         </section>

@@ -39,6 +39,12 @@ class PlanDestrezasListView(UserIsPremiumMixin, ListView):
 
         return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Planificación de Destrezas'
+        context['type'] = 'destrezas'
+        return context
+
 
 class PlanDestrezasCreateView(UserIsPremiumMixin, CreateView):
     template_name = 'planificaciones/forms/plan_destrezas_form.html'
