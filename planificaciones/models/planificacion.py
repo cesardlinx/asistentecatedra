@@ -5,7 +5,7 @@ from django.template.defaultfilters import slugify
 class Planificacion(models.Model):
     name = models.CharField(max_length=40)
     slug = models.SlugField()
-    docentes = models.TextField(max_length=255)
+    docentes = models.CharField(max_length=255)
     paralelos = models.CharField(max_length=20)
     aprobado_por = models.CharField(max_length=50, blank=True, null=True)
     revisado_por = models.CharField(max_length=50, blank=True, null=True)
