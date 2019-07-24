@@ -8,11 +8,12 @@
 {% endblock titulo %}
 
 {% block content %}
+
     <section class="detail">
         <div class="planification-title">
             <h3 class="main-title">Nuevo Plan Anual</h3>
         </div>
-        <form method="post" id="planClaseForm"
+        <form method="post" id="planAnualForm"
             load-cursos-url={% url 'ajax_load_cursos' template='select' %}
             load-unidades-url={% url 'ajax_load_unidades' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='curso' %}
@@ -51,7 +52,7 @@
                     {% include "forms/floating_input.html" with field=form.semanas_trabajo %}
                 </div>
 
-                <div class="form-group">
+                <div class="form-group-2">
                     {% include "forms/floating_input.html" with field=form.semanas_imprevistos %}
                 </div>
 
@@ -68,8 +69,6 @@
                     {{ form.objetivos_generales }}
                 </div>
 
-                <h5 class="form-label">Ejes Transversales:</h5>
-
                 <div class="form-group">
                     {% include "forms/floating_input.html" with field=form.ejes_transversales %}
                 </div>
@@ -77,68 +76,90 @@
             </section>
 
 
-            <section class="table-responsive elem-curric-container">
+            <section class="table-responsive formset-container">
                 <h5 class="form-label">Desarrollo de Unidades de Planificación:</h5>
-                <table class="desarrollo-unidad" id="desarrollo-unidad">
+                <table class="formset" id="desarrollo-unidad">
                     <thead>
                         <tr>
-                            <th class="col-title col-lg" rowspan="2">Destreza con Criterio de Desempeño</th>
-                            <th class="col-title" rowspan="2">Conocimientos Asociados</th>
-                            <th class="col-title" rowspan="2">Proceso Didáctico</th>
-                            <th class="col-title" rowspan="2">Tiempo</th>
-                            <th class="col-title" rowspan="2">Recursos</th>
+                            <th class="col-title col-lg" rowspan="2">Unidad</th>
+                            <th class="col-title col-lg" rowspan="2">Objetivos de la Unidad</th>
+                            <th class="col-title col-lg" rowspan="2">Contenido</th>
+                            <th class="col-title" rowspan="2">Orientaciones Metodológicas</th>
                             <th class="col-title" colspan="2">Evaluación</th>
+                            <th class="col-title col-lg" rowspan="2">Duración en Semanas</th>
                         </tr>
 
                         <tr>
+                            <th class="col-subtitle col-lg">Criterios de Evaluación</th>
                             <th class="col-subtitle col-lg">Indicadores de Logro</th>
-                            <th class="col-subtitle">Actividades de Evaluación</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {{ unidades_formset.management_form }}
                         {{ unidades_formset.non_form_errors }}
-                        {% for unidades_form in unidades_formsaet %}
+                        {% for unidades_form in unidades_formset %}
 
                             {% if form.instance.pk %} {% comment %}  Solo para update {% endcomment %}
                                 {{ unidades_form.id }}
                             {% endif %}
 
                             <tr>
-                                <td rowspan="{{ unidades_form.nested.total_form_count }}" class="elementos-form">
+                                <td>
                                     <div class="cell-wrapper-select">
-                                        {% include "forms/select_field.html" with field=unidades_form.destreza destreza=True %}
+                                        {% include "forms/select_field.html" with field=unidades_form.unidad %}
                                     </div>
                                 </td>
-                                <td rowspan="{{ unidades_form.nested.total_form_count }}" class="elementos-form">
+
+                                <td>
+                                    {% with field=unidades_form.objetivos %}
+                                        {% if field.errors %}
+                                            {% render_field field class="error" %}
+                                            {% include 'forms/field_errors.html'%}
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                    {% endwith %}
+
+                                    {% with field=unidades_form.objetivos_generales %}
+                                        {% if field.errors %}
+                                            {% render_field field class="error" %}
+                                            {% include 'forms/field_errors.html'%}
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+
+                                <td>
+                                    {% with field=unidades_form.destrezas %}
+                                        {% if field.errors %}
+                                            {% render_field field class="error" %}
+                                            {% include 'forms/field_errors.html'%}
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+
+                                <td>
                                     <div class="cell-wrapper-lg">
-                                        {% include "forms/table_textarea.html" with field=unidades_form.conocimientos_asociados placeholder="Conocimientos Asociados" %}
+                                        {% include "forms/table_textarea.html" with field=unidades_form.orientaciones_metodologicas placeholder="Orientaciones Metodológicas" %}
                                     </div>
                                 </td>
 
-                                {# Formset Anidado de procesos didácticos (Primera fila) #}
-                                {% if unidades_form.nested %}
-                                    {{ unidades_form.nested.management_form }}
-                                    {{ unidades_form.nested.non_form_errors }}
-
-
-                                    {% for procesos_form in unidades_form.nested.forms %}
-
-                                        {% if form.instance.pk %} {% comment %}  Solo para update {% endcomment %}
-                                            {{ procesos_form.id }}
+                                <td>
+                                    {% with field=unidades_form.criterios_evaluacion %}
+                                        {% if field.errors %}
+                                            {% render_field field class="error" %}
+                                            {% include 'forms/field_errors.html'%}
+                                        {% else %}
+                                            {{ field }}
                                         {% endif %}
+                                    {% endwith %}
+                                </td>
 
-                                        {% if forloop.first %}
-                                            {% include 'planificaciones/forms/procesos_didacticos_form.html' %}
-                                        {% endif %}
-
-                                    {% endfor %}
-
-                                {% endif %}
-                                {# Fin de Formset Anidado de procesos didácticos #}
-
-                                <td class="indicadores elementos-form" rowspan="{{ unidades_form.nested.total_form_count }}">
+                                <td class="indicadores">
                                     {% with field=unidades_form.indicadores %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
@@ -149,26 +170,14 @@
                                     {% endwith %}
                                 </td>
 
-                                <td rowspan="{{ unidades_form.nested.total_form_count }}" class="elementos-form">
-                                    <div class="cell-wrapper-md">
-                                        {% include "forms/table_textarea.html" with field=unidades_form.actividades_evaluacion placeholder="Actividades de Evaluación" %}
+                                <td>
+                                    <div class="cell-wrapper-select">
+                                        {% include "forms/floating_input.html" with field=unidades_form.semanas %}
                                     </div>
                                 </td>
+
                             </tr>
-
-                            {# Formset Anidado de procesos didácticos (filas restantes) #}
-                            {# Esto es para que estén en otra fila independiente #}
-                            {% for procesos_form in unidades_form.nested.forms %}
-
-                                {% if not forloop.first %}
-                                    <tr rowspan="1">
-                                        {% include 'planificaciones/forms/procesos_didacticos_form.html' %}
-                                    </tr>
-                                {% endif %}
-
-                            {% endfor %}
-                            {# Fin del Formset Anidado de procesos didácticos (filas restantes) #}
-                        {%  endfor %}
+                        {% endfor %}
                     </tbody>
 
                 </table>
@@ -221,7 +230,8 @@
             </section>
         </form>
     </section>
-{% endblock content%}
+
+{% endblock content %}
 
 {% block scripts %}
     <script src="{% static 'autosize/dist/autosize.min.js' %}"></script>

@@ -58,6 +58,7 @@ class PlanUnidadForm(forms.ModelForm):
 
         # Default Option for select fields
         self.fields['asignatura'].empty_label = 'Elija una asignatura.'
+        self.fields['curso'].empty_label = 'Elija un curso.'
 
         # Queryset para campos ajax en caso de existir datos post
         # en el formulario

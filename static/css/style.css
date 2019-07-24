@@ -616,65 +616,65 @@ h3.main-title {
   margin-bottom: 1.5em;
 }
 
-.elem-curric-container {
+.formset-container {
   margin: 0 auto;
   width: 90%;
 }
 
-.elementos-curriculares {
+.formset {
   margin-top: 1em;
   text-align: center;
   width: 100%;
 }
 
-.elementos-curriculares td {
+.formset td {
   border: 1px solid #2c3e50;
 }
 
-.elementos-curriculares th {
+.formset th {
   width: auto;
   background: #2c3e50;
   color: #fff;
 }
 
-.elementos-curriculares th.col-lg {
+.formset th.col-lg {
   min-width: 355px;
 }
 
-.elementos-curriculares th.col-std {
+.formset th.col-std {
   min-width: 333px;
 }
 
-.elementos-curriculares th.col-title {
+.formset th.col-title {
   border-right: 1px solid #fff;
   border-left: 1px solid #fff;
 }
 
-.elementos-curriculares th.col-title:first-child {
+.formset th.col-title:first-child {
   border-left: 1px solid #2c3e50;
 }
 
-.elementos-curriculares th.col-title:last-child {
+.formset th.col-title:last-child {
   border-right: 0;
 }
 
-.elementos-curriculares th.col-subtitle {
+.formset th.col-subtitle {
   border-top: 1px solid #fff;
 }
 
-.elementos-curriculares select {
+.formset select {
   width: 100%;
 }
 
-.elementos-curriculares .field-label {
+.formset .field-label {
   font-weight: bold;
 }
 
-.elementos-curriculares .eliminar-proceso {
+.formset .eliminar-proceso {
   color: #dc3545;
 }
 
-.elementos-curriculares .eliminar-proceso:hover {
+.formset .eliminar-proceso:hover {
   color: #bd2130;
 }
 

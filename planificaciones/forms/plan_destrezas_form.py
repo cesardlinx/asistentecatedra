@@ -58,6 +58,9 @@ class PlanDestrezasForm(forms.ModelForm):
         widgets = {
             'objetivos': EnhancedCheckboxSelectMultiple,
             'objetivos_generales': EnhancedCheckboxSelectMultiple,
+            'destrezas': EnhancedCheckboxSelectMultiple,
+            'indicadores': EnhancedCheckboxSelectMultiple,
+            'criterios_evaluacion': EnhancedCheckboxSelectMultiple,
         }
 
     def __init__(self, *args, **kwargs):
@@ -76,6 +79,7 @@ class PlanDestrezasForm(forms.ModelForm):
 
         # Default Option for select fields
         self.fields['asignatura'].empty_label = 'Elija una asignatura.'
+        self.fields['curso'].empty_label = 'Elija un curso.'
 
         # Queryset para campos ajax en caso de existir datos post
         # en el formulario

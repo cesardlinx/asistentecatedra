@@ -12,7 +12,7 @@
         <div class="planification-title">
             <h3 class="main-title">Nuevo Plan de Destrezas</h3>
         </div>
-        <form method="post" id="planClaseForm"
+        <form method="post" id="planDestrezasForm"
             load-cursos-url={% url 'ajax_load_cursos' template='select' %}
             load-unidades-url={% url 'ajax_load_unidades' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='unidad' %}
@@ -44,68 +44,114 @@
                 </div>
 
                 <div class="form-group-2">
-                    {% include "forms/select_field.html" with field=form.periodos %}
-                    {% include "forms/select_field.html" with field=form.tiempo %}
+                    {% include "forms/floating_input.html" with field=form.periodos %}
+                    {% include "forms/floating_input.html" with field=form.semana_inicio %}
+                </div>
+
+
+                {{ form.unidad|add_label_class:"form-label" }}
+                <div class="form-group-2">
+                    {% include "forms/select_field.html" with field=form.unidad %}
                 </div>
 
                 <div class="form-group">
+                    {{ form.objetivos|add_label_class:"form-label" }}
                     {{ form.objetivos }}
                     {{ form.objetivos_generales }}
                 </div>
+            </section>
 
-                <div class="form-group">
-                    {{ form.unidad|add_label_class:"form-label" }}
-                    {{ form.unidad }}
-                </div>
-
-                <div class="form-group">
-                    {{ form.periodos|add_label_class:"form-label" }}
-                    {{ form.periodos }}
-                </div>
-
-                <div class="form-group">
-                    {{ form.semana_inicio|add_label_class:"form-label" }}
-                    {{ form.semana_inicio }}
-                </div>
-
+            <section class="formset-container">
                 <h5 class="form-label">Planificación:</h5>
+                <table class="formset">
+                    <thead>
+                        <tr>
+                            <th class="col-title">Destrezas con Criterios de Desempeño</th>
+                            <th class="col-title">Indicadores esenciales de Evaluación</th>
+                            <th class="col-title">Ejes Transversales</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                {% with field=form.destrezas %}
+                                    {% if field.errors %}
+                                        {% render_field field class="error" %}
+                                        {% include 'forms/field_errors.html'%}
+                                    {% else %}
+                                        {{ field }}
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                {% with field=form.criterios_evaluacion %}
+                                    {% if field.errors %}
+                                        {% render_field field class="error" %}
+                                        {% include 'forms/field_errors.html'%}
+                                    {% else %}
+                                        {{ field }}
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                <div class="cell-wrapper-lg">
+                                    {% include "forms/table_textarea.html" with field=form.ejes_transversales placeholder="Ejes Transversales" %}
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
 
-                <div class="form-group">
-                    {{ form.destrezas|add_label_class:"form-label" }}
-                    {{ form.destrezas }}
-                </div>
+            <section class="table-responsive formset-container">
+                <table class="formset">
+                    <thead>
+                        <tr>
+                            <th class="col-title col-lg" rowspan="2">Estrategias Metodológicas</th>
+                            <th class="col-title" rowspan="2">Recursos</th>
+                            <th class="col-title col-lg" rowspan="2">Indicadores de Logro</th>
+                            <th class="col-title" colspan="2">Actividades de Evaluación</th>
+                        </tr>
+                    </thead>
 
-                <div class="form-group">
-                    {{ form.criterios_evaluacion|add_label_class:"form-label" }}
-                    {{ form.criterios_evaluacion }}
-                </div>
+                    <tbody>
+                        <tr>
 
-                <div class="form-group">
-                    {{ form.indicadores|add_label_class:"form-label" }}
-                    {{ form.indicadores }}
-                </div>
+                            <td>
+                                <div class="cell-wrapper-lg">
+                                    {% include "forms/table_textarea.html" with field=form.estrategias_metodologicas placeholder="Estrategias Metodológicas" %}
+                                </div>
+                            </td>
 
-                <div class="form-group">
-                    {{ form.estrategias_metodologicas|add_label_class:"form-label" }}
-                    {{ form.estrategias_metodologicas }}
-                </div>
+                            <td>
+                                <div class="cell-wrapper-lg">
+                                    {% include "forms/table_textarea.html" with field=form.recursos placeholder="Recursos" %}
+                                </div>
+                            </td>
 
-                <div class="form-group">
-                    {{ form.recursos|add_label_class:"form-label" }}
-                    {{ form.recursos }}
-                </div>
+                            <td class="indicadores">
+                                {% with field=form.indicadores %}
+                                    {% if field.errors %}
+                                        {% render_field field class="error" %}
+                                        {% include 'forms/field_errors.html'%}
+                                    {% else %}
+                                        {{ field }}
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
 
-                <div class="form-group">
-                    {{ form.actividades_evaluacion|add_label_class:"form-label" }}
-                    {{ form.actividades_evaluacion }}
-                </div>
+                            <td>
+                                <div class="cell-wrapper-lg">
+                                    {% include "forms/table_textarea.html" with field=form.actividades_evaluacion placeholder="Actividades de Evaluación" %}
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
 
-                <div class="form-group">
-                    {{ form.ejes_transversales|add_label_class:"form-label" }}
-                    {{ form.ejes_transversales }}
-                </div>
-
-                 <h5 class="form-label">Adaptaciones Curriculares:</h5>
+            <section class="form-footer">
+                <h5 class="form-label">Adaptaciones Curriculares:</h5>
 
                 <div class="form-group">
                     {{ form.necesidad_adaptacion|add_label_class:"form-label" }}
@@ -128,9 +174,7 @@
                 </div>
 
                 <input type="submit" value="Guardar Planificación" class="btn primary-button submit-btn">
-
             </section>
-
         </form>
     </section>
 {% endblock content%}
