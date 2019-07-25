@@ -60,8 +60,6 @@
                     {% else %}
                         {% render_field form.cursos class="checkbox-list" %}
                     {% endif %}
-
-
                 </div>
 
                 <div class="form-group">
@@ -104,7 +102,7 @@
                             <tr>
                                 <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
                                     <div class="cell-wrapper-select">
-                                        {% include "forms/select_field.html" with field=elementos_form.destreza destreza=True %}
+                                        {% include "forms/select_field.html" with field=elementos_form.destreza type="destreza" %}
                                     </div>
                                 </td>
                                 <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
@@ -134,7 +132,7 @@
                                 {% endif %}
                                 {# Fin de Formset Anidado de procesos didácticos #}
 
-                                <td class="indicadores elementos-form" rowspan="{{ elementos_form.nested.total_form_count }}">
+                                <td class="checklist elementos-form" rowspan="{{ elementos_form.nested.total_form_count }}">
                                     {% with field=elementos_form.indicadores %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}

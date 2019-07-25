@@ -2,10 +2,10 @@
     {% for criterio in criterios %}
         <li>
             <input type="checkbox" class="custom-checkbox"
-                name="{{ formset_name }}-{{ numero_fila }}-criterios"
+                name="{{ formset_name }}-{{ numero_fila }}-criterios_evaluacion"
                 value="{{ criterio.pk }}"
-                id="id_{{ formset_name }}-{{ numero_fila }}-criterios_{{ forloop.counter0 }}">
-            <label class="check-label" for="id_{{ formset_name }}-{{ numero_fila }}-criterios_{{ forloop.counter0 }}">
+                id="id_{{ formset_name }}-{{ numero_fila }}-criterios_evaluacion_{{ forloop.counter0 }}">
+            <label class="check-label" for="id_{{ formset_name }}-{{ numero_fila }}-criterios_evaluacion_{{ forloop.counter0 }}">
                 {{ criterio.codigo }} - {{ criterio.description }}
             </label>
         </li>
@@ -14,10 +14,10 @@
     {% for criterio in criterios %}
         <li>
             <input type="checkbox" class="custom-checkbox"
-                name="criterios"
+                name="criterios_evaluacion"
                 value="{{ criterio.pk }}"
-                id="id_criterios">
-            <label class="check-label" for="id_criterios">
+                id="id_criterios_evaluacion">
+            <label class="check-label" for="id_criterios_evaluacion">
                 {{ criterio.codigo }} - {{ criterio.description }}
             </label>
         </li>

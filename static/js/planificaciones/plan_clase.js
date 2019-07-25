@@ -59,7 +59,6 @@ $(document).ready(function() {
                 }
             });
         } else {
-            $('#id_cursos').html('');
             $('#id_objetivos').html('<span>Seleccione una asignatura.</span>');
             $('#id_cursos').html('<span>Seleccione una asignatura</span>');
             $('.destrezas').html('<option>Elija una destreza.</option>');
@@ -86,7 +85,7 @@ $(document).ready(function() {
             if (this.checked) {
                 cursosChecked.push(this.value)
             }
-        })
+        });
 
         // Cargar objetivos y objetivos generales
         if (asignaturaId) {
@@ -190,7 +189,7 @@ $(document).ready(function() {
     /**
      * Botón Agregar Destrezas
      */
-    $('.destrezas-buttons').on('click', '#agregar-destreza', function() {
+    $('.formset-buttons').on('click', '#agregar-destreza', function() {
 
         var idUltimaFila = $('#elementos-curriculares tr:last > td select').attr('id');
 
@@ -261,7 +260,7 @@ $(document).ready(function() {
                                     id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-recursos"></textarea>
                             </div>
                         </td>
-                        <td class="indicadores elementos-form" rowspan="1">
+                        <td class="checklist elementos-form" rowspan="1">
                             <ul id="id_elementos_curriculares-${numeroFila}-indicadores"></ul>
                         </td>
                         <td rowspan="1" class="elementos-form">
@@ -322,14 +321,32 @@ $(document).ready(function() {
     /**
      * Botón Eliminar Destreza
      */
-    $('.destrezas-buttons').on('click', '#eliminar-destreza', function() {
-        $('#elementos-curriculares tr:last').remove()
+    $('.formset-buttons').on('click', '#eliminar-destreza', function() {
+
+        // ultima fila
+        var lastRow = $('#elementos-curriculares tr:last td');
+        var numberCells = lastRow.length;
+
+        var rowsToBeRemoved = [];
+        rowsToBeRemoved.push(lastRow);
+        var subRow;
+
+        // Busqueda de filas extras a ser removidas
+        while (numberCells === 3) {
+            subRow = $('#elementos-curriculares tr:last').prev();
+            rowsToBeRemoved.push(subRow);
+            numberCells = subRow.length;
+        }
+
+        // eliminacion de filas
+        rowsToBeRemoved.forEach(function(row) {
+            row.remove();
+        });
 
         // Eliminar botón de remover si solo queda un elemento
         if ($('#elementos-curriculares tbody tr:has(td.elementos-form)').length === 1) {
             $(this).remove();
         }
-
 
         var totalElementosForms = parseInt($('#id_elementos_curriculares-TOTAL_FORMS').val());
         $('#id_elementos_curriculares-TOTAL_FORMS').val(totalElementosForms - 1);

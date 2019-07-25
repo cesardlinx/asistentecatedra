@@ -690,13 +690,13 @@ h3.main-title {
   color: #bd2130;
 }
 
-.indicadores ul {
+.checklist ul {
   margin: 1em;
   list-style: none;
   padding-left: 5%;
 }
 
-.indicadores ul li {
+.checklist ul li {
   text-align: left;
 }
 

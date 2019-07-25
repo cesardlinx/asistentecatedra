@@ -18,6 +18,7 @@
             load-unidades-url={% url 'ajax_load_unidades' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='curso' %}
             load-objetivos-area-url={% url 'ajax_load_objetivos' option='area' %}
+            load-objetivos-unidad-url={% url 'ajax_load_objetivos' option='unidad' %}
             load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' formset='desarrollo_unidades' %}
             load-criterios-url={% url 'ajax_load_criterios' %}
             load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' formset='desarrollo_unidades' %}
@@ -71,7 +72,14 @@
 
                  <div class="form-group">
                     {{ form.ejes_transversales|add_label_class:"form-label" }}
-                    {% render_field form.ejes_transversales class="textarea-full" %}
+                    {% if form.ejes_transversales.errors %}
+                        <div class="error">
+                            {% render_field form.ejes_transversales class="textarea-full" %}
+                            {% include 'forms/field_errors.html' with field=form.ejes_transversales%}
+                        </div>
+                    {% else %}
+                        {% render_field form.ejes_transversales class="textarea-full" %}
+                    {% endif %}
                 </div>
 
             </section>
@@ -79,7 +87,7 @@
 
             <section class="table-responsive formset-container">
                 <h5 class="form-label">Desarrollo de Unidades de Planificación:</h5>
-                <table class="formset" id="desarrollo-unidad">
+                <table class="formset" id="desarrollo-unidades">
                     <thead>
                         <tr>
                             <th class="col-title col-lg" rowspan="2">Unidad</th>
@@ -108,11 +116,11 @@
                             <tr>
                                 <td>
                                     <div class="cell-wrapper-select">
-                                        {% include "forms/select_field.html" with field=unidades_form.unidad %}
+                                        {% include "forms/select_field.html" with field=unidades_form.unidad type="unidad" %}
                                     </div>
                                 </td>
 
-                                <td>
+                                <td class="checklist">
                                     {% with field=unidades_form.objetivos %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
@@ -132,7 +140,7 @@
                                     {% endwith %}
                                 </td>
 
-                                <td>
+                                <td class="checklist destrezas">
                                     {% with field=unidades_form.destrezas %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
@@ -149,7 +157,7 @@
                                     </div>
                                 </td>
 
-                                <td>
+                                <td class="checklist criterios">
                                     {% with field=unidades_form.criterios_evaluacion %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
@@ -160,7 +168,7 @@
                                     {% endwith %}
                                 </td>
 
-                                <td class="indicadores">
+                                <td class="checklist">
                                     {% with field=unidades_form.indicadores %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
@@ -186,12 +194,12 @@
             </section>
 
             <div class="formset-buttons">
-                <button type="button" class="btn primary-button common-btn" id="agregar-destreza">
+                <button type="button" class="btn primary-button common-btn" id="agregar-unidad">
                     <span class="fas fa-plus"></span> Agregar Unidad
                 </button>
 
                 {% if unidades_formset.total_form_count > 1 %}
-                    <button class="secondary-button delete-btn" type="button" id="eliminar-destreza">
+                    <button class="secondary-button delete-btn" type="button" id="eliminar-unidad">
                         <span class="fas fa-minus"></span> Eliminar Unidad
                     </button>
                 {% endif %}
@@ -203,8 +211,8 @@
                     {{ form.bibliografia|add_label_class:"form-label" }}
                     {% if form.bibliografia.errors %}
                         <div class="error">
-                        {{ form.bibliografia }}
-                        {% include 'forms/field_errors.html'%}
+                            {{ form.bibliografia }}
+                            {% include 'forms/field_errors.html' with field=form.bibliografia%}
                         </div>
                     {% else %}
                         {{ form.bibliografia }}
