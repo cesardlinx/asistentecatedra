@@ -178,11 +178,11 @@ class TestUnidad:
             'The field curso should be an instance of Curso'
         assert isinstance(unidad.asignatura, Asignatura), \
             'The field asignatura should be an instance of Asignatura'
-        assert str(unidad) == '{} {} {}'.format(
+        truncated_titulo = Truncator(unidad.titulo)
+        assert str(unidad) == '{} - {}'.format(
             unidad.numero_unidad,
-            unidad.curso,
-            unidad.asignatura
-        ), 'The representation should be numero de unidad, curso y asignatura'
+            truncated_titulo.chars(30),
+        ), 'The representation should be numero de unidad y el título'
         assert unidad._meta.db_table == 'unidades', \
             'The table should be named "unidades"'
         assert unidad._meta.verbose_name_plural == 'unidades', \
@@ -214,7 +214,7 @@ class TestDestreza:
         truncated_description = Truncator(destreza.description)
         assert str(destreza) == '{} - {}'.format(
             destreza.codigo,
-            truncated_description.chars(50)
+            truncated_description.chars(10)
         ), 'The representation should be codigo and a truncated description'
         assert destreza._meta.db_table == 'destrezas', \
             'The table should be named "destrezas"'
@@ -390,6 +390,13 @@ class TestPlanAnual(TestCase):
         assert self.plan.total_periodos == self.plan.carga_horaria * \
             self.plan.semanas_trabajo, 'Should equal the product'
 
+    def test_get_absolute_url(self):
+        planificacion = mixer.blend(PlanAnual)
+        url = '/planificaciones/plan_anual/update/{}/{}/'.format(
+            planificacion.id, planificacion.slug)
+        assert url == planificacion.get_absolute_url(), \
+            'Should get url of updating plan anual'
+
 
 class TestDesarrolloUnidad:
     def test_model(self):
@@ -414,6 +421,13 @@ class TestPlanUnidad(TestCase):
         assert isinstance(self.plan.unidad, Unidad), \
             'Should be instance fo Unidad'
 
+    def test_get_absolute_url(self):
+        planificacion = mixer.blend(PlanUnidad)
+        url = '/planificaciones/plan_unidad/update/{}/{}/'.format(
+            planificacion.id, planificacion.slug)
+        assert url == planificacion.get_absolute_url(), \
+            'Should get url of updating plan de unidad'
+
 
 class TestActividadAprendizaje:
     def test_model(self):
@@ -434,3 +448,10 @@ class TestPlanDestrezas(TestCase):
     def test_model(self):
         assert isinstance(self.plan, PlanDestrezas), \
             'Should be instance of PlanDestrezas'
+
+    def test_get_absolute_url(self):
+        planificacion = mixer.blend(PlanDestrezas)
+        url = '/planificaciones/plan_destrezas/update/{}/{}/'.format(
+            planificacion.id, planificacion.slug)
+        assert url == planificacion.get_absolute_url(), \
+            'Should get url of updating plan destrezas'

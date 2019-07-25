@@ -4,6 +4,7 @@ from .asignatura import Asignatura
 from .curso import Curso
 from .objetivo_general import ObjetivoGeneral
 from .objetivo import Objetivo
+from django.utils.text import Truncator
 
 
 class UnidadManager(models.Manager):
@@ -47,5 +48,5 @@ class Unidad(models.Model):
         verbose_name_plural = "unidades"
 
     def __str__(self):
-        return '{} {} {}'.format(
-            self.numero_unidad, self.curso, self.asignatura)
+        truncated_titulo = Truncator(self.titulo)
+        return "{} - {}".format(self.numero_unidad, truncated_titulo.chars(30))

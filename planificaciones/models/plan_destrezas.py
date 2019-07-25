@@ -1,15 +1,15 @@
+from django.conf import settings
 from django.core.validators import MaxValueValidator
 from django.db import models
-# from django.urls import reverse
-from .asignatura import Asignatura
-from django.conf import settings
+from django.urls import reverse
 
+from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
+from planificaciones.models.destreza import Destreza
+from planificaciones.models.indicador import Indicador
 from planificaciones.models.planificacion import Planificacion
 from planificaciones.models.unidad import Unidad
-from planificaciones.models.indicador import Indicador
-from planificaciones.models.destreza import Destreza
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 
+from .asignatura import Asignatura
 from .curso import Curso
 from .objetivo import Objetivo
 from .objetivo_general import ObjetivoGeneral
@@ -85,8 +85,5 @@ class PlanDestrezas(Planificacion):
         verbose_name_plural = "planes de destrezas"
 
     def get_absolute_url(self):
-        pass
-        # kwargs = {'pk': self.pk, 'slug': self.slug}
-        # return reverse('plan_destrezas_update', kwargs=kwargs)
-
-
+        kwargs = {'pk': self.pk, 'slug': self.slug}
+        return reverse('plan_destrezas_update', kwargs=kwargs)

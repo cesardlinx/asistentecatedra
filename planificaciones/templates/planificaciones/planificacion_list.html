@@ -45,7 +45,7 @@
                          {% for plan in planes %}
                             <tr>
                                 <th scope="row">{{ forloop.counter }}</th>
-                                <td><a href="{% url 'plan_clase_update' pk=plan.pk slug=plan.slug %}">{{ plan.name }}</a></td>
+                                <td><a href="{{ plan.get_absolute_url }}">{{ plan.name }}</a></td>
                                 <td class="resp-column-md">{{ plan.asignatura.name }}</td>
                                 <td class="resp-column-md curso-cell">
                                 <ul>
@@ -57,7 +57,7 @@
                                 <td class="resp-column-lg">{{ plan.paralelos }}</td>
                                 <td class="resp-column-sm">{{ plan.created_at }}</td>
                                 <td>
-                                    <a class="icon edit" href="{% url 'plan_clase_update' pk=plan.pk slug=plan.slug %}" title="Editar plan">
+                                    <a class="icon edit" href="{{ plan.get_absolute_url }}" title="Editar plan">
                                         <span class="fas fa-edit"></span>
                                     </a>
 
@@ -68,19 +68,64 @@
                                         </button>
                                     </form>
 
-                                    <form method="POST" action="{% url 'plan_clase_duplicate' pk=plan.pk %}">
-                                        {% csrf_token %}
-                                        <button class="icon-button copy" type="submit" title="Duplicar Plan">
-                                            <span class="far fa-copy"></span>
-                                        </button>
-                                    </form>
+                                    {% if type == 'clase' %}
+                                        <form method="POST" action="{% url 'plan_clase_duplicate' pk=plan.pk %}">
+                                            {% csrf_token %}
+                                            <button class="icon-button copy" type="submit" title="Duplicar Plan">
+                                                <span class="far fa-copy"></span>
+                                            </button>
+                                        </form>
 
-                                    <form method="POST" action="{% url 'plan_clase_delete' pk=plan.pk %}" id="deletePlanificacionForm">
-                                        {% csrf_token %}
-                                        <button class="icon-button delete" type="submit" title="Eliminar Plan" id="deletePlanificacion">
-                                            <span class="fas fa-trash"></span>
-                                        </button>
-                                    </form>
+                                        <form method="POST" action="{% url 'plan_clase_delete' pk=plan.pk %}" id="deletePlanificacionForm">
+                                            {% csrf_token %}
+                                            <button class="icon-button delete" type="submit" title="Eliminar Plan" id="deletePlanificacion">
+                                                <span class="fas fa-trash"></span>
+                                            </button>
+                                        </form>
+                                    {% elif type == 'anual' %}
+                                        <form method="POST" action="{% url 'plan_anual_duplicate' pk=plan.pk %}">
+                                            {% csrf_token %}
+                                            <button class="icon-button copy" type="submit" title="Duplicar Plan">
+                                                <span class="far fa-copy"></span>
+                                            </button>
+                                        </form>
+
+                                        <form method="POST" action="{% url 'plan_anual_delete' pk=plan.pk %}" id="deletePlanificacionForm">
+                                            {% csrf_token %}
+                                            <button class="icon-button delete" type="submit" title="Eliminar Plan" id="deletePlanificacion">
+                                                <span class="fas fa-trash"></span>
+                                            </button>
+                                        </form>
+                                    {% elif type == 'unidad' %}
+                                        <form method="POST" action="{% url 'plan_unidad_duplicate' pk=plan.pk %}">
+                                            {% csrf_token %}
+                                            <button class="icon-button copy" type="submit" title="Duplicar Plan">
+                                                <span class="far fa-copy"></span>
+                                            </button>
+                                        </form>
+
+                                        <form method="POST" action="{% url 'plan_unidad_delete' pk=plan.pk %}" id="deletePlanificacionForm">
+                                            {% csrf_token %}
+                                            <button class="icon-button delete" type="submit" title="Eliminar Plan" id="deletePlanificacion">
+                                                <span class="fas fa-trash"></span>
+                                            </button>
+                                        </form>
+                                    {% elif type == 'destrezas' %}
+                                        <form method="POST" action="{% url 'plan_destrezas_duplicate' pk=plan.pk %}">
+                                            {% csrf_token %}
+                                            <button class="icon-button copy" type="submit" title="Duplicar Plan">
+                                                <span class="far fa-copy"></span>
+                                            </button>
+                                        </form>
+
+                                        <form method="POST" action="{% url 'plan_destrezas_delete' pk=plan.pk %}" id="deletePlanificacionForm">
+                                            {% csrf_token %}
+                                            <button class="icon-button delete" type="submit" title="Eliminar Plan" id="deletePlanificacion">
+                                                <span class="fas fa-trash"></span>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
                                 </td>
                             </tr>
                         {% endfor %}
