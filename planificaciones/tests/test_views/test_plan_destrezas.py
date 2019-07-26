@@ -158,6 +158,9 @@ class TestPlanDestrezasCreateView(PlanDestrezasTestCase):
         self.assertContains(response, 'name="aprobado_por"')
         self.assertContains(response, 'name="revisado_por"')
 
+        # The title should be Nuevo Plan de Destrezas
+        self.assertContains(response, 'Nuevo Plan de Destrezas')
+
     def test_post_success(self):
         """Prueba la creación de planes de destreza"""
         self.client.login(username='tester@tester.com',
@@ -279,6 +282,11 @@ class TestPlanDestrezasUpdateView(PlanDestrezasTestCase):
         self.assertContains(response, 'name="adaptacion_curricular"')
         self.assertContains(response, 'name="aprobado_por"')
         self.assertContains(response, 'name="revisado_por"')
+
+        # The title should be the planning name
+        self.assertContains(response,
+                            'Plan de Destrezas: {}'.format(
+                                self.plan_destrezas.name))
 
     def test_post_success(self):
         """Prueba la actualización de planes de destreza"""

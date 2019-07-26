@@ -185,6 +185,9 @@ class TestPlanAnualCreateView(PlanAnualTestCase):
         self.assertContains(response, 'name="aprobado_por"')
         self.assertContains(response, 'name="revisado_por"')
 
+        # The title should be Nuevo Plan Anual
+        self.assertContains(response, 'Nuevo Plan Anual')
+
     def test_post_success(self):
         """Prueba la creación de planes anuales"""
         self.client.login(username='tester@tester.com',
@@ -297,6 +300,10 @@ class TestPlanAnualUpdateView(PlanAnualTestCase):
         self.assertContains(response, 'name="bibliografia"')
         self.assertContains(response, 'name="aprobado_por"')
         self.assertContains(response, 'name="revisado_por"')
+
+        # The title should be the planning name
+        self.assertContains(response,
+                            'Plan Anual: {}'.format(self.plan_anual.name))
 
     def test_post_success(self):
         """Prueba la actualización de planes anuales"""

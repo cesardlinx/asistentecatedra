@@ -58,6 +58,7 @@ class PlanUnidadCreateView(UserIsPremiumMixin, View):
         context = {
             'form': form,
             'actividades_formset': actividades_formset,
+            'title': 'Nuevo Plan de Unidad'
         }
         return render(request, 'planificaciones/forms/plan_unidad_form.html',
                       context)
@@ -89,6 +90,7 @@ class PlanUnidadCreateView(UserIsPremiumMixin, View):
         context = {
             'form': form,
             'actividades_formset': actividades_formset,
+            'title': 'Nuevo Plan de Unidad'
         }
         return render(request, 'planificaciones/forms/plan_unidad_form.html',
                       context)
@@ -111,6 +113,7 @@ class PlanUnidadUpdateView(UserIsPremiumMixin, View):
         context = {
             'form': form,
             'actividades_formset': actividades_formset,
+            'title': 'Plan de Unidad: {}'.format(plan_unidad.name)
         }
         return render(request, 'planificaciones/forms/plan_unidad_form.html',
                       context)
@@ -145,6 +148,7 @@ class PlanUnidadUpdateView(UserIsPremiumMixin, View):
         context = {
             'form': form,
             'actividades_formset': actividades_formset,
+            'title': 'Plan de Unidad: {}'.format(plan_unidad.name)
         }
         return render(request, 'planificaciones/forms/plan_unidad_form.html',
                       context)

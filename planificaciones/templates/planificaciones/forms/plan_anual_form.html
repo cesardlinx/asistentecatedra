@@ -4,14 +4,14 @@
 {% load widget_tweaks %}
 
 {% block titulo %}
-    Nuevo Plan Anual
+    {{ title }}
 {% endblock titulo %}
 
 {% block content %}
 
     <section class="detail">
         <div class="planification-title">
-            <h3 class="main-title">Nuevo Plan Anual</h3>
+            <h3 class="main-title">{{ title }}</h3>
         </div>
         <form method="post" id="planAnualForm"
             load-cursos-url={% url 'ajax_load_cursos' template='select' %}

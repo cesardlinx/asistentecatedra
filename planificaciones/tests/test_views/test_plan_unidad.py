@@ -171,6 +171,9 @@ class TestPlanUnidadCreateView(PlanUnidadTestCase):
         self.assertContains(response, 'name="aprobado_por"')
         self.assertContains(response, 'name="revisado_por"')
 
+        # The title should be Nuevo Plan de Unidad
+        self.assertContains(response, 'Nuevo Plan de Unidad')
+
     def test_post_success(self):
         """Prueba la creación de planes de unidad"""
         self.client.login(username='tester@tester.com',
@@ -282,6 +285,10 @@ class TestPlanUnidadUpdateView(PlanUnidadTestCase):
         self.assertContains(response, 'name="adaptacion_curricular"')
         self.assertContains(response, 'name="aprobado_por"')
         self.assertContains(response, 'name="revisado_por"')
+
+        # The title should be the planning name
+        self.assertContains(response,
+                            'Plan de Unidad: {}'.format(self.plan_unidad.name))
 
     def test_post_success(self):
         """Prueba la actualización de planes de unidad"""
@@ -533,7 +540,7 @@ class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
         request = add_middleware_to_request(request)
 
         PlanUnidadDuplicateView.as_view()(request,
-                                                pk=self.plan_unidad.pk)
+                                          pk=self.plan_unidad.pk)
 
         plan_unidad_new = PlanUnidad.objects.last()
         assert plan_unidad_new.name == '{} (copia 2)'.format(

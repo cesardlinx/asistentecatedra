@@ -58,6 +58,7 @@ class PlanAnualCreateView(UserIsPremiumMixin, View):
         context = {
             'form': form,
             'unidades_formset': unidades_formset,
+            'title': 'Nuevo Plan Anual'
         }
         return render(request, 'planificaciones/forms/plan_anual_form.html',
                       context)
@@ -88,6 +89,7 @@ class PlanAnualCreateView(UserIsPremiumMixin, View):
         context = {
             'form': form,
             'unidades_formset': unidades_formset,
+            'title': 'Nuevo Plan Anual'
         }
         return render(request, 'planificaciones/forms/plan_anual_form.html',
                       context)
@@ -110,6 +112,7 @@ class PlanAnualUpdateView(UserIsPremiumMixin, View):
         context = {
             'form': form,
             'unidades_formset': unidades_formset,
+            'title': 'Plan Anual: {}'.format(plan_anual.name)
         }
         return render(request, 'planificaciones/forms/plan_anual_form.html',
                       context)
@@ -144,6 +147,7 @@ class PlanAnualUpdateView(UserIsPremiumMixin, View):
         context = {
             'form': form,
             'unidades_formset': unidades_formset,
+            'title': 'Plan Anual: {}'.format(plan_anual.name)
         }
         return render(request, 'planificaciones/forms/plan_anual_form.html',
                       context)

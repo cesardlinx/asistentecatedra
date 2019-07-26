@@ -194,6 +194,9 @@ class TestPlanClaseCreateView(PlanClaseTestCase):
         self.assertContains(response, 'name="observaciones"')
         self.assertContains(response, 'name="aprobado_por"')
 
+        # The title should be Nuevo Plan de Clase
+        self.assertContains(response, 'Nuevo Plan de Clase')
+
     def test_post_success(self):
         """Prueba la creación de planes de clase"""
         self.client.login(username='tester@tester.com',
@@ -300,6 +303,10 @@ class TestPlanClaseUpdateView(PlanClaseTestCase):
         self.assertContains(response, 'name="instrumento_evaluacion"')
         self.assertContains(response, 'name="observaciones"')
         self.assertContains(response, 'name="aprobado_por"')
+
+        # The title should be the planning name
+        self.assertContains(response,
+                            'Plan de Clase: {}'.format(self.plan_clase.name))
 
     def test_post_success(self):
         """Prueba la actualización de planes de clase"""

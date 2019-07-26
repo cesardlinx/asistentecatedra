@@ -80,6 +80,7 @@ def plan_clase_create(request):
     context = {
         'form': form,
         'elementos_formset': elementos_formset,
+        'title': 'Nuevo Plan de Clase'
     }
     return render(request, 'planificaciones/forms/plan_clase_form.html',
                   context)
@@ -122,6 +123,7 @@ def plan_clase_update(request, pk, slug):
     context = {
         'form': form,
         'elementos_formset': elementos_formset,
+        'title': 'Plan de Clase: {}'.format(plan_clase.name)
     }
     return render(request, 'planificaciones/forms/plan_clase_form.html',
                   context)

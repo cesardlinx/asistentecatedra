@@ -69,6 +69,11 @@ class PlanDestrezasCreateView(UserIsPremiumMixin, CreateView):
 
         return super().form_invalid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Nuevo Plan de Destrezas'
+        return context
+
 
 class PlanDestrezasUpdateView(UserIsPremiumMixin, View):
     """Vista para la edición de planes de destrezas"""
@@ -84,6 +89,7 @@ class PlanDestrezasUpdateView(UserIsPremiumMixin, View):
 
         context = {
             'form': form,
+            'title': 'Plan de Destrezas: {}'.format(plan_destrezas.name)
         }
         return render(request,
                       'planificaciones/forms/plan_destrezas_form.html',
@@ -116,6 +122,7 @@ class PlanDestrezasUpdateView(UserIsPremiumMixin, View):
 
         context = {
             'form': form,
+            'title': 'Plan de Destrezas: {}'.format(plan_destrezas.name)
         }
         return render(request,
                       'planificaciones/forms/plan_destrezas_form.html',
