@@ -105,12 +105,12 @@ class PlanUnidadUpdateView(UserIsPremiumMixin, View):
             return redirect('plan_unidad_list')
 
         form = PlanUnidadForm(instance=plan_unidad)
-        unidades_formset = ActividadAprendizajeFormset(
+        actividades_formset = ActividadAprendizajeFormset(
             instance=plan_unidad)
 
         context = {
             'form': form,
-            'unidades_formset': unidades_formset,
+            'actividades_formset': actividades_formset,
         }
         return render(request, 'planificaciones/forms/plan_unidad_form.html',
                       context)
@@ -123,15 +123,15 @@ class PlanUnidadUpdateView(UserIsPremiumMixin, View):
             return redirect('plan_unidad_list')
 
         form = PlanUnidadForm(request.POST, instance=plan_unidad)
-        unidades_formset = ActividadAprendizajeFormset(
+        actividades_formset = ActividadAprendizajeFormset(
             request.POST, instance=plan_unidad)
-        if form.is_valid() and unidades_formset.is_valid():
+        if form.is_valid() and actividades_formset.is_valid():
 
             with transaction.atomic():
                 plan_unidad = form.save(commit=False)
                 plan_unidad.updated_at = timezone.now()
                 plan_unidad.save()
-                unidades_formset.save()
+                actividades_formset.save()
                 form._save_m2m()
                 logger.info('Plan de unidad updated for the user: {}.'
                             .format(request.user.email))
@@ -144,7 +144,7 @@ class PlanUnidadUpdateView(UserIsPremiumMixin, View):
 
         context = {
             'form': form,
-            'unidades_formset': unidades_formset,
+            'actividades_formset': actividades_formset,
         }
         return render(request, 'planificaciones/forms/plan_unidad_form.html',
                       context)

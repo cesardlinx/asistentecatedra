@@ -16,9 +16,9 @@
             load-cursos-url={% url 'ajax_load_cursos' template='select' %}
             load-unidades-url={% url 'ajax_load_unidades' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='unidad' %}
-            load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' formset='desarrollo_unidades' %}
+            load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' formset='actividades_aprendizaje' %}
             load-criterios-url={% url 'ajax_load_criterios' %}
-            load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' formset='desarrollo_unidades' %}
+            load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' formset='actividades_aprendizaje' %}
             novalidate>
             {% csrf_token %}
             {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
@@ -63,7 +63,7 @@
 
             <section class="table-responsive formset-container">
                 <h5 class="form-label">Actividades de Aprendizaje:</h5>
-                <table class="formset" id="desarrollo-unidad">
+                <table class="formset" id="actividades-aprendizaje">
                     <thead>
                         <tr>
                             <th class="col-title col-lg" rowspan="2">Destrezas con Criterios de Desempeño</th>
@@ -85,7 +85,7 @@
                             {% endif %}
 
                             <tr>
-                                <td class="checklist">
+                                <td class="checklist destrezas">
                                     {% with field=actividades_form.destrezas %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
@@ -96,7 +96,7 @@
                                     {% endwith %}
                                 </td>
 
-                                <td class="checklist">
+                                <td class="checklist criterios">
                                     {% with field=actividades_form.criterios_evaluacion %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
@@ -144,12 +144,12 @@
             </section>
 
             <div class="formset-buttons">
-                <button type="button" class="btn primary-button common-btn" id="agregar-destreza">
+                <button type="button" class="btn primary-button common-btn" id="agregar-actividad">
                     <span class="fas fa-plus"></span> Agregar Actividad
                 </button>
 
                 {% if actividades_formset.total_form_count > 1 %}
-                    <button class="secondary-button delete-btn" type="button" id="eliminar-destreza">
+                    <button class="secondary-button delete-btn" type="button" id="eliminar-actividad">
                         <span class="fas fa-minus"></span> Eliminar Actividad
                     </button>
                 {% endif %}
