@@ -225,7 +225,7 @@ class TestAjaxUrls:
 
     def test_ajax_load_destrezas(self):
         path = reverse('ajax_load_destrezas',
-                       kwargs={'template': 'select', 'formset': 'somename'})
+                       kwargs={'template': 'select'})
         view = resolve(path)
         assert view.func.view_class == LoadDestrezasView, \
             'Should resolve to the view load_destrezas'
@@ -238,7 +238,7 @@ class TestAjaxUrls:
 
     def test_ajax_load_indicadores(self):
         path = reverse('ajax_load_indicadores',
-                       kwargs={'option': 'destreza', 'formset': 'somename'})
+                       kwargs={'option': 'destreza'})
         view = resolve(path)
         assert view.func.view_class == LoadIndicadoresView, \
             'Should resolve to the view load_indicadores'

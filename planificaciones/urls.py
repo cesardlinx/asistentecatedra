@@ -87,13 +87,13 @@ urlpatterns = [
      path('ajax/objetivos/<str:option>/', LoadObjetivosView.as_view(),
           name="ajax_load_objetivos"),
      # templates: select, checklist
-     path('ajax/destrezas/<str:template>/<str:formset>/',
+     path('ajax/destrezas/<str:template>/',
           LoadDestrezasView.as_view(),
           name="ajax_load_destrezas"),
      path('ajax/criterios/', LoadCriteriosView.as_view(),
           name="ajax_load_criterios"),
      # options: destreza, criterio
-     path('ajax/indicadores/<str:option>/<str:formset>/',
+     path('ajax/indicadores/<str:option>/',
           LoadIndicadoresView.as_view(),
           name="ajax_load_indicadores"),
 ]

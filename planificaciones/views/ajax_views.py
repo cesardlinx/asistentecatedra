@@ -147,13 +147,13 @@ class LoadObjetivosView(LoginRequiredMixin, View):
 class LoadDestrezasView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         template = kwargs['template']
-        formset_name = kwargs['formset']
 
         if request.is_ajax():
             asignatura_id = request.GET.get('asignatura')
             cursos_id = request.GET.getlist('cursos[]')
             curso_id = request.GET.get('curso')
             numero_fila = request.GET.get('numero_fila')
+            formset_name = request.GET.get('formset_name')
 
             if curso_id and not cursos_id:
                 cursos_id = [curso_id, ]
@@ -213,7 +213,7 @@ class LoadIndicadoresView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         option = kwargs['option']
-        formset_name = kwargs['formset']
+        formset_name = request.GET.get('formset_name')
         destreza_id = request.GET.get('destreza')
         criterios_id = request.GET.getlist('criterios[]')
         numero_fila = request.GET.get('numero_fila')

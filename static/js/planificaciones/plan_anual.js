@@ -227,7 +227,8 @@ $(document).ready(function() {
                     data: {
                         'asignatura': asignaturaId,
                         'curso': cursoId,
-                        'numero_fila': numeroFila
+                        'numero_fila': numeroFila,
+                        'formset_name': 'desarrollo_unidades'
                     },
                     success: function(data) { // `data` is the return of the `load_destrezas` view function
                         $(`#${nameDestrezas}`).html(data);
@@ -299,6 +300,7 @@ $(document).ready(function() {
             data: {
                 'criterios': criteriosChecked,
                 'numero_fila': numeroFila,
+                'formset_name': 'desarrollo_unidades'
             },
             success: function(data) {
                 $(`#${idIndicadores}`).html(data);

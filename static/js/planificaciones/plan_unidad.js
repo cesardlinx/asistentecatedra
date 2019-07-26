@@ -69,7 +69,8 @@ $(document).ready(function() {
                 data: {
                     'asignatura': asignaturaId,
                     'curso': cursoId,
-                    'numero_fila': 0
+                    'numero_fila': 0,
+                    'formset_name': 'actividades_aprendizaje'
                 },
                 success: function(data) { // `data` is the return of the `load_destrezas` view function
                     $('#id_actividades_aprendizaje-0-destrezas').html(data);
@@ -204,6 +205,7 @@ $(document).ready(function() {
             data: {
                 'criterios': criteriosChecked,
                 'numero_fila': numeroFila,
+                'formset_name': 'actividades_aprendizaje'
             },
             success: function(data) {
                 $(`#${idIndicadores}`).html(data);
@@ -218,19 +220,6 @@ $(document).ready(function() {
     $('.formset-buttons').on('click', '#agregar-actividad', function() {
 
         var idLastRow = $('#actividades-aprendizaje tr:last > td textarea').attr('id');
-
-        // Busqueda del id de la última fila que contenga el campo select
-        // var i = 0;
-        // while (!idLastRow) {
-        //     if (i == 0) {
-        //         var previousRow = $('#actividades-aprendizaje tr:last').prev();
-        //         idLastRow = previousRow.find('select').attr('id');
-        //     } else {
-        //         previousRow = previousRow.prev()
-        //         idLastRow = previousRow.find('select').attr('id');
-        //     }
-        //     i++;
-        // }
 
         var pattern = /id_actividades_aprendizaje-(\d+)-estrategias_metodologicas/i;
         var rowNumber = parseInt(pattern.exec(idLastRow)[1]) + 1;
@@ -298,7 +287,8 @@ $(document).ready(function() {
                 data: {
                     'asignatura': asignaturaId,
                     'curso': cursoId,
-                    'numero_fila': rowNumber
+                    'numero_fila': rowNumber,
+                    'formset_name': 'actividades_aprendizaje'
                 },
                 success: function(data) { // `data` is the return of the `load_destrezas` view function
                     $(`#id_actividades_aprendizaje-${rowNumber}-destrezas`).html(data);

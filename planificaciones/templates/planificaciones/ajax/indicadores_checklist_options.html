@@ -1,11 +1,23 @@
 {% for indicador in indicadores %}
-    <li>
-        <input type="checkbox" class="custom-checkbox"
-            name="{{ formset_name }}-{{ numero_fila }}-indicadores"
-            value="{{ indicador.pk }}"
-            id="id_{{ formset_name }}-{{ numero_fila }}-indicadores_{{ forloop.counter0 }}">
-        <label class="check-label" for="id_{{ formset_name }}-{{ numero_fila }}-indicadores_{{ forloop.counter0 }}">
-            {{ indicador.codigo }} - {{ indicador.description }}
-        </label>
-    </li>
+    {% if formset_name and numero_fila %}
+        <li>
+            <input type="checkbox" class="custom-checkbox"
+                name="{{ formset_name }}-{{ numero_fila }}-indicadores"
+                value="{{ indicador.pk }}"
+                id="id_{{ formset_name }}-{{ numero_fila }}-indicadores_{{ forloop.counter0 }}">
+            <label class="check-label" for="id_{{ formset_name }}-{{ numero_fila }}-indicadores_{{ forloop.counter0 }}">
+                {{ indicador.codigo }} - {{ indicador.description }}
+            </label>
+        </li>
+    {% else %}
+        <li>
+            <input type="checkbox" class="custom-checkbox"
+                name="indicadores"
+                value="{{ indicador.pk }}"
+                id="id_indicadores_{{ forloop.counter0 }}">
+            <label class="check-label" for="id_indicadores_{{ forloop.counter0 }}">
+                {{ indicador.codigo }} - {{ indicador.description }}
+            </label>
+        </li>
+    {% endif %}
 {% endfor %}

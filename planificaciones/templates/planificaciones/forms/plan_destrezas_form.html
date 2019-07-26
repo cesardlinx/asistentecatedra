@@ -16,9 +16,9 @@
             load-cursos-url={% url 'ajax_load_cursos' template='select' %}
             load-unidades-url={% url 'ajax_load_unidades' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='unidad' %}
-            load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' formset='desarrollo_unidades' %}
+            load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' %}
             load-criterios-url={% url 'ajax_load_criterios' %}
-            load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' formset='desarrollo_unidades' %}
+            load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' %}
             novalidate>
             {% csrf_token %}
             {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
@@ -67,7 +67,7 @@
                     <thead>
                         <tr>
                             <th class="col-title">Destrezas con Criterios de Desempeño</th>
-                            <th class="col-title">Indicadores esenciales de Evaluación</th>
+                            <th class="col-title col-lg">Indicadores esenciales de Evaluación</th>
                             <th class="col-title">Ejes Transversales</th>
                         </tr>
                     </thead>

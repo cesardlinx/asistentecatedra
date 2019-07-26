@@ -80,6 +80,7 @@ class PlanDestrezasForm(forms.ModelForm):
         # Default Option for select fields
         self.fields['asignatura'].empty_label = 'Elija una asignatura.'
         self.fields['curso'].empty_label = 'Elija un curso.'
+        self.fields['unidad'].empty_label = 'Elija una unidad.'
 
         # Queryset para campos ajax en caso de existir datos post
         # en el formulario
