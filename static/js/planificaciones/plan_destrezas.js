@@ -12,9 +12,8 @@ $(document).ready(function() {
         var url_cursos = $('#planDestrezasForm').attr('load-cursos-url');
 
         $('#id_curso').html('<option>Elija un curso.</option>');
-        $('#id_unidad').html('<option>Elija una unidad didáctica.</option>');
-        $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
-        $('#id_objetivos_generales').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
+
+        clearFields();
 
         if (asignaturaId) {
             $.ajax({
@@ -44,10 +43,7 @@ $(document).ready(function() {
         var asignaturaId = $('#id_asignatura').val();
         var cursoId = $('#id_curso').val();
 
-        $('#id_unidad').html('<option>Elija una unidad didáctica.</option>');
-        $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
-        $('#id_objetivos_generales').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
-        $('#id_destrezas').html('<span>Seleccione una asignatura y un curso.</span>');
+        clearFields();
 
         // Cargar objetivos y objetivos generales
         if (asignaturaId && cursoId) {
@@ -89,7 +85,7 @@ $(document).ready(function() {
 
 
         $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
-        $('#id_objetivos_generales').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
+        $('#id_objetivos_generales').html('');
 
         if (unidadId) {
             // cargar objetivos de unidad
@@ -196,4 +192,16 @@ $(document).ready(function() {
             }
         });
     });
+
+    /**
+     * Helper Functions
+     */
+    var clearFields = function() {
+        $('#id_unidad').html('<option>Elija una unidad didáctica.</option>');
+        $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
+        $('#id_destrezas').html('<span>Seleccione una asignatura y un curso.</span>');
+        $('#id_objetivos_generales').html('');
+        $('.criterios ul').html('');
+        $('.indicadores ul').html('');
+    }
 });

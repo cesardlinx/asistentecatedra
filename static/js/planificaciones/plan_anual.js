@@ -13,10 +13,8 @@ $(document).ready(function() {
         var urlObjetivosArea = $('#planAnualForm').attr('load-objetivos-area-url');
 
         $('#id_curso').html('<option>Elija un curso.</option>');
-        $('.unidades').html('<option>Elija una unidad didáctica.</option>');
-        $('#id_objetivos_generales').html('<span>Seleccione una asignatura y un curso.</span>');
-        $('#id_objetivos_curso').html('<span>Seleccione una asignatura y un curso.</span>');
-        $('#id_objetivos_generales_curso').html('');
+        $('#id_objetivos_generales').html('<span>Seleccione una asignatura.</span>');
+        clearFields();
 
         if (asignaturaId) {
             $.ajax({
@@ -74,9 +72,7 @@ $(document).ready(function() {
         var asignaturaId = $('#id_asignatura').val();
         var cursoId = $('#id_curso').val();
 
-        $('.unidades').html('<option>Elija una unidad didáctica.</option>');
-        $('#id_objetivos_curso').html('<span>Seleccione una asignatura y un curso.</span>');
-        $('#id_objetivos_generales_curso').html('');
+        clearFields();
 
         // Cargar objetivos y objetivos generales
         if (asignaturaId && cursoId) {
@@ -343,7 +339,7 @@ $(document).ready(function() {
                             </div>
                         </td>
 
-                        <td class="checklist">
+                        <td class="checklist objetivos">
                             <ul id="id_desarrollo_unidades-${rowNumber}-objetivos"></ul>
                             <ul id="id_desarrollo_unidades-${rowNumber}-objetivos_generales"></ul>
                         </td>
@@ -362,7 +358,7 @@ $(document).ready(function() {
                             <ul id="id_desarrollo_unidades-${rowNumber}-criterios_evaluacion"></ul>
                         </td>
 
-                        <td class="checklist">
+                        <td class="checklist indicadores">
                             <ul id="id_desarrollo_unidades-${rowNumber}-indicadores"></ul>
                         </td>
 
@@ -438,5 +434,19 @@ $(document).ready(function() {
         var totalUnidadesForms = parseInt($('#id_desarrollo_unidades-TOTAL_FORMS').val());
         $('#id_desarrollo_unidades-TOTAL_FORMS').val(totalUnidadesForms - 1);
     });
+
+
+    /**
+     * Helper Functions
+     */
+    var clearFields = function() {
+        $('.objetivos ul').html('');
+        $('.destrezas ul').html('');
+        $('.criterios ul').html('');
+        $('.indicadores ul').html('');
+        $('.unidades').html('<option>Elija una unidad didáctica.</option>');
+        $('#id_objetivos_curso').html('<span>Seleccione una asignatura y un curso.</span>');
+        $('#id_objetivos_generales_curso').html('');
+    }
 
 });

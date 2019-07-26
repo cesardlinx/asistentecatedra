@@ -73,7 +73,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="checklist">
+                            <td class="checklist destrezas">
                                 {% with field=form.destrezas %}
                                     {% if field.errors %}
                                         {% render_field field class="error" %}
@@ -83,7 +83,7 @@
                                     {% endif %}
                                 {% endwith %}
                             </td>
-                            <td class="checklist">
+                            <td class="checklist criterios">
                                 {% with field=form.criterios_evaluacion %}
                                     {% if field.errors %}
                                         {% render_field field class="error" %}
@@ -129,7 +129,7 @@
                                 </div>
                             </td>
 
-                            <td class="checklist">
+                            <td class="checklist indicadores">
                                 {% with field=form.indicadores %}
                                     {% if field.errors %}
                                         {% render_field field class="error" %}

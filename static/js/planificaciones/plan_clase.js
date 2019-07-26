@@ -44,6 +44,10 @@ $(document).ready(function() {
         var destrezasOptions = $('.destrezas option')
         var url_cursos = $('#planClaseForm').attr('load-cursos-url');
 
+        $('#id_objetivos').html('<span>Seleccione una asignatura y un curso.</span>');
+        $('#id_cursos').html('<span>Seleccione una asignatura</span>');
+        $('.destrezas').html('<option>Elija una destreza.</option>');
+
         if (asignaturaId) {
             $('#id_objetivos').html('<span>Seleccione un curso.</span>');
             $.ajax({
@@ -58,10 +62,6 @@ $(document).ready(function() {
                     }
                 }
             });
-        } else {
-            $('#id_objetivos').html('<span>Seleccione una asignatura.</span>');
-            $('#id_cursos').html('<span>Seleccione una asignatura</span>');
-            $('.destrezas').html('<option>Elija una destreza.</option>');
         }
     };
 
@@ -149,7 +149,8 @@ $(document).ready(function() {
                 url: urlDestrezas,
                 data: {
                     'asignatura': asignaturaId,
-                    'cursos': cursosChecked
+                    'cursos': cursosChecked,
+                    'formset_name': 'elementos_curriculares'
                 },
                 success: function(data) { // `data` is the return of the `load_destrezas` view function
                     $('.destrezas').html(data);
@@ -163,26 +164,27 @@ $(document).ready(function() {
      * Se cargan los indicadores
      */
     $('#planClaseForm').on('change', '.destrezas', function() {
-         // Obtener URL
-         var urlIndicadores = $('#planClaseForm').attr('load-indicadores-url');
+        // Obtener URL
+        var urlIndicadores = $('#planClaseForm').attr('load-indicadores-url');
 
-         var idDestrezas = $(this).attr('id');
-         var pattern = /(id_elementos_curriculares-(\d+)-)destreza/i
-         var idIndicadores = pattern.exec(idDestrezas)[1] + 'indicadores'
+        var idDestrezas = $(this).attr('id');
+        var pattern = /(id_elementos_curriculares-(\d+)-)destreza/i
+        var idIndicadores = pattern.exec(idDestrezas)[1] + 'indicadores'
 
-         var destrezaId = $(`#${idDestrezas}`).val();
-         var numeroFila = pattern.exec(idDestrezas)[2];
+        var destrezaId = $(`#${idDestrezas}`).val();
+        var numeroFila = pattern.exec(idDestrezas)[2];
 
-         $.ajax({
-             url: urlIndicadores,
-             data: {
-                 'destreza': destrezaId,
-                 'numero_fila': numeroFila
-             },
-             success: function(data) {
-                 $(`#${idIndicadores}`).html(data);
-             }
-         });
+        $.ajax({
+            url: urlIndicadores,
+            data: {
+                'destreza': destrezaId,
+                'numero_fila': numeroFila,
+                'formset_name': 'elementos_curriculares'
+            },
+            success: function(data) {
+                $(`#${idIndicadores}`).html(data);
+            }
+        });
     });
 
 

@@ -12,9 +12,7 @@ $(document).ready(function() {
         var url_cursos = $('#planUnidadForm').attr('load-cursos-url');
 
         $('#id_curso').html('<option>Elija un curso.</option>');
-        $('#id_unidad').html('<option>Elija una unidad didáctica.</option>');
-        $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
-        $('#id_objetivos_generales').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
+        clearFields();
 
         if (asignaturaId) {
             $.ajax({
@@ -44,9 +42,7 @@ $(document).ready(function() {
         var asignaturaId = $('#id_asignatura').val();
         var cursoId = $('#id_curso').val();
 
-        $('#id_unidad').html('<option>Elija una unidad didáctica.</option>');
-        $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
-        $('#id_objetivos_generales').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
+        clearFields();
 
         // Cargar objetivos y objetivos generales
         if (asignaturaId && cursoId) {
@@ -63,19 +59,23 @@ $(document).ready(function() {
                 }
             });
 
-            // Cargar Destrezas
-            $.ajax({
-                url: urlDestrezas,
-                data: {
-                    'asignatura': asignaturaId,
-                    'curso': cursoId,
-                    'numero_fila': 0,
-                    'formset_name': 'actividades_aprendizaje'
-                },
-                success: function(data) { // `data` is the return of the `load_destrezas` view function
-                    $('#id_actividades_aprendizaje-0-destrezas').html(data);
-                }
-            });
+            var totalUnidadesForms = parseInt($('#id_actividades_aprendizaje-TOTAL_FORMS').val());
+
+            for (let i = 0; i < totalUnidadesForms; i++) {
+                // Cargar Destrezas
+                $.ajax({
+                    url: urlDestrezas,
+                    data: {
+                        'asignatura': asignaturaId,
+                        'curso': cursoId,
+                        'numero_fila': i,
+                        'formset_name': 'actividades_aprendizaje'
+                    },
+                    success: function(data) { // `data` is the return of the `load_destrezas` view function
+                        $(`#id_actividades_aprendizaje-${i}-destrezas`).html(data);
+                    }
+                });
+            }
         }
     });
 
@@ -90,7 +90,7 @@ $(document).ready(function() {
 
 
         $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
-        $('#id_objetivos_generales').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
+        $('#id_objetivos_generales').html('');
 
         if (unidadId) {
             // cargar objetivos de unidad
@@ -245,7 +245,7 @@ $(document).ready(function() {
                             </div>
                         </td>
 
-                        <td class="checklist">
+                        <td class="checklist indicadores">
                             <ul id="id_actividades_aprendizaje-${rowNumber}-indicadores"></ul>
                         </td>
 
@@ -312,5 +312,17 @@ $(document).ready(function() {
         var totalActividadesForms = parseInt($('#id_actividades_aprendizaje-TOTAL_FORMS').val());
         $('#id_actividades_aprendizaje-TOTAL_FORMS').val(totalActividadesForms - 1);
     });
+
+    /**
+     * Helper Functions
+     */
+    var clearFields = function() {
+        $('#id_unidad').html('<option>Elija una unidad didáctica.</option>');
+        $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
+        $('.destrezas ul').html('<span>Seleccione una asignatura y un curso.</span>');
+        $('#id_objetivos_generales').html('');
+        $('.criterios ul').html('');
+        $('.indicadores ul').html('');
+    }
 
 });

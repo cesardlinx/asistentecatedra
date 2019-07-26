@@ -15,8 +15,8 @@
         <form method="post" id="planClaseForm"
             load-cursos-url={% url 'ajax_load_cursos' template='checklist' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='curso' %}
-            load-destrezas-url={% url 'ajax_load_destrezas' template='select' formset='elementos_curriculares' %}
-            load-indicadores-url={% url 'ajax_load_indicadores' option='destreza' formset='elementos_curriculares' %}
+            load-destrezas-url={% url 'ajax_load_destrezas' template='select' %}
+            load-indicadores-url={% url 'ajax_load_indicadores' option='destreza' %}
             novalidate>
             {% csrf_token %}
             {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}

@@ -217,18 +217,16 @@ class TestLoadDestrezasView(PlanificacionesTestCase):
 
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
-        request = RequestFactory().get('/',
+        request = RequestFactory().get('/', {'formset_name': 'somename'},
                                        HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         request.user = AnonymousUser()
-        response = LoadDestrezasView.as_view()(request, template='checklist',
-                                               formset='somename')
+        response = LoadDestrezasView.as_view()(request, template='checklist')
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_not_ajax(self):
-        request = RequestFactory().get('/')
+        request = RequestFactory().get('/', {'formset_name': 'somename'})
         request.user = self.user
-        response = LoadDestrezasView.as_view()(request, template='checklist',
-                                               formset='somename')
+        response = LoadDestrezasView.as_view()(request, template='checklist')
         assert response.status_code == 200, 'Authenticated user can access'
         assert response.content == b'', 'Response should be empty'
 
@@ -237,10 +235,9 @@ class TestLoadDestrezasView(PlanificacionesTestCase):
         Tests that when there is a bad template name
         will return an empty response
         """
-        request = RequestFactory().get('/')
+        request = RequestFactory().get('/', {'formset_name': 'somename'})
         request.user = self.user
-        response = LoadDestrezasView.as_view()(request, template='checklist',
-                                               formset='somename')
+        response = LoadDestrezasView.as_view()(request, template='checklist')
         assert response.status_code == 200, 'Authenticated user can access'
         assert response.content == b'', 'Response should be empty'
 
@@ -254,13 +251,13 @@ class TestLoadDestrezasView(PlanificacionesTestCase):
             {
                 'asignatura': self.asignatura.id,
                 'cursos[]': self.curso_1.id,
-                'numero_fila': 0
+                'numero_fila': 0,
+                'formset_name': 'somename'
             },
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         request.user = self.user
-        response = LoadDestrezasView.as_view()(request, template='checklist',
-                                               formset='somename')
+        response = LoadDestrezasView.as_view()(request, template='checklist')
         assert response.status_code == 200, 'Authenticated user can access'
         # The template should contain checkboxes
         self.assertContains(response,
@@ -279,13 +276,13 @@ class TestLoadDestrezasView(PlanificacionesTestCase):
             '/',
             {
                 'asignatura': self.asignatura.id,
-                'curso': self.curso_1.id
+                'curso': self.curso_1.id,
+                'formset_name': 'somename'
             },
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         request.user = self.user
-        response = LoadDestrezasView.as_view()(request, template='select',
-                                               formset='somename')
+        response = LoadDestrezasView.as_view()(request, template='select')
         assert response.status_code == 200, 'Authenticated user can access'
         # The template should contain the options
         self.assertContains(response,
@@ -337,7 +334,7 @@ class TestLoadCriteriosView(PlanificacionesTestCase):
         self.assertContains(
             response, self.criterio_2.codigo)
         self.assertContains(
-            response, 'name="somename-0-criterios"')
+            response, 'name="somename-0-criterios_evaluacion"')
 
     def test_success_without_formset_name(self):
         """
@@ -369,15 +366,13 @@ class TestLoadIndicadoresView(PlanificacionesTestCase):
         request = RequestFactory().get('/',
                                        HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         request.user = AnonymousUser()
-        response = LoadIndicadoresView.as_view()(request, option='destreza',
-                                                 formset='somename')
+        response = LoadIndicadoresView.as_view()(request, option='destreza')
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
     def test_not_ajax(self):
         request = RequestFactory().get('/')
         request.user = self.user
-        response = LoadIndicadoresView.as_view()(request, option='destreza',
-                                                 formset='somename')
+        response = LoadIndicadoresView.as_view()(request, option='destreza')
         assert response.status_code == 200, 'Authenticated user can access'
         assert response.content == b'', 'Response should be empty'
 
@@ -386,10 +381,9 @@ class TestLoadIndicadoresView(PlanificacionesTestCase):
         Tests that when there is a bad option
         will return an empty response
         """
-        request = RequestFactory().get('/')
+        request = RequestFactory().get('/', {'formset_name': 'somename'})
         request.user = self.user
-        response = LoadIndicadoresView.as_view()(request, option='bad',
-                                                 formset='somename')
+        response = LoadIndicadoresView.as_view()(request, option='bad')
         assert response.status_code == 200, 'Authenticated user can access'
         assert response.content == b'', 'Response should be empty'
 
@@ -401,13 +395,13 @@ class TestLoadIndicadoresView(PlanificacionesTestCase):
             '/',
             {
                 'destreza': self.destreza_1.id,
-                'numero_fila': 0
+                'numero_fila': 0,
+                'formset_name': 'somename'
             },
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         request.user = self.user
-        response = LoadIndicadoresView.as_view()(request, option='destreza',
-                                                 formset='somename')
+        response = LoadIndicadoresView.as_view()(request, option='destreza')
         assert response.status_code == 200, 'Authenticated user can access'
         self.assertContains(
             response, 'name="somename-0-indicadores"')
@@ -425,13 +419,13 @@ class TestLoadIndicadoresView(PlanificacionesTestCase):
             '/',
             {
                 'criterios[]': [self.criterio_1.id, self.criterio_2.id],
-                'numero_fila': 0
+                'numero_fila': 0,
+                'formset_name': 'somename'
             },
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         request.user = self.user
-        response = LoadIndicadoresView.as_view()(request, option='criterio',
-                                                 formset='somename')
+        response = LoadIndicadoresView.as_view()(request, option='criterio')
         assert response.status_code == 200, 'Authenticated user can access'
         self.assertContains(
             response, 'name="somename-0-indicadores"')
