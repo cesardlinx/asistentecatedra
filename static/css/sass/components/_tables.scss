@@ -1,5 +1,9 @@
 //** Tables
 
+table {
+  min-height: 160px;
+}
+
 .table-responsive {
   margin-bottom: 1.5em;
 }
@@ -54,8 +58,8 @@
       min-width: 333px;
     }
 
-    &.col-310 {
-      min-width: 310px;
+    &.col-355 {
+      min-width: 355px;
     }
 
     &.col-236 {

@@ -3,8 +3,16 @@ $(document).ready(function() {
     // All textarea resizables
     textareaResizables();
 
-    // fix ejes transversales stextarea width
+    // fix ejes transversales textarea width
     $('#id_ejes_transversales').width('87%');
+
+    var mainTitle = $('.main-title').html();
+    var ejesTransversales = 'La interculturalidad,\nla formación de una ciudadanía democrática,\nla protección del medio ambiente,\nEl cuidado de la salud\nlos hábitos de recreación de los estudiantes,\nla educación sexual en los jóvenes.';
+
+    // Agregar ejes transversales solo si es un nuevo plan anual
+    if (mainTitle === 'Nuevo Plan de Destrezas') {
+        $('#id_ejes_transversales').text(ejesTransversales);
+    }
 
     /**
      * Al elegir una asignatura

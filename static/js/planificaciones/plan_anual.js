@@ -3,6 +3,15 @@ $(document).ready(function() {
     // All textarea resizables
     textareaResizables();
 
+    var mainTitle = $('.main-title').html();
+
+    var ejesTransversales = 'La interculturalidad,\nla formación de una ciudadanía democrática,\nla protección del medio ambiente,\nEl cuidado de la salud\nlos hábitos de recreación de los estudiantes,\nla educación sexual en los jóvenes.';
+
+    // Agregar ejes transversales solo si es un nuevo plan anual
+    if (mainTitle === 'Nuevo Plan Anual') {
+        $('#id_ejes_transversales').text(ejesTransversales);
+    }
+
     /**
      * Al elegir una asignatura
      * se cargan los cursos
@@ -64,7 +73,7 @@ $(document).ready(function() {
      * Al elegir un curso
      * Se cargan los objetivos y las unidades
      */
-    $('#planAnualForm').on('change', '#id_curso', function() {
+    $('#planAnualForm').on('change', '#id_curso', function(e) {
         // Obtener URLs
         var urlObjetivos = $('#planAnualForm').attr('load-objetivos-url');
         var urlUnidades = $('#planAnualForm').attr('load-unidades-url');
@@ -76,6 +85,21 @@ $(document).ready(function() {
 
         // Cargar objetivos y objetivos generales
         if (asignaturaId && cursoId) {
+
+            // agregar a la bibliografia
+            if (mainTitle === 'Nuevo Plan Anual') {
+                var book = '';
+                var asignatura = $('#id_asignatura option:selected').text();
+                var curso = $('#id_curso option:selected').text();
+
+                if (curso !== 'Elija un curso.') {
+                    // agregar libros a la bibliografia
+                    var curriculo = 'Ministerio de Educación (2016) Curriculo, Quito-Ecuador';
+                    book = `Ministerio de Educación (2018) ${asignatura} ${curso} Texto del Estudiante, Quito-Ecuador`;
+                    CKEDITOR.instances['id_bibliografia'].setData(`<li>${book}</li><li>${curriculo}</li>`);
+                }
+
+            }
 
             $.ajax({
                 url: urlObjetivos,

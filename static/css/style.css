@@ -401,6 +401,7 @@ input::placeholder {
   right: 1em;
   bottom: 1.5em;
   resize: vertical;
+  min-height: 64px;
 }
 
 .textarea-proceso {
@@ -631,6 +632,10 @@ h3.main-title {
   margin-bottom: 0;
 }
 
+table {
+  min-height: 160px;
+}
+
 .table-responsive {
   margin-bottom: 1.5em;
 }
@@ -687,8 +692,8 @@ h3.main-title {
   min-width: 333px;
 }
 
-.formset th.col-310 {
-  min-width: 310px;
+.formset th.col-355 {
+  min-width: 355px;
 }
 
 .formset th.col-236 {

@@ -3,6 +3,8 @@ $(document).ready(function() {
     // All textarea resizables
     textareaResizables();
 
+    var mainTitle = $('.main-title').html();
+
     // Extra Fields Validation
     var extraFields = SpecialFields({
         fields: [
@@ -72,7 +74,7 @@ $(document).ready(function() {
      * Al elegir un curso
      * Se cargan los objetivos y destrezas
      */
-    $('#planClaseForm').on('change', '#id_cursos input', function() {
+    $('#planClaseForm').on('change', '#id_cursos input', function(e) {
         // Obtener URLs
         var urlObjetivos = $('#planClaseForm').attr('load-objetivos-url');
         var urlDestrezas = $('#planClaseForm').attr('load-destrezas-url');
@@ -89,6 +91,25 @@ $(document).ready(function() {
 
         // Cargar objetivos y objetivos generales
         if (asignaturaId) {
+
+            // agregar a la bibliografia
+            if (mainTitle === 'Nuevo Plan de Clase' && e.target.checked) {
+                var book = '';
+                var asignatura = $('#id_asignatura option:selected').text();
+
+                // si hay datos previos borrar
+                var editorData = CKEDITOR.instances['id_bibliografia'].getData();
+                if (!editorData) {
+                    // agregar curriculum a la bibliografia
+                    CKEDITOR.instances['id_bibliografia'].insertHtml('<li>Ministerio de Educación (2016) Curriculo, Quito-Ecuador</li>');
+                }
+
+                var curso = e.target.nextSibling.nextSibling.textContent.trim();
+
+                // agregar libro de curso a la bibliografia
+                book = `Ministerio de Educación (2018) ${asignatura} ${curso} Texto del Estudiante, Quito-Ecuador`;
+                CKEDITOR.instances['id_bibliografia'].insertHtml(`<li>${book}</li>`);
+            }
 
             $.ajax({
                 url: urlObjetivos,
