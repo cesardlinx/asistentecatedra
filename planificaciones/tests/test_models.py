@@ -214,7 +214,7 @@ class TestDestreza:
         truncated_description = Truncator(destreza.description)
         assert str(destreza) == '{} - {}'.format(
             destreza.codigo,
-            truncated_description.chars(20)
+            truncated_description.chars(110)
         ), 'The representation should be codigo and a truncated description'
         assert destreza._meta.db_table == 'destrezas', \
             'The table should be named "destrezas"'

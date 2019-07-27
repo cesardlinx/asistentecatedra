@@ -131,6 +131,7 @@ body {
 .custom-checkbox {
   opacity: 0;
   cursor: pointer;
+  display: block;
 }
 
 .custom-checkbox:checked + .check-label::after {
@@ -394,14 +395,15 @@ input::placeholder {
 }
 
 .table-textarea {
-  width: 91%;
-  position: absolute;
-  top: 1.5em;
-  left: 1em;
-  right: 1em;
-  bottom: 1.5em;
+  width: 100%;
   resize: vertical;
   min-height: 64px;
+}
+
+@-moz-document url-prefix() {
+  .table-textarea {
+    position: static;
+  }
 }
 
 .textarea-proceso {
@@ -670,7 +672,7 @@ table {
   padding: 1.5em 1em;
 }
 
-.formset td.objetivos, .formset td.indicadores, .formset td.criterios {
+.formset td.objetivos, .formset td.indicadores, .formset td.criterios, .formset td.destrezas {
   padding: 0 1em;
 }
 

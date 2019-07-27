@@ -5,8 +5,8 @@
                 name="{{ formset_name }}-{{ numero_fila }}-destrezas"
                 value="{{ destreza.pk }}"
                 id="id_{{ formset_name }}-{{ numero_fila }}-destrezas_{{ forloop.counter0 }}">
-            <label class="check-label" for="id_{{ formset_name }}-{{ numero_fila }}-destrezas_{{ forloop.counter0 }}">
-                {{ destreza.codigo }} - {{ destreza.description|slice:":20"|add:'...' }}
+            <label class="check-label" for="id_{{ formset_name }}-{{ numero_fila }}-destrezas_{{ forloop.counter0 }}" title="{{ destreza.description }}">
+                {{ destreza.codigo }} - {{ destreza.description|slice:":110"|add:'...' }}
             </label>
         </li>
     {% else %}
@@ -15,8 +15,8 @@
                 name="destrezas"
                 value="{{ destreza.pk }}"
                 id="id_destrezas_{{ forloop.counter0 }}">
-            <label class="check-label" for="id_destrezas_{{ forloop.counter0 }}">
-                {{ destreza.codigo }} - {{ destreza.description|slice:":20"|add:'...' }}
+            <label class="check-label" for="id_destrezas_{{ forloop.counter0 }}" title="{{ destreza.description }}">
+                {{ destreza.codigo }} - {{ destreza.description|slice:":110"|add:'...' }}
             </label>
         </li>
     {% endif %}

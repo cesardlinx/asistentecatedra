@@ -27,6 +27,7 @@
 .custom-checkbox {
   opacity: 0;
   cursor: pointer;
+  display: block;
 
   &:checked+.check-label::after { //sass-lint:disable-line force-pseudo-nesting
     display: block;
@@ -278,14 +279,15 @@ input {
 }
 
 .table-textarea {
-  width: 91%;
-  position: absolute;
-  top: 1.5em;
-  left: 1em;
-  right: 1em;
-  bottom: 1.5em;
+  width: 100%;
   resize: vertical;
   min-height: 64px;
+}
+
+@-moz-document url-prefix() {
+  .table-textarea {
+    position: static;
+  }
 }
 
 .textarea-proceso {
