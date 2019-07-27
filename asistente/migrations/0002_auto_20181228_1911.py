@@ -50,19 +50,18 @@ def add_books(apps, schema_editor):
     Asignatura = apps.get_model('planificaciones', 'Asignatura')
 
     # Cursos
-    primero_egb = Curso.objects.get(pk=1)
-    segundo_egb = Curso.objects.get(pk=2)
-    tercero_egb = Curso.objects.get(pk=3)
-    cuarto_egb = Curso.objects.get(pk=4)
-    quinto_egb = Curso.objects.get(pk=5)
-    sexto_egb = Curso.objects.get(pk=6)
-    septimo_egb = Curso.objects.get(pk=7)
-    octavo_egb = Curso.objects.get(pk=8)
-    noveno_egb = Curso.objects.get(pk=9)
-    decimo_egb = Curso.objects.get(pk=10)
-    primero_bgu = Curso.objects.get(pk=11)
-    segundo_bgu = Curso.objects.get(pk=12)
-    tercero_bgu = Curso.objects.get(pk=13)
+    segundo_egb = Curso.objects.get(name="2° EGB")
+    tercero_egb = Curso.objects.get(name="3° EGB")
+    cuarto_egb = Curso.objects.get(name="4° EGB")
+    quinto_egb = Curso.objects.get(name="5° EGB")
+    sexto_egb = Curso.objects.get(name="6° EGB")
+    septimo_egb = Curso.objects.get(name="7° EGB")
+    octavo_egb = Curso.objects.get(name="8° EGB")
+    noveno_egb = Curso.objects.get(name="9° EGB")
+    decimo_egb = Curso.objects.get(name="10° EGB")
+    primero_bgu = Curso.objects.get(name="1° BGU")
+    tercero_bgu = Curso.objects.get(name="2° BGU")
+    segundo_bgu = Curso.objects.get(name="3° BGU")
 
     # Listas de cursos
     todos_cursos = [
@@ -101,13 +100,6 @@ def add_books(apps, schema_editor):
     )
     emprendimiento = Asignatura.objects.get(
         name="Emprendimiento y Gestión"
-    )
-
-    # Preparatoria
-    Libro.objects.create(
-        name="Preparatoria",
-        archivo="libros/Guía Preparatoria.pdf",
-        curso=primero_egb,
     )
 
     create_books(Libro, 'EGB', matematica, todos_cursos)

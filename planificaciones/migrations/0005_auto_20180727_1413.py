@@ -6,7 +6,6 @@ def create_cursos(apps, schema_editor):
     Subnivel = apps.get_model('planificaciones', 'Subnivel')
 
     # Subniveles
-    preparatoria = Subnivel.objects.get(name='Básica Preparatoria')
     elemental = Subnivel.objects.get(name='Básica Elemental')
     media = Subnivel.objects.get(name='Básica Media')
     superior = Subnivel.objects.get(name='Básica Superior')
@@ -14,7 +13,6 @@ def create_cursos(apps, schema_editor):
 
     # Cursos
     Curso.objects.bulk_create([
-        Curso(name='1° EGB', subnivel=preparatoria),
         Curso(name='2° EGB', subnivel=elemental),
         Curso(name='3° EGB', subnivel=elemental),
         Curso(name='4° EGB', subnivel=elemental),

@@ -9,7 +9,6 @@ def create_bloques(apps, schema_editor):
     lengua_literatura = Asignatura.objects.get(
        name="Lengua y Literatura"
     )
-    ingles = Asignatura.objects.get(name="Inglés")
     matematica = Asignatura.objects.get(name="Matemática")
     ciencias_naturales = Asignatura.objects.get(
        name="Ciencias Naturales"
@@ -25,42 +24,12 @@ def create_bloques(apps, schema_editor):
     educacion_ciudadania = Asignatura.objects.get(
        name="Educación para la Ciudadanía"
     )
-    educacion_fisica = Asignatura.objects.get(name="Educación Física")
-    educacion_cultural = Asignatura.objects.get(
-       name="Educación Cultural y Artística")
     emprendimiento = Asignatura.objects.get(
        name="Emprendimiento y Gestión"
     )
 
     # Bloques
     Bloque.objects.bulk_create([
-        # Educación cultural
-        Bloque(numero_bloque=1,
-               name='El yo: la identidad',
-               asignatura=educacion_cultural),
-        Bloque(numero_bloque=2,
-               name='El encuentro con otros: la alteridad',
-               asignatura=educacion_cultural),
-        Bloque(numero_bloque=3,
-               name='El entorno: espacio, tiempo y objetos',
-               asignatura=educacion_cultural),
-        # Educación física
-        Bloque(numero_bloque=1,
-               name='Prácticas lúdicas: los juegos y el jugar',
-               asignatura=educacion_fisica),
-        Bloque(numero_bloque=2,
-               name='Prácticas gimnásticas',
-               asignatura=educacion_fisica),
-        Bloque(numero_bloque=3,
-               name='Prácticas corporales expreso-comunicativas',
-               asignatura=educacion_fisica),
-        Bloque(numero_bloque=4,
-               name='Prácticas deportivas', asignatura=educacion_fisica),
-        Bloque(numero_bloque=5, name='Construcción de la identidad corporal',
-               asignatura=educacion_fisica),
-        Bloque(numero_bloque=6,
-               name='Relaciones entre prácticas corporales y salud',
-               asignatura=educacion_fisica),
         # Ciencias naturales
         Bloque(numero_bloque=1,
                name='Seres vivos y su ambiente',
@@ -166,17 +135,7 @@ def create_bloques(apps, schema_editor):
                name='Geometría y medida', asignatura=matematica),
         Bloque(numero_bloque=3,
                name='Estadística y probabilidad', asignatura=matematica),
-        # Inglés
-        Bloque(numero_bloque=1,
-               name='Communication and Cultural Awareness',
-               asignatura=ingles),
-        Bloque(numero_bloque=2,
-               name='Oral Communication: (Listening and Speaking)',
-               asignatura=ingles),
-        Bloque(numero_bloque=3, name='Reading', asignatura=ingles),
-        Bloque(numero_bloque=4, name='Writing', asignatura=ingles),
-        Bloque(numero_bloque=5,
-               name='Language through the Arts', asignatura=ingles),
+
         # Emprendimiento
         Bloque(numero_bloque=1,
                name='Planificación y control financiero del emprendimiento',

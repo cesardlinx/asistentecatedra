@@ -11,7 +11,6 @@ def create_subniveles(apps, schema_editor):
 
     # Subniveles
     Subnivel.objects.bulk_create([
-        Subnivel(name="Básica Preparatoria", nivel=EGB),
         Subnivel(name="Básica Elemental", nivel=EGB),
         Subnivel(name="Básica Media", nivel=EGB),
         Subnivel(name="Básica Superior", nivel=EGB),

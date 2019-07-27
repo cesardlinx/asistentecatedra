@@ -7,13 +7,9 @@ def create_asignaturas(apps, schema_editor):
 
     # Areas
     lengua_literatura = Area.objects.get(name='Lengua y Literatura')
-    lengua_extranjera = Area.objects.get(name='Lengua Extranjera')
     matematica = Area.objects.get(name='Matemática')
     ciencias_naturales = Area.objects.get(name='Ciencias Naturales')
     ciencias_sociales = Area.objects.get(name='Ciencias Sociales')
-    educacion_fisica = Area.objects.get(name='Educación Física')
-    educacion_cultural = Area.objects.get(
-        name='Educación Cultural y Artística')
     interdisciplinar = Area.objects.get(name='Interdisciplinar')
 
     # Asignaturas
@@ -21,10 +17,6 @@ def create_asignaturas(apps, schema_editor):
         Asignatura(
             name='Lengua y Literatura',
             area=lengua_literatura
-        ),
-        Asignatura(
-            name='Inglés',
-            area=lengua_extranjera
         ),
         Asignatura(
             name='Matemática',
@@ -61,14 +53,6 @@ def create_asignaturas(apps, schema_editor):
         Asignatura(
             name='Educación para la Ciudadanía',
             area=ciencias_sociales,
-        ),
-        Asignatura(
-            name='Educación Física',
-            area=educacion_fisica,
-        ),
-        Asignatura(
-            name='Educación Cultural y Artística',
-            area=educacion_cultural,
         ),
         Asignatura(
             name='Emprendimiento y Gestión',
