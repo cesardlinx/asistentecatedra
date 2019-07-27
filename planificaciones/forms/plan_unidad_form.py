@@ -15,8 +15,8 @@ class PlanUnidadForm(forms.ModelForm):
         fields = [
             'name',
             'ano_lectivo',
-            'docentes',
             'asignatura',
+            'docentes',
             'curso',
             'paralelos',
             'unidad',
@@ -33,6 +33,7 @@ class PlanUnidadForm(forms.ModelForm):
             'name': 'Nombre de la Planificación de Unidad',
             'ano_lectivo': 'Año Lectivo',
             'docentes': 'Docente/s',
+            'objetivos': 'Objetivos de Unidad',
             'periodos': 'Períodos',
             'necesidad_adaptacion': 'Especificación de la necesidad '
                                     'educativa (opcional)',

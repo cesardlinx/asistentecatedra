@@ -37,8 +37,8 @@
                 </div>
 
                 <div class="form-group-2">
-                    {% include "forms/floating_input.html" with field=form.docentes %}
                     {% include "forms/select_field.html" with field=form.asignatura %}
+                    {% include "forms/floating_input.html" with field=form.docentes %}
                 </div>
 
                 <div class="form-group-2">
@@ -70,7 +70,7 @@
                     {{ form.objetivos_generales }}
                 </div>
 
-                 <div class="form-group">
+                <div class="form-group">
                     {{ form.ejes_transversales|add_label_class:"form-label" }}
                     {% if form.ejes_transversales.errors %}
                         <div class="error">
@@ -141,10 +141,10 @@
                                 <td class="checklist destrezas">
                                     {% with field=unidades_form.destrezas %}
                                         {% if field.errors %}
-                                            {% render_field field class="error scrollable-list" %}
+                                            {% render_field field class="error" %}
                                             {% include 'forms/field_errors.html'%}
                                         {% else %}
-                                            {% render_field field class="scrollable-list" %}
+                                            {{ field }}
                                         {% endif %}
                                     {% endwith %}
                                 </td>

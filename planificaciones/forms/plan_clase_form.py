@@ -15,9 +15,9 @@ class PlanClaseForm(forms.ModelForm):
         fields = [
             'name',
             'numero_plan',
-            'docentes',
-            'fecha',
             'asignatura',
+            'fecha',
+            'docentes',
             'cursos',
             'paralelos',
             'numero_estudiantes',

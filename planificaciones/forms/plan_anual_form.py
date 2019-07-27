@@ -14,8 +14,8 @@ class PlanAnualForm(forms.ModelForm):
         fields = [
             'name',
             'ano_lectivo',
-            'docentes',
             'asignatura',
+            'docentes',
             'curso',
             'paralelos',
             'carga_horaria',

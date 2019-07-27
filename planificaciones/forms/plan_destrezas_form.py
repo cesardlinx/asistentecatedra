@@ -19,8 +19,8 @@ class PlanDestrezasForm(forms.ModelForm):
         fields = [
             'name',
             'ano_lectivo',
-            'docentes',
             'asignatura',
+            'docentes',
             'curso',
             'paralelos',
             'unidad',
@@ -44,6 +44,7 @@ class PlanDestrezasForm(forms.ModelForm):
             'name': 'Nombre de la Planificación de Unidad',
             'ano_lectivo': 'Año Lectivo',
             'docentes': 'Docente/s',
+            'objetivos': 'Objetivos de Unidad',
             'periodos': 'Períodos',
             'semana_inicio': 'Semana de Inicio',
             'indicadores': 'Indicadores de logro',
