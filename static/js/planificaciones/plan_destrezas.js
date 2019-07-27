@@ -7,7 +7,7 @@ $(document).ready(function() {
     $('#id_ejes_transversales').width('87%');
 
     var mainTitle = $('.main-title').html();
-    var ejesTransversales = 'La interculturalidad,\nla formación de una ciudadanía democrática,\nla protección del medio ambiente,\nEl cuidado de la salud\nlos hábitos de recreación de los estudiantes,\nla educación sexual en los jóvenes.';
+    var ejesTransversales = 'La interculturalidad.\nLa formación de una ciudadanía democrática.\nLa protección del medio ambiente.\nEl cuidado de la salud.\nLos hábitos de recreación de los estudiantes.\nLa educación sexual en los jóvenes.';
 
     // Agregar ejes transversales solo si es un nuevo plan anual
     if (mainTitle === 'Nuevo Plan de Destrezas') {
@@ -172,7 +172,6 @@ $(document).ready(function() {
             },
             success: function(data) {
                 $('#id_criterios_evaluacion').html(data);
-                updateTextareasSize('', '', ['ejes_transversales']);
             }
         });
     });
@@ -214,7 +213,7 @@ $(document).ready(function() {
         $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
         $('#id_destrezas').html('<span>Seleccione una asignatura y un curso.</span>');
         $('#id_objetivos_generales').html('');
-        $('.criterios ul').html('');
+        $('#id_criterios_evaluacion').html('');
         $('.indicadores ul').html('');
     }
 

@@ -5,7 +5,7 @@ $(document).ready(function() {
 
     var mainTitle = $('.main-title').html();
 
-    var ejesTransversales = 'La interculturalidad,\nla formación de una ciudadanía democrática,\nla protección del medio ambiente,\nEl cuidado de la salud\nlos hábitos de recreación de los estudiantes,\nla educación sexual en los jóvenes.';
+    var ejesTransversales = 'La interculturalidad.\nLa formación de una ciudadanía democrática.\nLa protección del medio ambiente.\nEl cuidado de la salud.\nLos hábitos de recreación de los estudiantes.\nLa educación sexual en los jóvenes.';
 
     // Agregar ejes transversales solo si es un nuevo plan anual
     if (mainTitle === 'Nuevo Plan Anual') {
