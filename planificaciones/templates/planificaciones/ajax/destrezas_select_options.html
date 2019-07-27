@@ -1,6 +1,6 @@
 <option value selected>Elija una destreza.</option>
 {% for destreza in destrezas %}
-    <option value="{{ destreza.pk }}"
+    <option value="{{ destreza.pk }}" title="{{ destreza.description }}"
         id="id_destrezas_{{ destreza.pk }}">
         {{ destreza.codigo }} - {{ destreza.description|slice:":30"|add:'...' }}
     </option>

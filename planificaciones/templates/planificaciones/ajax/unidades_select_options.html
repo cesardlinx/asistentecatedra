@@ -1,6 +1,6 @@
 <option value selected>Elija una unidad didáctica.</option>
 {% for unidad in unidades %}
-    <option value="{{ unidad.pk }}"
+    <option value="{{ unidad.pk }}" title="{{ unidad.titulo }}"
         id="id_unidades_{{ unidad.pk }}">
         {{ unidad.numero_unidad }} - {{ unidad.titulo|slice:":30"|add:'...' }}
     </option>
