@@ -174,6 +174,7 @@ $(document).ready(function() {
             },
             success: function(data) {
                 $(`#${idCriterios}`).html(data);
+                updateTextareas(numeroFila);
             }
         });
     });
@@ -209,6 +210,7 @@ $(document).ready(function() {
             },
             success: function(data) {
                 $(`#${idIndicadores}`).html(data);
+                updateTextareas(numeroFila);
             }
         });
     });
@@ -234,15 +236,17 @@ $(document).ready(function() {
                         </td>
 
                         <td>
-                            <div class="cell-wrapper-lg">
-                                <textarea name="actividades_aprendizaje-${rowNumber}-estrategias_metodologicas" maxlength="600" id="id_actividades_aprendizaje-${rowNumber}-estrategias_metodologicas" class="table-textarea textarea-full" placeholder="Estrategias Metodológicas" cols="40" rows="10" style="overflow: hidden; overflow-wrap: break-word; resize: none; height: 200px;"></textarea>
-                            </div>
+                            <textarea name="actividades_aprendizaje-${rowNumber}-estrategias_metodologicas"
+                            id="id_actividades_aprendizaje-${rowNumber}-estrategias_metodologicas"
+                            class="table-textarea textarea-full"
+                            placeholder="Estrategias Metodológicas"></textarea>
                         </td>
 
                         <td>
-                            <div class="cell-wrapper-lg">
-                                <textarea name="actividades_aprendizaje-${rowNumber}-recursos" maxlength="400" id="id_actividades_aprendizaje-0-recursos" class="table-textarea textarea-full" placeholder="Recursos" cols="40" rows="10" style="overflow: hidden; overflow-wrap: break-word; resize: none; height: 200px;"></textarea>
-                            </div>
+                            <textarea name="actividades_aprendizaje-${rowNumber}-recursos"
+                            id="id_actividades_aprendizaje-${rowNumber}-recursos"
+                            class="table-textarea textarea-full"
+                            placeholder="Recursos"></textarea>
                         </td>
 
                         <td class="checklist indicadores">
@@ -250,9 +254,10 @@ $(document).ready(function() {
                         </td>
 
                         <td>
-                            <div class="cell-wrapper-lg">
-                                <textarea name="actividades_aprendizaje-${rowNumber}-instrumentos_evaluacion" maxlength="600" id="id_actividades_aprendizaje-${rowNumber}-instrumentos_evaluacion" class="table-textarea textarea-full" placeholder="Técnicas e Instrumentos de Evaluación" cols="40" rows="10" style="overflow: hidden; overflow-wrap: break-word; resize: none; height: 200px;"></textarea>
-                            </div>
+                            <textarea name="actividades_aprendizaje-${rowNumber}-instrumentos_evaluacion"
+                            id="id_actividades_aprendizaje-${rowNumber}-instrumentos_evaluacion"
+                            class="table-textarea textarea-full"
+                            placeholder="Técnicas e Instrumentos de Evaluación"></textarea>
                         </td>
                     </tr>`;
 
@@ -292,6 +297,7 @@ $(document).ready(function() {
                 },
                 success: function(data) { // `data` is the return of the `load_destrezas` view function
                     $(`#id_actividades_aprendizaje-${rowNumber}-destrezas`).html(data);
+                    updateTextareas(rowNumber);
                 }
             });
 
@@ -325,4 +331,8 @@ $(document).ready(function() {
         $('.indicadores ul').html('');
     }
 
+    var updateTextareas = function(numeroFila) {
+        var fields = ['estrategias_metodologicas', 'recursos', 'instrumentos_evaluacion'];
+        updateTextareasSize(numeroFila, 'actividades_aprendizaje', fields);
+    };
 });

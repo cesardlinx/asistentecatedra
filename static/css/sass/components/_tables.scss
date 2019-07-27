@@ -25,6 +25,19 @@
 
   td {
     border: 1px solid $secondary-color;
+    position: relative;
+    vertical-align: top;
+    padding: 1.5em 1em;
+
+    &.objetivos,
+    &.indicadores,
+    &.criterios {
+      padding: 0 1em;
+    }
+
+    &.procesos {
+      padding: .5em 1em;
+    }
   }
 
   th {
@@ -39,6 +52,18 @@
 
     &.col-std {
       min-width: 333px;
+    }
+
+    &.col-310 {
+      min-width: 310px;
+    }
+
+    &.col-236 {
+      min-width: 236px;
+    }
+
+    &.col-254 {
+      min-width: 254px;
     }
 
     &.col-title {
@@ -79,9 +104,7 @@
 
 .checklist {
   ul {
-    margin: 1em;
     list-style: none;
-    padding-left: 5%;
 
 
     li {

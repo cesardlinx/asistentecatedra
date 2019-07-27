@@ -214,7 +214,7 @@ class TestDestreza:
         truncated_description = Truncator(destreza.description)
         assert str(destreza) == '{} - {}'.format(
             destreza.codigo,
-            truncated_description.chars(10)
+            truncated_description.chars(20)
         ), 'The representation should be codigo and a truncated description'
         assert destreza._meta.db_table == 'destrezas', \
             'The table should be named "destrezas"'
@@ -239,10 +239,9 @@ class TestCriterioEvaluacion:
             'The field asignatura should be an instance of Asignatura'
         assert isinstance(criterio.subnivel, Subnivel), \
             'The field subnivel should be an instance of Subnivel'
-        truncated_description = Truncator(criterio.description)
         assert str(criterio) == '{} - {}'.format(
             criterio.codigo,
-            truncated_description.chars(50)
+            criterio.description
         ), 'The representation should be codigo and a truncated description'
         assert criterio._meta.db_table == 'criterios_evaluacion', \
             'The table should be named "criterios_evaluacion"'

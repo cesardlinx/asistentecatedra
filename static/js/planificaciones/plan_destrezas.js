@@ -3,6 +3,9 @@ $(document).ready(function() {
     // All textarea resizables
     textareaResizables();
 
+    // fix ejes transversales stextarea width
+    $('#id_ejes_transversales').width('87%');
+
     /**
      * Al elegir una asignatura
      * se cargan los cursos
@@ -161,6 +164,7 @@ $(document).ready(function() {
             },
             success: function(data) {
                 $('#id_criterios_evaluacion').html(data);
+                updateTextareasSize('', '', ['ejes_transversales']);
             }
         });
     });
@@ -189,6 +193,7 @@ $(document).ready(function() {
             },
             success: function(data) {
                 $('#id_indicadores').html(data);
+                updateTextareas();
             }
         });
     });
@@ -204,4 +209,9 @@ $(document).ready(function() {
         $('.criterios ul').html('');
         $('.indicadores ul').html('');
     }
+
+    var updateTextareas = function() {
+        var fields = ['estrategias_metodologicas', 'recursos', 'actividades_evaluacion'];
+        updateTextareasSize('', '', fields);
+    };
 });

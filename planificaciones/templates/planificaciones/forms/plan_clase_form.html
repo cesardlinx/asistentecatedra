@@ -77,16 +77,16 @@
                     <thead>
                         <tr>
                             <th class="col-title col-lg" rowspan="2">Destreza con Criterio de Desempeño</th>
-                            <th class="col-title" rowspan="2">Conocimientos Asociados</th>
+                            <th class="col-title col-lg" rowspan="2">Conocimientos Asociados</th>
                             <th class="col-title" rowspan="2">Proceso Didáctico</th>
                             <th class="col-title" rowspan="2">Tiempo</th>
-                            <th class="col-title" rowspan="2">Recursos</th>
+                            <th class="col-title col-lg" rowspan="2">Recursos</th>
                             <th class="col-title" colspan="2">Evaluación</th>
                         </tr>
 
                         <tr>
                             <th class="col-subtitle col-lg">Indicadores de Logro</th>
-                            <th class="col-subtitle">Actividades de Evaluación</th>
+                            <th class="col-subtitle col-lg">Actividades de Evaluación</th>
                         </tr>
                     </thead>
 
@@ -106,9 +106,7 @@
                                     </div>
                                 </td>
                                 <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
-                                    <div class="cell-wrapper-lg">
                                         {% include "forms/table_textarea.html" with field=elementos_form.conocimientos_asociados placeholder="Conocimientos Asociados" %}
-                                    </div>
                                 </td>
 
                                 {# Formset Anidado de procesos didácticos (Primera fila) #}
@@ -132,7 +130,7 @@
                                 {% endif %}
                                 {# Fin de Formset Anidado de procesos didácticos #}
 
-                                <td class="checklist elementos-form" rowspan="{{ elementos_form.nested.total_form_count }}">
+                                <td class="checklist elementos-form indicadores" rowspan="{{ elementos_form.nested.total_form_count }}">
                                     {% with field=elementos_form.indicadores %}
                                         {% if field.errors %}
                                             {% render_field field class="error" %}
@@ -144,9 +142,7 @@
                                 </td>
 
                                 <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
-                                    <div class="cell-wrapper-md">
-                                        {% include "forms/table_textarea.html" with field=elementos_form.actividades_evaluacion placeholder="Actividades de Evaluación" %}
-                                    </div>
+                                    {% include "forms/table_textarea.html" with field=elementos_form.actividades_evaluacion placeholder="Actividades de Evaluación" %}
                                 </td>
                             </tr>
 

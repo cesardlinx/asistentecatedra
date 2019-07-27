@@ -193,6 +193,7 @@ $(document).ready(function() {
                             listaObjetivos += template;
                         });
                         $(`#${nameObjetivos}`).html(listaObjetivos)
+                        updateTextareas(numeroFila);
                     }
 
                     if (objetivosGenerales) {
@@ -212,6 +213,7 @@ $(document).ready(function() {
                             listaObjetivosGenerales += templateGenerales;
                         });
                         $(`#${nameObjetivosGenerales}`).html(listaObjetivosGenerales)
+                        updateTextareas(numeroFila);
                     }
                 }
             });
@@ -228,6 +230,7 @@ $(document).ready(function() {
                     },
                     success: function(data) { // `data` is the return of the `load_destrezas` view function
                         $(`#${nameDestrezas}`).html(data);
+                        updateTextareas(numeroFila);
                     }
                 });
             }
@@ -265,6 +268,7 @@ $(document).ready(function() {
             },
             success: function(data) {
                 $(`#${idCriterios}`).html(data);
+                updateTextareas(numeroFila);
             }
         });
     });
@@ -300,6 +304,7 @@ $(document).ready(function() {
             },
             success: function(data) {
                 $(`#${idIndicadores}`).html(data);
+                updateTextareas(numeroFila);
             }
         });
     });
@@ -330,12 +335,10 @@ $(document).ready(function() {
 
         var newRow = `<tr>
                         <td>
-                            <div class="cell-wrapper-select">
-                                <div class="select-wrapper">
-                                    <select name="desarrollo_unidades-${rowNumber}-unidad" id="id_desarrollo_unidades-${rowNumber}-unidad" class="custom-select unidades">
-                                        <option value="" selected="">Elija una unidad.</option>
-                                    </select>
-                                </div>
+                            <div class="select-wrapper">
+                                <select name="desarrollo_unidades-${rowNumber}-unidad" id="id_desarrollo_unidades-${rowNumber}-unidad" class="custom-select unidades">
+                                    <option value="" selected="">Elija una unidad.</option>
+                                </select>
                             </div>
                         </td>
 
@@ -345,13 +348,14 @@ $(document).ready(function() {
                         </td>
 
                         <td class="checklist destrezas">
-                            <ul id="id_desarrollo_unidades-${rowNumber}-destrezas"></ul>
+                            <ul id="id_desarrollo_unidades-${rowNumber}-destrezas" class="scrollable-list special-field"></ul>
                         </td>
 
                         <td>
-                            <div class="cell-wrapper-lg">
-                                <textarea name="desarrollo_unidades-${rowNumber}-orientaciones_metodologicas" placeholder="Orientaciones Metodológicas" rows="10" id="id_desarrollo_unidades-${rowNumber}-orientaciones_metodologicas" cols="40" class="table-textarea textarea-full" maxlength="700" style="overflow: hidden; overflow-wrap: break-word; resize: none; height: 200px;"></textarea>
-                            </div>
+                            <textarea name="desarrollo_unidades-${rowNumber}-orientaciones_metodologicas"
+                            placeholder="Orientaciones Metodológicas"
+                            id="id_desarrollo_unidades-${rowNumber}-orientaciones_metodologicas"
+                            class="table-textarea textarea-full"></textarea>
                         </td>
 
                         <td class="checklist criterios">
@@ -447,6 +451,10 @@ $(document).ready(function() {
         $('.unidades').html('<option>Elija una unidad didáctica.</option>');
         $('#id_objetivos_curso').html('<span>Seleccione una asignatura y un curso.</span>');
         $('#id_objetivos_generales_curso').html('');
-    }
+    };
+
+    var updateTextareas = function(numeroFila) {
+        updateTextareasSize(numeroFila, 'desarrollo_unidades', ['orientaciones_metodologicas']);
+    };
 
 });

@@ -15,6 +15,7 @@ var testFloatingInput = function(input) {
 // Requires autosize library
 var textareaResizables = function() {
     autosize($('textarea'));
+    autosize.destroy($('.table-textarea'));
 };
 
 
@@ -57,6 +58,18 @@ var fieldUnhighlight = function(element, errorClass, validClass) {
     }
 };
 
+var updateTextareasSize = function(numeroFila, formsetName, fields) {
+    $.each(fields, function(i, field) {
+        var textareaElement;
+        if (formsetName && numeroFila >= 0) {
+            textareaElement = $(`#id_${formsetName}-${numeroFila}-${field}`);
+        } else {
+            textareaElement = $(`#id_${field}`);
+        }
+        var cellHeight = textareaElement.parent().height();
+        textareaElement.height(cellHeight);
+    });
+};
 
 
 

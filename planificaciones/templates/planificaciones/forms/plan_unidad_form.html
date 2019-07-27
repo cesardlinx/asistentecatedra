@@ -68,10 +68,10 @@
                         <tr>
                             <th class="col-title col-lg" rowspan="2">Destrezas con Criterios de Desempeño</th>
                             <th class="col-title col-lg" rowspan="2">Criterios de Evaluación</th>
-                            <th class="col-title" rowspan="2">Estrategias metodológicas</th>
-                            <th class="col-title" rowspan="2">Recursos</th>
+                            <th class="col-title col-lg" rowspan="2">Estrategias metodológicas</th>
+                            <th class="col-title col-lg" rowspan="2">Recursos</th>
                             <th class="col-title col-lg" rowspan="2">Indicadores de Logro</th>
-                            <th class="col-title" colspan="2">Técnicas/Instrumentos de Evaluación</th>
+                            <th class="col-title col-lg" colspan="2">Técnicas/Instrumentos de Evaluación</th>
                         </tr>
                     </thead>
 
@@ -108,15 +108,11 @@
                                 </td>
 
                                 <td>
-                                    <div class="cell-wrapper-lg">
-                                        {% include "forms/table_textarea.html" with field=actividades_form.estrategias_metodologicas placeholder="Estrategias Metodológicas" %}
-                                    </div>
+                                    {% include "forms/table_textarea.html" with field=actividades_form.estrategias_metodologicas placeholder="Estrategias Metodológicas" %}
                                 </td>
 
                                 <td>
-                                    <div class="cell-wrapper-lg">
-                                        {% include "forms/table_textarea.html" with field=actividades_form.recursos placeholder="Recursos" %}
-                                    </div>
+                                    {% include "forms/table_textarea.html" with field=actividades_form.recursos placeholder="Recursos" %}
                                 </td>
 
                                 <td class="checklist indicadores">
@@ -131,9 +127,7 @@
                                 </td>
 
                                 <td>
-                                    <div class="cell-wrapper-lg">
-                                        {% include "forms/table_textarea.html" with field=actividades_form.instrumentos_evaluacion placeholder="Técnicas e Instrumentos de Evaluación" %}
-                                    </div>
+                                    {% include "forms/table_textarea.html" with field=actividades_form.instrumentos_evaluacion placeholder="Técnicas e Instrumentos de Evaluación" %}
                                 </td>
                             </tr>
                         {% endfor %}

@@ -3,7 +3,6 @@ from .destreza import Destreza
 from .objetivo_general import ObjetivoGeneral
 from .subnivel import Subnivel
 from django.db import models
-from django.utils.text import Truncator
 
 
 class CriterioManager(models.Manager):
@@ -47,5 +46,4 @@ class CriterioEvaluacion(models.Model):
         verbose_name_plural = "criterios de evaluación"
 
     def __str__(self):
-        truncated_description = Truncator(self.description)
-        return "{} - {}".format(self.codigo, truncated_description.chars(50))
+        return "{} - {}".format(self.codigo, self.description)

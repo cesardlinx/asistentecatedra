@@ -1,6 +1,6 @@
 {% load widget_tweaks %}
 
-<td rowspan="1" class="procesos-form">
+<td rowspan="1" class="procesos-form procesos">
     <div class="cell-wrapper-lg">
         {% with field=procesos_form.name %}
             {% if field.errors %}
@@ -13,10 +13,10 @@
 
         {% with field=procesos_form.description %}
             {% if field.errors %}
-                {% render_field field class="table-textarea error" placeholder="Descripción" %}
+                {% render_field field class="textarea-proceso error" placeholder="Descripción" %}
                 {% include 'forms/field_errors.html'%}
             {% else %}
-                {% render_field field class="table-textarea" placeholder="Descripción" %}
+                {% render_field field class="textarea-proceso" placeholder="Descripción" %}
             {% endif %}
         {% endwith %}
     </div>
@@ -40,7 +40,7 @@
 
 </td>
 
-<td rowspan="1" class="procesos-form">
+<td rowspan="1" class="procesos-form procesos">
     {% with field=procesos_form.tiempo %}
     <div class="cell-wrapper-sm">
         {% if field.errors %}
@@ -55,13 +55,11 @@
 
 <td rowspan="1" class="procesos-form">
     {% with field=procesos_form.recursos %}
-    <div class="cell-wrapper-md">
         {% if field.errors %}
             {% render_field field class="table-textarea textarea-full error" placeholder="Recursos" %}
             {% include 'forms/field_errors.html'%}
         {% else %}
             {% render_field field class="table-textarea textarea-full" placeholder="Recursos" %}
         {% endif %}
-    </div>
     {% endwith %}
 </td>

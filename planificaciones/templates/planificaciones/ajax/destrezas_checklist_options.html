@@ -6,7 +6,7 @@
                 value="{{ destreza.pk }}"
                 id="id_{{ formset_name }}-{{ numero_fila }}-destrezas_{{ forloop.counter0 }}">
             <label class="check-label" for="id_{{ formset_name }}-{{ numero_fila }}-destrezas_{{ forloop.counter0 }}">
-                {{ destreza.codigo }} - {{ destreza.description|slice:":10"|add:'...' }}
+                {{ destreza.codigo }} - {{ destreza.description|slice:":20"|add:'...' }}
             </label>
         </li>
     {% else %}
@@ -16,7 +16,7 @@
                 value="{{ destreza.pk }}"
                 id="id_destrezas_{{ forloop.counter0 }}">
             <label class="check-label" for="id_destrezas_{{ forloop.counter0 }}">
-                {{ destreza.codigo }} - {{ destreza.description|slice:":10"|add:'...' }}
+                {{ destreza.codigo }} - {{ destreza.description|slice:":20"|add:'...' }}
             </label>
         </li>
     {% endif %}

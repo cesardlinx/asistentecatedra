@@ -222,23 +222,21 @@ $(document).ready(function() {
                             </div>
                         </td>
                         <td rowspan="1" class="elementos-form">
-                            <div class="cell-wrapper-lg">
-                                <textarea class="table-textarea textarea-full" name="elementos_curriculares-${numeroFila}-conocimientos_asociados"
-                                    placeholder="Conocimientos Asociados" maxlength="100"
-                                    id="id_elementos_curriculares-${numeroFila}-conocimientos_asociados"
-                                    rows="10" cols="40"></textarea>
-                            </div>
+                            <textarea class="table-textarea textarea-full" name="elementos_curriculares-${numeroFila}-conocimientos_asociados"
+                                placeholder="Conocimientos Asociados" maxlength="100"
+                                id="id_elementos_curriculares-${numeroFila}-conocimientos_asociados"
+                                rows="10" cols="40"></textarea>
                         </td>
                         <input type="hidden" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-TOTAL_FORMS" value="1" id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-TOTAL_FORMS">
                         <input type="hidden" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-INITIAL_FORMS" value="0" id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-INITIAL_FORMS">
                         <input type="hidden" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-MIN_NUM_FORMS" value="0" id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-MIN_NUM_FORMS">
                         <input type="hidden" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-MAX_NUM_FORMS" value="1000" id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-MAX_NUM_FORMS">
-                        <td rowspan="1" class="procesos-form">
+                        <td rowspan="1" class="procesos-form procesos">
                             <div class="cell-wrapper-lg">
                                 <input type="text" class="table-form-control mb-4" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-name"
                                     placeholder="Nombre del Proceso" maxlength="50"
                                     id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-name">
-                                <textarea class="table-textarea" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-description"
+                                <textarea class="textarea-proceso" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-description"
                                     maxlength="200" placeholder="Descripción" cols="40" rows="10"
                                     id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-description"></textarea>
                             </div>
@@ -248,7 +246,7 @@ $(document).ready(function() {
                                 </a>
                             </p>
                         </td>
-                        <td rowspan="1" class="procesos-form">
+                        <td rowspan="1" class="procesos-form procesos">
                             <div class="cell-wrapper-sm">
                                 <input type="text" class="table-form-control" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-tiempo"
                                     maxlength="10" placeholder="Tiempo"
@@ -256,21 +254,17 @@ $(document).ready(function() {
                             </div>
                         </td>
                         <td rowspan="1" class="procesos-form">
-                            <div class="cell-wrapper-md">
-                                <textarea class="table-textarea textarea-full" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-recursos"
-                                    maxlength="200" placeholder="Recursos" cols="40" rows="10"
-                                    id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-recursos"></textarea>
-                            </div>
+                            <textarea class="table-textarea textarea-full" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-recursos"
+                                maxlength="200" placeholder="Recursos" cols="40" rows="10"
+                                id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-recursos"></textarea>
                         </td>
-                        <td class="checklist elementos-form" rowspan="1">
+                        <td class="checklist elementos-form indicadores" rowspan="1">
                             <ul id="id_elementos_curriculares-${numeroFila}-indicadores"></ul>
                         </td>
                         <td rowspan="1" class="elementos-form">
-                            <div class="cell-wrapper-md">
-                                <textarea class="table-textarea textarea-full" name="elementos_curriculares-${numeroFila}-actividades_evaluacion" maxlength="200"
-                                    placeholder="Actividades de Evaluación" cols="40" rows="10"
-                                    id="id_elementos_curriculares-${numeroFila}-actividades_evaluacion"></textarea>
-                            </div>
+                            <textarea class="table-textarea textarea-full" name="elementos_curriculares-${numeroFila}-actividades_evaluacion" maxlength="200"
+                                placeholder="Actividades de Evaluación" cols="40" rows="10"
+                                id="id_elementos_curriculares-${numeroFila}-actividades_evaluacion"></textarea>
                         </td>
                     </tr>`
 
@@ -396,12 +390,12 @@ $(document).ready(function() {
 
         procesoHtml = `
             <tr>
-                <td>
+                <td rowspan="1" class="procesos-form procesos">
                     <div class="cell-wrapper-lg">
                         <input type="text" class="table-form-control mb-4" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-name"
                                     placeholder="Nombre del Proceso" maxlength="50"
                                     id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-name">
-                        <textarea class="table-textarea" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-description"
+                        <textarea class="textarea-proceso" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-description"
                             maxlength="200" placeholder="Descripción" cols="40" rows="10"
                             id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-description"></textarea>
                     </div>
@@ -416,30 +410,33 @@ $(document).ready(function() {
                         </a>
                     </p>
                 </td>
-                <td>
+                <td rowspan="1" class="procesos-form procesos">
                     <div class="cell-wrapper-sm">
                         <input type="text" class="table-form-control" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-tiempo"
                                     maxlength="10" placeholder="Tiempo"
                                     id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-tiempo">
                     </div>
                 </td>
-                <td>
-                    <div class="cell-wrapper-md">
-                        <textarea class="table-textarea textarea-full" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-recursos"
-                                    maxlength="200" placeholder="Recursos" cols="40" rows="10"
-                                    id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-recursos"></textarea>
-                    </div>
+                <td rowspan="1" class="procesos-form">
+                    <textarea class="table-textarea textarea-full" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-recursos"
+                        maxlength="200" placeholder="Recursos" cols="40" rows="10"
+                        id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-${numeroProceso}-recursos"></textarea>
                 </td>
             </tr>
         `;
         fila.after(procesoHtml);
 
-        // All textarea resizables
+        // Resizables textarea
         textareaResizables();
 
         // Suma 1 al valor actual del campo TOTAL_FORMS del formset de elementos curriculares
         var totalProcesosForms = parseInt($(`#id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-TOTAL_FORMS`).val());
         $(`#id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-TOTAL_FORMS`).val(totalProcesosForms + 1);
+
+        // Reparar tamaño del anterior textarea de proceso y los demas textareas
+        var formsetName = `proceso-elementos_curriculares-${numeroFila}-procesos_didacticos`;
+        updateTextareasSize(numeroProceso - 1, formsetName, ['recursos']);
+        updateTextareasSize(numeroFila, 'elementos_curriculares', ['conocimientos_asociados', 'actividades_evaluacion']);
     });
 
     /**
@@ -511,6 +508,10 @@ $(document).ready(function() {
         // Actualización del campo TOTAL_FORMS del formset de procesos
         var totalProcesosForms = parseInt($(`#id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-TOTAL_FORMS`).val());
         $(`#id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-TOTAL_FORMS`).val(totalProcesosForms - 1);
+
+        // Reparar tamaño de los demas textareas
+        var formsetName = `proceso-elementos_curriculares-${numeroFila}-procesos_didacticos`;
+        updateTextareasSize(numeroFila, 'elementos_curriculares', ['conocimientos_asociados', 'actividades_evaluacion']);
     });
 
     /**

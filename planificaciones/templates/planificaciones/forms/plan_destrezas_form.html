@@ -66,9 +66,9 @@
                 <table class="formset">
                     <thead>
                         <tr>
-                            <th class="col-title">Destrezas con Criterios de Desempeño</th>
-                            <th class="col-title col-lg">Indicadores esenciales de Evaluación</th>
-                            <th class="col-title">Ejes Transversales</th>
+                            <th class="col-title col-310">Destrezas con Criterios de Desempeño</th>
+                            <th class="col-title col-236">Indicadores esenciales de Evaluación</th>
+                            <th class="col-title col-254">Ejes Transversales</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,9 +94,7 @@
                                 {% endwith %}
                             </td>
                             <td>
-                                <div class="cell-wrapper-lg">
-                                    {% include "forms/table_textarea.html" with field=form.ejes_transversales placeholder="Ejes Transversales" %}
-                                </div>
+                                {% include "forms/table_textarea.html" with field=form.ejes_transversales placeholder="Ejes Transversales" %}
                             </td>
                         </tr>
                     </tbody>
@@ -108,9 +106,9 @@
                     <thead>
                         <tr>
                             <th class="col-title col-lg" rowspan="2">Estrategias Metodológicas</th>
-                            <th class="col-title" rowspan="2">Recursos</th>
+                            <th class="col-title col-lg" rowspan="2">Recursos</th>
                             <th class="col-title col-lg" rowspan="2">Indicadores de Logro</th>
-                            <th class="col-title" colspan="2">Actividades de Evaluación</th>
+                            <th class="col-title col-lg" colspan="2">Actividades de Evaluación</th>
                         </tr>
                     </thead>
 
@@ -118,15 +116,11 @@
                         <tr>
 
                             <td>
-                                <div class="cell-wrapper-lg">
-                                    {% include "forms/table_textarea.html" with field=form.estrategias_metodologicas placeholder="Estrategias Metodológicas" %}
-                                </div>
+                                {% include "forms/table_textarea.html" with field=form.estrategias_metodologicas placeholder="Estrategias Metodológicas" %}
                             </td>
 
                             <td>
-                                <div class="cell-wrapper-lg">
-                                    {% include "forms/table_textarea.html" with field=form.recursos placeholder="Recursos" %}
-                                </div>
+                                {% include "forms/table_textarea.html" with field=form.recursos placeholder="Recursos" %}
                             </td>
 
                             <td class="checklist indicadores">
@@ -141,9 +135,7 @@
                             </td>
 
                             <td>
-                                <div class="cell-wrapper-lg">
-                                    {% include "forms/table_textarea.html" with field=form.actividades_evaluacion placeholder="Actividades de Evaluación" %}
-                                </div>
+                                {% include "forms/table_textarea.html" with field=form.actividades_evaluacion placeholder="Actividades de Evaluación" %}
                             </td>
                         </tr>
                     </tbody>
