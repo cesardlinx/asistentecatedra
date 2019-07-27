@@ -32,23 +32,27 @@
                 </div>
 
                 <div class="form-group-2">
+                    {% include "forms/floating_input.html" with field=form.docentes %}
                     {% include "forms/floating_input.html" with field=form.fecha %}
+                </div>
+
+                <div class="form-group-2">
                     {% include "forms/select_field.html" with field=form.asignatura %}
-                </div>
-
-                <div class="form-group-2">
                     {% include "forms/floating_input.html" with field=form.paralelos %}
-                    {% include "forms/floating_input.html" with field=form.numero_estudiantes %}
                 </div>
 
                 <div class="form-group-2">
+                    {% include "forms/floating_input.html" with field=form.numero_estudiantes %}
                     {% include "forms/floating_input.html" with field=form.tema %}
+                </div>
+
+                <div class="form-group-2">
                     {% include "forms/floating_input.html" with field=form.periodos %}
+                    {% include "forms/floating_input.html" with field=form.tecnica %}
                 </div>
 
                 <div class="form-group-2">
                     {% include "forms/floating_input.html" with field=form.metodologia %}
-                    {% include "forms/floating_input.html" with field=form.tecnica %}
                 </div>
 
                 <div class="form-group">
@@ -179,7 +183,7 @@
 
             <section class="form-footer">
                 {% for field in form %}
-                    {% if forloop.counter > 13 and forloop.counter < 18 %}
+                    {% if forloop.counter > 14 and forloop.counter < 19 %}
                         <div class="form-group">
                             {{ field|add_label_class:"form-label" }}
                             {% if field.errors %}
@@ -202,6 +206,11 @@
                 <div class="form-group">
                     {{ form.aprobado_por|add_label_class:"form-label" }}
                     {{ form.aprobado_por }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.revisado_por|add_label_class:"form-label" }}
+                    {{ form.revisado_por }}
                 </div>
 
                 <input type="submit" value="Guardar Planificación" class="btn primary-button submit-btn">

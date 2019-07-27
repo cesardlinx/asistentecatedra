@@ -15,6 +15,7 @@ class PlanClaseForm(forms.ModelForm):
         fields = [
             'name',
             'numero_plan',
+            'docentes',
             'fecha',
             'asignatura',
             'cursos',
@@ -32,10 +33,12 @@ class PlanClaseForm(forms.ModelForm):
             'instrumento_evaluacion',
             'observaciones',
             'aprobado_por',
+            'revisado_por',
         ]
         labels = {
             'name': 'Nombre del Plan de Clase',
             'numero_plan': 'Número de Plan de Clase (opcional)',
+            'docentes': 'Docente/s',
             'objetivos': 'Objetivos de la unidad',
             'numero_estudiantes': 'Número de estudiantes',
             'periodo': 'Período',
@@ -46,6 +49,7 @@ class PlanClaseForm(forms.ModelForm):
             'instrumento_evaluacion': 'Instrumento de Evaluación',
             'observaciones': 'Observaciones (opcional)',
             'aprobado_por': 'Aprobado por (opcional)',
+            'revisado_por': 'Revisado por (opcional)',
         }
         widgets = {
             'numero_plan': forms.TextInput,
