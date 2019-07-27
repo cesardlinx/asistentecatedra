@@ -59,46 +59,29 @@
                     {{ form.objetivos }}
                     {{ form.objetivos_generales }}
                 </div>
-            </section>
 
-            <section class="formset-container">
-                <h5 class="form-label">Planificación:</h5>
-                <table class="formset">
-                    <thead>
-                        <tr>
-                            <th class="col-title col-355">Destrezas con Criterios de Desempeño</th>
-                            <th class="col-title col-236">Indicadores esenciales de Evaluación</th>
-                            <th class="col-title col-254">Ejes Transversales</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="checklist destrezas">
-                                {% with field=form.destrezas %}
-                                    {% if field.errors %}
-                                        {% render_field field class="error" %}
-                                        {% include 'forms/field_errors.html'%}
-                                    {% else %}
-                                        {{ field }}
-                                    {% endif %}
-                                {% endwith %}
-                            </td>
-                            <td class="checklist criterios">
-                                {% with field=form.criterios_evaluacion %}
-                                    {% if field.errors %}
-                                        {% render_field field class="error" %}
-                                        {% include 'forms/field_errors.html'%}
-                                    {% else %}
-                                        {{ field }}
-                                    {% endif %}
-                                {% endwith %}
-                            </td>
-                            <td>
-                                {% include "forms/table_textarea.html" with field=form.ejes_transversales placeholder="Ejes Transversales" %}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="form-group">
+                    {{ form.destrezas|add_label_class:"form-label" }}
+                    {{ form.destrezas }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.criterios_evaluacion|add_label_class:"form-label" }}
+                    {{ form.criterios_evaluacion }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.ejes_transversales|add_label_class:"form-label" }}
+                    {% if form.ejes_transversales.errors %}
+                        <div class="error">
+                            {% render_field form.ejes_transversales class="textarea-full" %}
+                            {% include 'forms/field_errors.html' with field=form.ejes_transversales%}
+                        </div>
+                    {% else %}
+                        {% render_field form.ejes_transversales class="textarea-full" %}
+                    {% endif %}
+                </div>
+
             </section>
 
             <section class="table-responsive formset-container">
