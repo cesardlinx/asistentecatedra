@@ -3118,6 +3118,12 @@ h4.subscription-card-title {
   margin-bottom: 0;
 }
 
+.table-responsive {
+  max-width: 800px;
+  max-height: 400px;
+  overflow: auto;
+}
+
 .StripeElement {
   background-color: #fff;
   height: 40px;

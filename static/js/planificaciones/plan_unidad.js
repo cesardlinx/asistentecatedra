@@ -73,6 +73,7 @@ $(document).ready(function() {
                     },
                     success: function(data) { // `data` is the return of the `load_destrezas` view function
                         $(`#id_actividades_aprendizaje-${i}-destrezas`).html(data);
+                        updateTextareas(i);
                     }
                 });
             }
