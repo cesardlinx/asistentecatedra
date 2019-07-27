@@ -220,7 +220,7 @@ def create_destrezas(apps, schema_editor):
             description=(
                 "Enriquecer las ideas e indagar sobre temas de interés "
                 "mediante la consulta de diccionarios, textos escolares, "
-                "enciclopBedias y otros recursos de la biblioteca y la web."
+                "enciclopedias y otros recursos de la biblioteca y la web."
             ),
             codigo="LL.2.3.7.",
             asignatura=literatura,

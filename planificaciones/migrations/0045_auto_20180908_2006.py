@@ -113,6 +113,7 @@ def create_relationships(apps, schema_editor):
     destreza2_5_6 = Destreza.objects.get(codigo="CN.2.5.6.")
     destreza2_5_7 = Destreza.objects.get(codigo="CN.2.5.7.")
     destreza2_5_8 = Destreza.objects.get(codigo="CN.2.5.8.")
+    destreza2_5_9 = Destreza.objects.get(codigo="CN.2.5.9.")
     destreza3_1_1 = Destreza.objects.get(codigo="CN.3.1.1.")
     destreza3_1_2 = Destreza.objects.get(codigo="CN.3.1.2.")
     destreza3_1_3 = Destreza.objects.get(codigo="CN.3.1.3.")
@@ -275,7 +276,7 @@ def create_relationships(apps, schema_editor):
         destreza2_1_6,
         destreza2_1_7,
         destreza2_1_8,
-        destreza2_1_9,
+        destreza2_5_9,
     )
 
     criterio2_3.objetivos_generales.add(
