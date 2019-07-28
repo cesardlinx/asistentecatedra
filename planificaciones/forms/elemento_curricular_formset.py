@@ -1,11 +1,9 @@
 from planificaciones.models.destreza import Destreza
-from planificaciones.models.indicador import Indicador
 from planificaciones.models.plan_clase import PlanClase
 from planificaciones.models.elemento_curricular import ElementoCurricular
 from planificaciones.models.proceso_didactico import ProcesoDidactico
 from django.http import QueryDict
 from django.forms import BaseInlineFormSet, inlineformset_factory
-from planificaciones.widgets import EnhancedCheckboxSelectMultiple
 
 
 """Creación de formsets para Elemento Curricular y para Proceso Didáctico"""
@@ -60,12 +58,12 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
     """Clase que sirve de base para el inline formset de Elemento Curricular"""
 
     def __init__(self, *args, **kwargs):
-        """Inicializa los queryset de destrezas e indicadores en none
+        """Inicializa los queryset de destrezas en none
         se encarga de que reconozca los id provistos por el usuario
         en instancias"""
         super().__init__(*args, **kwargs)
 
-        # Inicializa los queryset de las destrezas e indicadores en none
+        # Inicializa los queryset de las destrezas en none
         # self.forms son el set de formularios del formset
         for idx, form in enumerate(self.forms):
 
@@ -74,9 +72,6 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
 
             form.fields['destreza'].queryset = Destreza.objects.none()
             form.fields['destreza'].empty_label = 'Elija una destreza.'
-
-            form.fields['indicadores'].queryset = Indicador.objects\
-                .none()
 
             # Para convertir el id de destreza en una instancia de
             # Destreza en el formset
@@ -103,22 +98,6 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
                 form.fields['destreza'].queryset = Destreza.objects\
                     .get_destrezas_by_asignatura_cursos(
                         asignatura_id, cursos_id)
-
-            # Para convertir el id de indicador en una instancia de Indicador
-            # en el formset
-            if 'elementos_curriculares-{}-destreza'.format(idx) in form.data:
-                try:
-                    destreza_id = int(form.data.get(
-                        'elementos_curriculares-{}-destreza'.format(idx)))
-                    form.fields['indicadores'].queryset = Indicador\
-                        .objects.get_indicadores_by_destreza(destreza_id)
-                except (ValueError, TypeError):
-                    pass
-            elif form.instance.pk:
-                destreza_id = form.instance.destreza.pk
-
-                form.fields['indicadores'].queryset = Indicador.objects\
-                    .get_indicadores_by_destreza(destreza_id)
 
     def add_fields(self, form, index):
         """Se crea el formset anidado con ProcesoDidacticoFormset"""
@@ -187,11 +166,8 @@ class BaseElementoCurricularFormset(BaseInlineFormSet):
 ElementoCurricularFormset = inlineformset_factory(
     PlanClase,
     ElementoCurricular,
-    fields=('destreza', 'conocimientos_asociados', 'indicadores',
+    fields=('destreza', 'conocimientos_asociados',
             'actividades_evaluacion'),
-    widgets={
-        'indicadores': EnhancedCheckboxSelectMultiple,
-    },
     formset=BaseElementoCurricularFormset,
     max_num=10,
     extra=1,

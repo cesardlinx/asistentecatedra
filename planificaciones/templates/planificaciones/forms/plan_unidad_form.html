@@ -17,8 +17,6 @@
             load-unidades-url={% url 'ajax_load_unidades' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='unidad' %}
             load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' %}
-            load-criterios-url={% url 'ajax_load_criterios' %}
-            load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' %}
             novalidate>
             {% csrf_token %}
             {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
@@ -66,12 +64,10 @@
                 <table class="formset" id="actividades-aprendizaje">
                     <thead>
                         <tr>
-                            <th class="col-title col-lg" rowspan="2">Destrezas con Criterios de Desempeño</th>
-                            <th class="col-title col-lg" rowspan="2">Criterios de Evaluación</th>
-                            <th class="col-title col-lg" rowspan="2">Estrategias metodológicas</th>
-                            <th class="col-title col-lg" rowspan="2">Recursos</th>
-                            <th class="col-title col-lg" rowspan="2">Indicadores de Logro</th>
-                            <th class="col-title col-lg" colspan="2">Técnicas/Instrumentos de Evaluación</th>
+                            <th class="col-title col-lg">Destrezas con Criterios de Desempeño</th>
+                            <th class="col-title col-lg">Estrategias metodológicas</th>
+                            <th class="col-title col-lg">Recursos</th>
+                            <th class="col-title col-lg">Técnicas/Instrumentos de Evaluación</th>
                         </tr>
                     </thead>
 
@@ -96,34 +92,12 @@
                                     {% endwith %}
                                 </td>
 
-                                <td class="checklist criterios">
-                                    {% with field=actividades_form.criterios_evaluacion %}
-                                        {% if field.errors %}
-                                            {% render_field field class="error" %}
-                                            {% include 'forms/field_errors.html'%}
-                                        {% else %}
-                                            {{ field }}
-                                        {% endif %}
-                                    {% endwith %}
-                                </td>
-
                                 <td>
                                     {% include "forms/table_textarea.html" with field=actividades_form.estrategias_metodologicas placeholder="Estrategias Metodológicas" %}
                                 </td>
 
                                 <td>
                                     {% include "forms/table_textarea.html" with field=actividades_form.recursos placeholder="Recursos" %}
-                                </td>
-
-                                <td class="checklist indicadores">
-                                    {% with field=actividades_form.indicadores %}
-                                        {% if field.errors %}
-                                            {% render_field field class="error" %}
-                                            {% include 'forms/field_errors.html'%}
-                                        {% else %}
-                                            {{ field }}
-                                        {% endif %}
-                                    {% endwith %}
                                 </td>
 
                                 <td>

@@ -1,7 +1,6 @@
 from django.db import models
 from .destreza import Destreza
 from .plan_clase import PlanClase
-from .indicador import Indicador
 
 
 class ElementoCurricular(models.Model):
@@ -18,10 +17,6 @@ class ElementoCurricular(models.Model):
         blank=False
     )
     conocimientos_asociados = models.TextField(max_length=200)
-    indicadores = models.ManyToManyField(
-        Indicador,
-        related_name='elementos_curriculares'
-    )
     actividades_evaluacion = models.TextField(max_length=200)
 
     class Meta:

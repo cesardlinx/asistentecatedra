@@ -672,7 +672,7 @@ table {
   padding: 1.5em 1em;
 }
 
-.formset td.objetivos, .formset td.indicadores, .formset td.criterios, .formset td.destrezas {
+.formset td.objetivos, .formset td.destrezas {
   padding: 0 1em;
 }
 
@@ -3122,6 +3122,7 @@ h4.subscription-card-title {
   max-width: 800px;
   max-height: 400px;
   overflow: auto;
+  margin-bottom: 1em;
 }
 
 .StripeElement {

@@ -178,12 +178,10 @@ class PlanClaseDuplicateView(LoginRequiredMixin, View):
             plan_clase.cursos.set(cursos_old)
 
             for elemento in elementos:
-                indicadores = elemento.indicadores.all()
                 procesos = elemento.procesos_didacticos.all()
                 elemento.pk = None
                 elemento.plan_clase = plan_clase
                 elemento.save()
-                elemento.indicadores.set(indicadores)
                 for proceso in procesos:
                     proceso.pk = None
                     proceso.elemento_curricular = elemento

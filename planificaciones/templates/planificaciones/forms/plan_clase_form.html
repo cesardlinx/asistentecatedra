@@ -16,7 +16,6 @@
             load-cursos-url={% url 'ajax_load_cursos' template='checklist' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='curso' %}
             load-destrezas-url={% url 'ajax_load_destrezas' template='select' %}
-            load-indicadores-url={% url 'ajax_load_indicadores' option='destreza' %}
             novalidate>
             {% csrf_token %}
             {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
@@ -80,17 +79,12 @@
                 <table class="formset" id="elementos-curriculares">
                     <thead>
                         <tr>
-                            <th class="col-title col-lg" rowspan="2">Destreza con Criterio de Desempeño</th>
-                            <th class="col-title col-lg" rowspan="2">Conocimientos Asociados</th>
-                            <th class="col-title" rowspan="2">Proceso Didáctico</th>
-                            <th class="col-title" rowspan="2">Tiempo</th>
-                            <th class="col-title col-lg" rowspan="2">Recursos</th>
-                            <th class="col-title" colspan="2">Evaluación</th>
-                        </tr>
-
-                        <tr>
-                            <th class="col-subtitle col-lg">Indicadores de Logro</th>
-                            <th class="col-subtitle col-lg">Actividades de Evaluación</th>
+                            <th class="col-title col-lg">Destreza con Criterio de Desempeño</th>
+                            <th class="col-title col-lg">Conocimientos Asociados</th>
+                            <th class="col-title">Proceso Didáctico</th>
+                            <th class="col-title">Tiempo</th>
+                            <th class="col-title col-lg">Recursos</th>
+                            <th class="col-title col-lg">Actividades de Evaluación</th>
                         </tr>
                     </thead>
 
@@ -133,17 +127,6 @@
 
                                 {% endif %}
                                 {# Fin de Formset Anidado de procesos didácticos #}
-
-                                <td class="checklist elementos-form indicadores" rowspan="{{ elementos_form.nested.total_form_count }}">
-                                    {% with field=elementos_form.indicadores %}
-                                        {% if field.errors %}
-                                            {% render_field field class="error" %}
-                                            {% include 'forms/field_errors.html'%}
-                                        {% else %}
-                                            {{ field }}
-                                        {% endif %}
-                                    {% endwith %}
-                                </td>
 
                                 <td rowspan="{{ elementos_form.nested.total_form_count }}" class="elementos-form">
                                     {% include "forms/table_textarea.html" with field=elementos_form.actividades_evaluacion placeholder="Actividades de Evaluación" %}

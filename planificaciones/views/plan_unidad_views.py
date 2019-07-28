@@ -203,14 +203,10 @@ class PlanUnidadDuplicateView(UserIsPremiumMixin, View):
 
             for actividad_aprendizaje in actividades_aprendizaje:
                 destrezas = actividad_aprendizaje.destrezas.all()
-                criterios = actividad_aprendizaje.criterios_evaluacion.all()
-                indicadores = actividad_aprendizaje.indicadores.all()
                 actividad_aprendizaje.pk = None
                 actividad_aprendizaje.plan_unidad = plan_unidad
                 actividad_aprendizaje.save()
                 actividad_aprendizaje.destrezas.set(destrezas)
-                actividad_aprendizaje.criterios_evaluacion.set(criterios)
-                actividad_aprendizaje.indicadores.set(indicadores)
 
         messages.success(request, 'Plan de Unidad duplicado exitosamente.')
         return redirect('plan_unidad_list')

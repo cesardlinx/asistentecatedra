@@ -5,7 +5,6 @@ from planificaciones.views.planificaciones_view import \
 from django.test import RequestFactory
 from django.contrib.auth.models import AnonymousUser
 from mixer.backend.django import mixer
-from planificaciones import views
 from django.contrib.auth import get_user_model
 User = get_user_model()
 

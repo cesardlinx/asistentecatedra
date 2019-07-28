@@ -8,9 +8,7 @@ from django.shortcuts import render
 from django.views import View
 
 from planificaciones.models.asignatura import Asignatura
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 from planificaciones.models.destreza import Destreza
-from planificaciones.models.indicador import Indicador
 from planificaciones.models.objetivo import Objetivo
 from planificaciones.models.objetivo_general import ObjetivoGeneral
 from planificaciones.models.unidad import Unidad
@@ -177,72 +175,5 @@ class LoadDestrezasView(LoginRequiredMixin, View):
             else:
                 return HttpResponse('')
 
-        else:
-            return HttpResponse('')
-
-
-class LoadCriteriosView(LoginRequiredMixin, View):
-    """
-    Regresa los criterios de evaluación por destrezas
-    """
-
-    def get(self, request, *args, **kwargs):
-        destrezas_id = request.GET.getlist('destrezas[]')
-        formset_name = request.GET.get('formset_name')
-        numero_fila = request.GET.get('numero_fila')
-
-        if request.is_ajax():
-            criterios = CriterioEvaluacion.objects.\
-                get_criterios_by_destrezas(destrezas_id)
-            context = {'criterios': criterios,
-                       'formset_name': formset_name,
-                       'numero_fila': numero_fila}
-            return render(
-                request,
-                'planificaciones/ajax/criterios_checklist_options.html',
-                context)
-        else:
-            return HttpResponse('')
-
-
-class LoadIndicadoresView(LoginRequiredMixin, View):
-    """
-    Regresa los objetivos por curso y asignatura
-    si se lo llama con el parámetro curso
-    """
-
-    def get(self, request, *args, **kwargs):
-        option = kwargs['option']
-        formset_name = request.GET.get('formset_name')
-        destreza_id = request.GET.get('destreza')
-        criterios_id = request.GET.getlist('criterios[]')
-        numero_fila = request.GET.get('numero_fila')
-
-        if request.is_ajax():
-            if option == 'destreza' and destreza_id:
-                # Indicadores por destrezas
-                indicadores = Indicador.objects.get_indicadores_by_destreza(
-                    destreza_id)
-                context = {'indicadores': indicadores,
-                           'numero_fila': numero_fila,
-                           'formset_name': formset_name}
-                return render(
-                    request,
-                    'planificaciones/ajax/indicadores_checklist_options.html',
-                    context)
-
-            elif option == 'criterio' and criterios_id:
-                # Indicadores por criterios
-                indicadores = Indicador.objects.get_indicadores_by_criterios(
-                    criterios_id)
-                context = {'indicadores': indicadores,
-                           'numero_fila': numero_fila,
-                           'formset_name': formset_name}
-                return render(
-                    request,
-                    'planificaciones/ajax/indicadores_checklist_options.html',
-                    context)
-            else:
-                return HttpResponse('')
         else:
             return HttpResponse('')

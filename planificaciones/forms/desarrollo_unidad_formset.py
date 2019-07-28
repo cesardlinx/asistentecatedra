@@ -1,12 +1,9 @@
 from planificaciones.models.destreza import Destreza
-from planificaciones.models.indicador import Indicador
 from planificaciones.models.objetivo import Objetivo
 from planificaciones.models.objetivo_general import ObjetivoGeneral
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 from planificaciones.models.plan_anual import PlanAnual
 from planificaciones.models.desarrollo_unidad import DesarrolloUnidad
 from planificaciones.models.unidad import Unidad
-from django.http import QueryDict
 from django.forms import BaseInlineFormSet, inlineformset_factory
 from planificaciones.widgets import EnhancedCheckboxSelectMultiple
 
@@ -17,12 +14,12 @@ class BaseDesarrolloUnidadFormset(BaseInlineFormSet):
     """
 
     def __init__(self, *args, **kwargs):
-        """Inicializa los queryset de destrezas e indicadores en none
+        """Inicializa los queryset de destrezas en none
         se encarga de que reconozca los id provistos por el usuario
         en instancias"""
         super().__init__(*args, **kwargs)
 
-        # Inicializa los queryset de las destrezas e indicadores en none
+        # Inicializa los queryset de las destrezas en none
         # self.forms son el set de formularios del formset
         for idx, form in enumerate(self.forms):
 
@@ -32,12 +29,8 @@ class BaseDesarrolloUnidadFormset(BaseInlineFormSet):
             form.fields['unidad'].queryset = Unidad.objects.none()
             form.fields['unidad'].empty_label = 'Elija una unidad.'
 
-            form.fields['indicadores'].queryset = Indicador.objects\
-                .none()
             form.fields['destrezas'].queryset = Destreza.objects\
                 .none()
-            form.fields['criterios_evaluacion'].queryset = CriterioEvaluacion.\
-                objects.none()
             form.fields['objetivos'].queryset = Objetivo.objects\
                 .none()
             form.fields['objetivos_generales'].queryset = ObjetivoGeneral.\
@@ -94,61 +87,6 @@ class BaseDesarrolloUnidadFormset(BaseInlineFormSet):
                 form.fields['objetivos_generales'].queryset = unidad.\
                     objetivos_generales.all()
 
-            # Para convertir el id de criterio en una instancia de
-            # CriterioEvaluacion en el formset
-            if 'desarrollo_unidades-{}-destrezas'.format(idx) in form.data:
-                try:
-                    if isinstance(self.data, QueryDict):
-                        destrezas_id = list(self.data.getlist(
-                            'desarrollo_unidades-{}-destrezas'.format(idx)))
-                    else:
-                        destrezas_id = list(self.data.get(
-                            'desarrollo_unidades-{}-destrezas'.format(idx)))
-
-                    form.fields['criterios_evaluacion'].queryset = \
-                        CriterioEvaluacion.objects.get_criterios_by_destrezas(
-                            destrezas_id
-                    )
-                except (ValueError, TypeError):
-                    pass
-            elif form.instance.pk:
-                destrezas = form.instance.destrezas.all()
-                destrezas_id = [destreza.pk for destreza in destrezas]
-                form.fields['criterios_evaluacion'].queryset = \
-                    CriterioEvaluacion.objects.get_criterios_by_destrezas(
-                        destrezas_id
-                )
-
-            # Para convertir el id de indicador en una instancia de
-            # Indicador en el formset
-            if 'desarrollo_unidades-{}-criterios_evaluacion'.format(idx)\
-                    in form.data:
-                try:
-                    if isinstance(self.data, QueryDict):
-                        criterios_id = list(self.data.getlist(
-                            'desarrollo_unidades-{}-criterios_evaluacion'
-                            .format(idx)))
-                    else:
-                        criterios_id = list(self.data.get(
-                            'desarrollo_unidades-{}-criterios_evaluacion'
-                            .format(idx)))
-
-                    form.fields['indicadores'].queryset = \
-                        Indicador.objects.get_indicadores_by_criterios(
-                            criterios_id
-                    )
-                except (ValueError, TypeError):
-                    pass
-            elif form.instance.pk:
-                criterios = form.instance.criterios_evaluacion.all()
-
-                criterios_id = [criterio.pk for criterio in criterios]
-
-                form.fields['indicadores'].queryset = \
-                    Indicador.objects.get_indicadores_by_criterios(
-                        criterios_id
-                )
-
     def total_form_count(self):
         """
         Return the total number of forms in this FormSet.
@@ -178,14 +116,11 @@ DesarrolloUnidadFormset = inlineformset_factory(
     PlanAnual,
     DesarrolloUnidad,
     fields=('unidad', 'objetivos', 'objetivos_generales', 'destrezas',
-            'orientaciones_metodologicas', 'criterios_evaluacion',
-            'indicadores', 'semanas'),
+            'orientaciones_metodologicas', 'semanas'),
     widgets={
         'objetivos': EnhancedCheckboxSelectMultiple,
         'objetivos_generales': EnhancedCheckboxSelectMultiple,
         'destrezas': EnhancedCheckboxSelectMultiple,
-        'criterios_evaluacion': EnhancedCheckboxSelectMultiple,
-        'indicadores': EnhancedCheckboxSelectMultiple,
     },
     formset=BaseDesarrolloUnidadFormset,
     max_num=10,

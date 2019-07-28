@@ -20,8 +20,7 @@ from .views.plan_destrezas_views import (PlanDestrezasListView,
                                          PlanDestrezasUpdateView,
                                          PlanDestrezasDeleteView,
                                          PlanDestrezasDuplicateView)
-from .views.ajax_views import (LoadCriteriosView, LoadCursosView,
-                               LoadDestrezasView, LoadIndicadoresView,
+from .views.ajax_views import (LoadCursosView, LoadDestrezasView,
                                LoadObjetivosView, LoadUnidadesView)
 
 urlpatterns = [
@@ -90,10 +89,4 @@ urlpatterns = [
      path('ajax/destrezas/<str:template>/',
           LoadDestrezasView.as_view(),
           name="ajax_load_destrezas"),
-     path('ajax/criterios/', LoadCriteriosView.as_view(),
-          name="ajax_load_criterios"),
-     # options: destreza, criterio
-     path('ajax/indicadores/<str:option>/',
-          LoadIndicadoresView.as_view(),
-          name="ajax_load_indicadores"),
 ]

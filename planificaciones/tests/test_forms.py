@@ -21,6 +21,7 @@ class TestPlanClaseForm(PlanificacionesTestCase):
         super().setUp()
         self.data = {
             'name': 'Plan de Clase1',
+            'docentes': 'David',
             'numero_plan': 2,
             'fecha': '2019-01-20',
             'asignatura': self.asignatura.id,
@@ -35,7 +36,6 @@ class TestPlanClaseForm(PlanificacionesTestCase):
             'bibliografia': 'Lorem ipsum dolor sit amet.',
             'contenido_cientifico': 'Lorem ipsum dolor sit amet.',
             'material_didactico': 'Lorem ipsum dolor sit amet.',
-            'instrumento_evaluacion': 'Lorem ipsum dolor sit amet.',
             'instrumento_evaluacion': 'Lorem ipsum dolor sit amet.',
         }
 
@@ -69,13 +69,9 @@ class TestElementoCurricularFormset(PlanificacionesTestCase):
             'elementos_curriculares-MAX_NUM_FORMS': '1000',
             'elementos_curriculares-0-destreza': self.destreza_1.id,
             'elementos_curriculares-0-conocimientos_asociados': 'lorem ipsum',
-            'elementos_curriculares-0-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
             'elementos_curriculares-0-actividades_evaluacion': 'lorem ipsum',
             'elementos_curriculares-1-destreza': self.destreza_1.id,
             'elementos_curriculares-1-conocimientos_asociados': 'lorem ipsum',
-            'elementos_curriculares-1-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
             'elementos_curriculares-1-actividades_evaluacion': 'lorem ipsum',
 
             # Formset Procesos didacticos
@@ -202,10 +198,6 @@ class TestDesarrolloUnidadFormset(PlanificacionesTestCase):
             'desarrollo_unidades-0-destrezas': [self.destreza_1.id,
                                                 self.destreza_2.id],
             'desarrollo_unidades-0-orientaciones_metodologicas': 'lorem ipsum',
-            'desarrollo_unidades-0-criterios_evaluacion': [self.criterio_1.id,
-                                                           self.criterio_2.id],
-            'desarrollo_unidades-0-indicadores': [self.indicador_1.id,
-                                                  self.indicador_2.id],
             'desarrollo_unidades-0-semanas': 7,
 
             # Formset Desarrollo Unidad 2
@@ -217,10 +209,6 @@ class TestDesarrolloUnidadFormset(PlanificacionesTestCase):
             'desarrollo_unidades-1-destrezas': [self.destreza_1.id,
                                                 self.destreza_2.id],
             'desarrollo_unidades-1-orientaciones_metodologicas': 'lorem ipsum',
-            'desarrollo_unidades-1-criterios_evaluacion': [self.criterio_1.id,
-                                                           self.criterio_2.id],
-            'desarrollo_unidades-1-indicadores': [self.indicador_3.id,
-                                                  self.indicador_4.id],
             'desarrollo_unidades-1-semanas': 8,
         }
 
@@ -294,30 +282,16 @@ class TestActividadesAprendizajeFormset(PlanificacionesTestCase):
             'actividades_aprendizaje-MAX_NUM_FORMS': '1000',
             'actividades_aprendizaje-0-destrezas': [self.destreza_1.id,
                                                     self.destreza_2.id],
-            'actividades_aprendizaje-0-criterios_evaluacion': [
-                self.criterio_1.id,
-                self.criterio_2.id
-            ],
             'actividades_aprendizaje-0-estrategias_metodologicas': 'lorem ips',
             'actividades_aprendizaje-0-recursos': 'lorem ipsum',
-            'actividades_aprendizaje-0-indicadores': [
-                self.indicador_1.id,
-                self.indicador_2.id
-            ],
             'actividades_aprendizaje-0-instrumentos_evaluacion': 'lorem ipsum',
             # Formset Actividades Aprendizaje 2
             'actividades_aprendizaje-1-destrezas': [
                 self.destreza_1.id,
                 self.destreza_2.id
             ],
-            'actividades_aprendizaje-1-criterios_evaluacion': [
-                self.criterio_1.id,
-                self.criterio_2.id
-            ],
             'actividades_aprendizaje-1-estrategias_metodologicas': 'lorem ips',
             'actividades_aprendizaje-1-recursos': 'lorem ipsum',
-            'actividades_aprendizaje-1-indicadores': [self.indicador_3.id,
-                                                      self.indicador_4.id],
             'actividades_aprendizaje-1-instrumentos_evaluacion': 'lorem ipsum',
         }
 
@@ -361,13 +335,9 @@ class TestPlanDestrezasForm(PlanificacionesTestCase):
                                     str(self.general_2.id)],
             'destrezas': [str(self.destreza_1.id),
                           str(self.destreza_2.id)],
-            'criterios_evaluacion': [str(self.criterio_1.id),
-                                     str(self.criterio_2.id)],
             'estrategias_metodologicas': 'lorem ipsum',
             'recursos': 'lorem ipsum',
             'actividades_evaluacion': 'lorem ipsum',
-            'indicadores': [str(self.indicador_1.id),
-                            str(self.indicador_2.id)],
             'necesidad_adaptacion': 'Lorem ipsum dolor sit amet.',
             'adaptacion-curricular': 'Lorem ipsum dolor sit amet.',
         }

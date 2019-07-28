@@ -64,24 +64,16 @@ class PlanUnidadTestCase(PlanificacionesTestCase):
             'actividades_aprendizaje-MAX_NUM_FORMS': '1000',
             'actividades_aprendizaje-0-destrezas': [
                 self.destreza_1.id, self.destreza_2.id],
-            'actividades_aprendizaje-0-criterios_evaluacion': [
-                self.criterio_1.id, self.criterio_2.id],
             'actividades_aprendizaje-0-estrategias_metodologicas':
             'lorem ipsum',
             'actividades_aprendizaje-0-recursos': 'lorem ipsum',
-            'actividades_aprendizaje-0-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
             'actividades_aprendizaje-0-instrumentos_evaluacion': 'lorem ipsum',
 
             'actividades_aprendizaje-1-destrezas': [
                 self.destreza_1.id, self.destreza_2.id],
-            'actividades_aprendizaje-1-criterios_evaluacion': [
-                self.criterio_1.id, self.criterio_2.id],
             'actividades_aprendizaje-1-estrategias_metodologicas':
             'lorem ipsum',
             'actividades_aprendizaje-1-recursos': 'lorem ipsum',
-            'actividades_aprendizaje-1-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
             'actividades_aprendizaje-1-instrumentos_evaluacion': 'lorem ipsum',
         }
 
@@ -470,19 +462,11 @@ class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
                                               plan_unidad=self.plan_unidad)
         actividad_aprendizaje_1.destrezas.set(
             [self.destreza_1, self.destreza_2])
-        actividad_aprendizaje_1.criterios_evaluacion.set(
-            [self.criterio_1, self.criterio_2])
-        actividad_aprendizaje_1.indicadores.set(
-            [self.indicador_1, self.indicador_2])
 
         actividad_aprendizaje_2 = mixer.blend(ActividadAprendizaje,
                                               plan_unidad=self.plan_unidad)
         actividad_aprendizaje_2.destrezas.set(
             [self.destreza_1, self.destreza_2])
-        actividad_aprendizaje_2.criterios_evaluacion.set(
-            [self.criterio_1, self.criterio_2])
-        actividad_aprendizaje_2.indicadores.set(
-            [self.indicador_1, self.indicador_2])
 
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
@@ -529,9 +513,9 @@ class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
 
         # Debe tener igual todos los campos many to many
         # al desarrollo de unidad original
-        assert actividad_aprendizaje_new.indicadores.first() == \
-            self.indicador_1
-        assert actividad_aprendizaje_new.indicadores.last() == self.indicador_2
+        assert actividad_aprendizaje_new.destrezas.first() == \
+            self.destreza_1
+        assert actividad_aprendizaje_new.destrezas.last() == self.destreza_2
 
         # Test second duplication
 

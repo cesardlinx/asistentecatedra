@@ -1,14 +1,11 @@
 from planificaciones.models.curso import Curso
 from planificaciones.models.destreza import Destreza
-from planificaciones.models.indicador import Indicador
 from planificaciones.models.objetivo import Objetivo
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.objetivo_general import ObjetivoGeneral
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 from planificaciones.models.unidad import Unidad
 from planificaciones.models.plan_destrezas import PlanDestrezas
 from django import forms
-from django.http import QueryDict
 from planificaciones.widgets import EnhancedCheckboxSelectMultiple
 
 
@@ -27,13 +24,11 @@ class PlanDestrezasForm(forms.ModelForm):
             'objetivos',
             'objetivos_generales',
             'destrezas',
-            'criterios_evaluacion',
             'periodos',
             'semana_inicio',
             'ejes_transversales',
             'estrategias_metodologicas',
             'recursos',
-            'indicadores',
             'actividades_evaluacion',
             'necesidad_adaptacion',
             'adaptacion_curricular',
@@ -47,7 +42,6 @@ class PlanDestrezasForm(forms.ModelForm):
             'objetivos': 'Objetivos de Unidad',
             'periodos': 'Períodos',
             'semana_inicio': 'Semana de Inicio',
-            'indicadores': 'Indicadores de logro',
             'actividades_evaluacion': 'Actividades de Evaluación',
             'necesidad_adaptacion': 'Especificación de la necesidad '
                                     'educativa (opcional)',
@@ -60,8 +54,6 @@ class PlanDestrezasForm(forms.ModelForm):
             'objetivos': EnhancedCheckboxSelectMultiple,
             'objetivos_generales': EnhancedCheckboxSelectMultiple,
             'destrezas': EnhancedCheckboxSelectMultiple,
-            'indicadores': EnhancedCheckboxSelectMultiple,
-            'criterios_evaluacion': EnhancedCheckboxSelectMultiple,
         }
 
     def __init__(self, *args, **kwargs):
@@ -74,9 +66,6 @@ class PlanDestrezasForm(forms.ModelForm):
         self.fields['objetivos_generales'].queryset = ObjetivoGeneral.objects\
             .none()
         self.fields['destrezas'].queryset = Destreza.objects.none()
-        self.fields['criterios_evaluacion'].queryset = \
-            CriterioEvaluacion.objects.none()
-        self.fields['indicadores'].queryset = Indicador.objects.none()
 
         # Default Option for select fields
         self.fields['asignatura'].empty_label = 'Elija una asignatura.'
@@ -168,54 +157,3 @@ class PlanDestrezasForm(forms.ModelForm):
             self.fields['objetivos'].queryset = unidad.objetivos.all()
             self.fields['objetivos_generales']\
                 .queryset = unidad.objetivos_generales.all()
-
-        # Para convertir el id de criterio en una instancia de
-        # CriterioEvaluacion en el formset
-        if 'destrezas' in self.data:
-            try:
-                if isinstance(self.data, QueryDict):
-                    destrezas_id = list(self.data.getlist('destrezas'))
-                else:
-                    destrezas_id = list(self.data.get('destrezas'))
-
-                self.fields['criterios_evaluacion'].queryset = \
-                    CriterioEvaluacion.objects.get_criterios_by_destrezas(
-                        destrezas_id
-                )
-            except (ValueError, TypeError):
-                pass
-
-        elif self.instance.pk:
-            destrezas = self.instance.destrezas.all()
-            destrezas_id = [destreza.pk for destreza in destrezas]
-            self.fields['criterios_evaluacion'].queryset = \
-                CriterioEvaluacion.objects.get_criterios_by_destrezas(
-                    destrezas_id
-            )
-
-        # Para convertir el id de indicador en una instancia de
-        # Indicador en el formset
-        if 'criterios_evaluacion' in self.data:
-            try:
-                if isinstance(self.data, QueryDict):
-                    criterios_id = list(self.data
-                                        .getlist('criterios_evaluacion'))
-                else:
-                    criterios_id = list(self.data
-                                        .get('criterios_evaluacion'))
-
-                self.fields['indicadores'].queryset = \
-                    Indicador.objects.get_indicadores_by_criterios(
-                        criterios_id
-                )
-            except (ValueError, TypeError):
-                pass
-        elif self.instance.pk:
-            criterios = self.instance.criterios_evaluacion.all()
-
-            criterios_id = [criterio.pk for criterio in criterios]
-
-            self.fields['indicadores'].queryset = \
-                Indicador.objects.get_indicadores_by_criterios(
-                    criterios_id
-            )

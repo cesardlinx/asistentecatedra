@@ -3,9 +3,7 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 from django.urls import reverse
 
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 from planificaciones.models.destreza import Destreza
-from planificaciones.models.indicador import Indicador
 from planificaciones.models.planificacion import Planificacion
 from planificaciones.models.unidad import Unidad
 
@@ -49,10 +47,6 @@ class PlanDestrezas(Planificacion):
         Destreza,
         related_name='planes_destrezas',
     )
-    criterios_evaluacion = models.ManyToManyField(
-        CriterioEvaluacion,
-        related_name='planes_destrezas',
-    )
     objetivos = models.ManyToManyField(
         Objetivo,
         related_name='planes_destrezas',
@@ -65,10 +59,6 @@ class PlanDestrezas(Planificacion):
     )
     estrategias_metodologicas = models.TextField(max_length=700)
     recursos = models.TextField(max_length=500)
-    indicadores = models.ManyToManyField(
-        Indicador,
-        related_name='planes_destrezas',
-    )
     actividades_evaluacion = models.TextField(max_length=600)
     necesidad_adaptacion = models.TextField(max_length=600,
                                             blank=True, null=True)

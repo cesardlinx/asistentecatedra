@@ -53,13 +53,11 @@ class PlanDestrezasTestCase(PlanificacionesTestCase):
             'objetivos': [self.objetivo_1.id, self.objetivo_2.id],
             'objetivos_generales': [self.general_1.id, self.general_2.id],
             'destrezas': [self.destreza_1.id, self.destreza_2.id],
-            'criterios_evaluacion': [self.criterio_1.id, self.criterio_2.id],
             'periodos': 20,
             'semana_inicio': 'lorem ipsum dolor sit amet',
             'ejes_transversales': 'Lorem ipsum dolor sit amet.',
             'estrategias_metodologicas': 'Lorem ipsum dolor sit amet.',
             'recursos': 'Lorem ipsum dolor sit amet.',
-            'indicadores': [self.indicador_1.id, self.indicador_2.id],
             'actividades_evaluacion': 'Lorem ipsum dolor sit amet.',
         }
 
@@ -145,8 +143,6 @@ class TestPlanDestrezasCreateView(PlanDestrezasTestCase):
         self.assertContains(response, 'id="id_objetivos"')
         self.assertContains(response, 'id="id_objetivos_generales"')
         self.assertContains(response, 'id="id_destrezas"')
-        self.assertContains(response, 'id="id_criterios_evaluacion"')
-        self.assertContains(response, 'id="id_indicadores"')
         self.assertContains(response, 'name="periodos"')
         self.assertContains(response, 'name="semana_inicio"')
         self.assertContains(response, 'name="ejes_transversales"')
@@ -270,8 +266,6 @@ class TestPlanDestrezasUpdateView(PlanDestrezasTestCase):
         self.assertContains(response, 'id="id_objetivos"')
         self.assertContains(response, 'id="id_objetivos_generales"')
         self.assertContains(response, 'id="id_destrezas"')
-        self.assertContains(response, 'id="id_criterios_evaluacion"')
-        self.assertContains(response, 'id="id_indicadores"')
         self.assertContains(response, 'name="periodos"')
         self.assertContains(response, 'name="semana_inicio"')
         self.assertContains(response, 'name="ejes_transversales"')
@@ -469,10 +463,6 @@ class TestPlanDestrezasDuplicateView(PlanDestrezasTestCase):
             [self.general_1, self.general_2])
         self.plan_destrezas.destrezas.set(
             [self.destreza_1, self.destreza_2])
-        self.plan_destrezas.criterios_evaluacion.set(
-            [self.criterio_1, self.criterio_2])
-        self.plan_destrezas.indicadores.set(
-            [self.indicador_1, self.indicador_2])
 
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
@@ -507,12 +497,6 @@ class TestPlanDestrezasDuplicateView(PlanDestrezasTestCase):
         assert plan_destrezas_new.objetivos_generales.last() == self.general_2
         assert plan_destrezas_new.destrezas.first() == self.destreza_1
         assert plan_destrezas_new.destrezas.last() == self.destreza_2
-        assert plan_destrezas_new.criterios_evaluacion.first() == \
-            self.criterio_1
-        assert plan_destrezas_new.criterios_evaluacion.last() == \
-            self.criterio_2
-        assert plan_destrezas_new.indicadores.first() == self.indicador_1
-        assert plan_destrezas_new.indicadores.last() == self.indicador_2
 
         assert self.plan_destrezas.updated_at != \
             plan_destrezas_new.updated_at, \

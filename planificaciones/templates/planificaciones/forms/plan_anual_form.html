@@ -20,8 +20,6 @@
             load-objetivos-area-url={% url 'ajax_load_objetivos' option='area' %}
             load-objetivos-unidad-url={% url 'ajax_load_objetivos' option='unidad' %}
             load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' %}
-            load-criterios-url={% url 'ajax_load_criterios' %}
-            load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' %}
             novalidate>
             {% csrf_token %}
             {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
@@ -90,17 +88,11 @@
                 <table class="formset" id="desarrollo-unidades">
                     <thead>
                         <tr>
-                            <th class="col-title col-lg" rowspan="2">Unidad</th>
-                            <th class="col-title col-lg" rowspan="2">Objetivos de la Unidad</th>
-                            <th class="col-title col-lg" rowspan="2">Contenido</th>
-                            <th class="col-title col-lg" rowspan="2">Orientaciones Metodológicas</th>
-                            <th class="col-title" colspan="2">Evaluación</th>
-                            <th class="col-title col-lg" rowspan="2">Duración en Semanas</th>
-                        </tr>
-
-                        <tr>
-                            <th class="col-subtitle col-lg">Criterios de Evaluación</th>
-                            <th class="col-subtitle col-lg">Indicadores de Logro</th>
+                            <th class="col-title col-lg">Unidad</th>
+                            <th class="col-title col-lg">Objetivos de la Unidad</th>
+                            <th class="col-title col-lg">Contenido</th>
+                            <th class="col-title col-lg">Orientaciones Metodológicas</th>
+                            <th class="col-title col-lg">Duración en Semanas</th>
                         </tr>
                     </thead>
 
@@ -153,31 +145,9 @@
                                     {% include "forms/table_textarea.html" with field=unidades_form.orientaciones_metodologicas placeholder="Orientaciones Metodológicas" %}
                                 </td>
 
-                                <td class="checklist criterios">
-                                    {% with field=unidades_form.criterios_evaluacion %}
-                                        {% if field.errors %}
-                                            {% render_field field class="error" %}
-                                            {% include 'forms/field_errors.html'%}
-                                        {% else %}
-                                            {{ field }}
-                                        {% endif %}
-                                    {% endwith %}
-                                </td>
-
-                                <td class="checklist indicadores">
-                                    {% with field=unidades_form.indicadores %}
-                                        {% if field.errors %}
-                                            {% render_field field class="error" %}
-                                            {% include 'forms/field_errors.html'%}
-                                        {% else %}
-                                            {{ field }}
-                                        {% endif %}
-                                    {% endwith %}
-                                </td>
-
                                 <td>
                                     <div class="cell-wrapper-select">
-                                        {% include "forms/floating_input.html" with field=unidades_form.semanas %}
+                                        {% include "forms/floating_input.html" with field=unidades_form.semanas semanas=True%}
                                     </div>
                                 </td>
 

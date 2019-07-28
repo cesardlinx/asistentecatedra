@@ -2,12 +2,16 @@
 
 <div class="form-group-float">
     {% if field.errors %}
-        {{ field | add_label_class:"form-control-placeholder label-error" }}
+        {% if not semanas %}
+            {{ field | add_label_class:"form-control-placeholder label-error" }}
+        {% endif %}
         {% render_field field class="form-control floating-input error" %}
         {% include 'forms/help_text.html'%}
         {% include 'forms/field_errors.html'%}
     {% else %}
-        {{ field | add_label_class:"form-control-placeholder" }}
+        {% if not semanas %}
+            {{ field | add_label_class:"form-control-placeholder" }}
+        {% endif %}
         {% render_field field class="form-control floating-input" %}
         {% include 'forms/help_text.html'%}
     {% endif %}

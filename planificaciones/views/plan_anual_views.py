@@ -204,14 +204,10 @@ class PlanAnualDuplicateView(UserIsPremiumMixin, View):
 
             for desarrollo_unidad in desarrollo_unidades:
                 destrezas = desarrollo_unidad.destrezas.all()
-                criterios = desarrollo_unidad.criterios_evaluacion.all()
-                indicadores = desarrollo_unidad.indicadores.all()
                 desarrollo_unidad.pk = None
                 desarrollo_unidad.plan_anual = plan_anual
                 desarrollo_unidad.save()
                 desarrollo_unidad.destrezas.set(destrezas)
-                desarrollo_unidad.criterios_evaluacion.set(criterios)
-                desarrollo_unidad.indicadores.set(indicadores)
 
         messages.success(request, 'Plan Anual duplicado exitosamente.')
         return redirect('plan_anual_list')

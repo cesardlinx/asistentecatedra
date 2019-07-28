@@ -17,8 +17,6 @@
             load-unidades-url={% url 'ajax_load_unidades' %}
             load-objetivos-url={% url 'ajax_load_objetivos' option='unidad' %}
             load-destrezas-url={% url 'ajax_load_destrezas' template='checklist' %}
-            load-criterios-url={% url 'ajax_load_criterios' %}
-            load-indicadores-url={% url 'ajax_load_indicadores' option='criterio' %}
             novalidate>
             {% csrf_token %}
             {{ form.media }} {% comment %} Para el CKeditor  {% endcomment %}
@@ -66,11 +64,6 @@
                 </div>
 
                 <div class="form-group">
-                    {{ form.criterios_evaluacion|add_label_class:"form-label" }}
-                    {{ form.criterios_evaluacion }}
-                </div>
-
-                <div class="form-group">
                     {{ form.ejes_transversales|add_label_class:"form-label" }}
                     {% if form.ejes_transversales.errors %}
                         <div class="error">
@@ -88,10 +81,9 @@
                 <table class="formset">
                     <thead>
                         <tr>
-                            <th class="col-title col-lg" rowspan="2">Estrategias Metodológicas</th>
-                            <th class="col-title col-lg" rowspan="2">Recursos</th>
-                            <th class="col-title col-lg" rowspan="2">Indicadores de Logro</th>
-                            <th class="col-title col-lg" colspan="2">Actividades de Evaluación</th>
+                            <th class="col-title col-lg">Estrategias Metodológicas</th>
+                            <th class="col-title col-lg">Recursos</th>
+                            <th class="col-title col-lg">Actividades de Evaluación</th>
                         </tr>
                     </thead>
 
@@ -104,17 +96,6 @@
 
                             <td>
                                 {% include "forms/table_textarea.html" with field=form.recursos placeholder="Recursos" %}
-                            </td>
-
-                            <td class="checklist indicadores">
-                                {% with field=form.indicadores %}
-                                    {% if field.errors %}
-                                        {% render_field field class="error" %}
-                                        {% include 'forms/field_errors.html'%}
-                                    {% else %}
-                                        {{ field }}
-                                    {% endif %}
-                                {% endwith %}
                             </td>
 
                             <td>

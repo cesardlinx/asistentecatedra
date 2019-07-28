@@ -48,6 +48,7 @@ class PlanClaseTestCase(PlanificacionesTestCase):
         self.data = {
             'name': 'Plan de Clase1',
             'numero_plan': 2,
+            'docentes': 'David',
             'fecha': '2019-01-20',
             'asignatura': self.asignatura.id,
             'cursos': [self.curso_1.id, self.curso_2.id],
@@ -70,13 +71,9 @@ class PlanClaseTestCase(PlanificacionesTestCase):
             'elementos_curriculares-MAX_NUM_FORMS': '1000',
             'elementos_curriculares-0-destreza': self.destreza_1.id,
             'elementos_curriculares-0-conocimientos_asociados': 'lorem ipsum',
-            'elementos_curriculares-0-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
             'elementos_curriculares-0-actividades_evaluacion': 'lorem ipsum',
             'elementos_curriculares-1-destreza': self.destreza_2.id,
             'elementos_curriculares-1-conocimientos_asociados': 'lorem ipsum',
-            'elementos_curriculares-1-indicadores': [
-                self.indicador_3.id, self.indicador_4.id],
             'elementos_curriculares-1-actividades_evaluacion': 'lorem ipsum',
 
             # Formset Procesos didacticos
@@ -470,12 +467,6 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         elemento_curricular_1 = mixer.blend(ElementoCurricular,
                                             plan_clase=self.plan_clase,
                                             destreza=self.destreza_1)
-        elemento_curricular_1.indicadores.set(
-            [self.indicador_1, self.indicador_2])
-
-        elemento_curricular_2 = mixer.blend(ElementoCurricular,
-                                            plan_clase=self.plan_clase)
-        elemento_curricular_2.indicadores.set([self.indicador_1, ])
 
         proceso_didactico_1 = mixer.blend(
             ProcesoDidactico,
@@ -527,11 +518,6 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         assert elemento_curricular_new.conocimientos_asociados == \
             elemento_curricular_1.conocimientos_asociados
         assert elemento_curricular_new.destreza == self.destreza_1
-
-        # Debe tener igual todos los campos many to many al elemento curricular
-        # original
-        assert elemento_curricular_new.indicadores.first() == self.indicador_1
-        assert elemento_curricular_new.indicadores.last() == self.indicador_2
 
         proceso_didactico_new = elemento_curricular_new.procesos_didacticos\
             .first()

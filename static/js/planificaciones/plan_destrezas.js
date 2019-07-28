@@ -3,9 +3,6 @@ $(document).ready(function() {
     // All textarea resizables
     textareaResizables();
 
-    // fix ejes transversales textarea width
-    $('#id_ejes_transversales').width('87%');
-
     var mainTitle = $('.main-title').html();
     var ejesTransversales = 'La interculturalidad.\nLa formación de una ciudadanía democrática.\nLa protección del medio ambiente.\nEl cuidado de la salud.\nLos hábitos de recreación de los estudiantes.\nLa educación sexual en los jóvenes.';
 
@@ -149,63 +146,6 @@ $(document).ready(function() {
     });
 
     /**
-     * Al elegir las destrezas
-     * Se cargan los criterios
-     */
-    $('#planDestrezasForm').on('change', '#id_destrezas input', function() {
-        // Obtener URL
-        var urlCriterios = $('#planDestrezasForm').attr('load-criterios-url');
-
-        // Obtiene las destrezas seleccionados
-        var destrezas = $(`#id_destrezas li input[type="checkbox"]`);
-        var destrezasChecked = [];
-        destrezas.each(function() {
-            if (this.checked) {
-                destrezasChecked.push(this.value)
-            }
-        })
-
-        $.ajax({
-            url: urlCriterios,
-            data: {
-                'destrezas': destrezasChecked,
-            },
-            success: function(data) {
-                $('#id_criterios_evaluacion').html(data);
-            }
-        });
-    });
-
-    /**
-     * Al elegir los criterios
-     * Se cargan los indicadores
-     */
-    $('#planDestrezasForm').on('change', '#id_criterios_evaluacion input', function() {
-        // Obtener URL
-        var urlIndicadores = $('#planDestrezasForm').attr('load-indicadores-url');
-
-        // Obtiene las criterios seleccionados
-        var criterios = $(`#id_criterios_evaluacion li input[type="checkbox"]`);
-        var criteriosChecked = [];
-        criterios.each(function() {
-            if (this.checked) {
-                criteriosChecked.push(this.value)
-            }
-        })
-
-        $.ajax({
-            url: urlIndicadores,
-            data: {
-                'criterios': criteriosChecked,
-            },
-            success: function(data) {
-                $('#id_indicadores').html(data);
-                updateTextareas();
-            }
-        });
-    });
-
-    /**
      * Helper Functions
      */
     var clearFields = function() {
@@ -213,8 +153,6 @@ $(document).ready(function() {
         $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
         $('#id_destrezas').html('<span>Seleccione una asignatura y un curso.</span>');
         $('#id_objetivos_generales').html('');
-        $('#id_criterios_evaluacion').html('');
-        $('.indicadores ul').html('');
     }
 
     var updateTextareas = function() {

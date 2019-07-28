@@ -22,7 +22,7 @@ from planificaciones.views.plan_destrezas_views import (
     PlanDestrezasListView, PlanDestrezasCreateView, PlanDestrezasUpdateView,
     PlanDestrezasDeleteView, PlanDestrezasDuplicateView)
 from planificaciones.views.ajax_views import (
-    LoadCriteriosView, LoadCursosView, LoadDestrezasView, LoadIndicadoresView,
+    LoadCursosView, LoadDestrezasView,
     LoadObjetivosView, LoadUnidadesView)
 
 pytestmark = pytest.mark.django_db
@@ -229,16 +229,3 @@ class TestAjaxUrls:
         view = resolve(path)
         assert view.func.view_class == LoadDestrezasView, \
             'Should resolve to the view load_destrezas'
-
-    def test_ajax_load_criterios(self):
-        path = reverse('ajax_load_criterios')
-        view = resolve(path)
-        assert view.func.view_class == LoadCriteriosView, \
-            'Should resolve to the view load_criterios'
-
-    def test_ajax_load_indicadores(self):
-        path = reverse('ajax_load_indicadores',
-                       kwargs={'option': 'destreza'})
-        view = resolve(path)
-        assert view.func.view_class == LoadIndicadoresView, \
-            'Should resolve to the view load_indicadores'

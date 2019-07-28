@@ -1,8 +1,6 @@
 from django.core.validators import MaxValueValidator
 from django.db import models
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 from planificaciones.models.destreza import Destreza
-from planificaciones.models.indicador import Indicador
 from planificaciones.models.objetivo import Objetivo
 from planificaciones.models.objetivo_general import ObjetivoGeneral
 from planificaciones.models.plan_anual import PlanAnual
@@ -37,14 +35,6 @@ class DesarrolloUnidad(models.Model):
         related_name='desarrollo_unidades',
     )
     orientaciones_metodologicas = models.TextField(max_length=700)
-    criterios_evaluacion = models.ManyToManyField(
-        CriterioEvaluacion,
-        related_name='desarrollo_unidades',
-    )
-    indicadores = models.ManyToManyField(
-        Indicador,
-        related_name='desarrollo_unidades',
-    )
     semanas = models.PositiveIntegerField(
         choices=[(x, str(x)) for x in range(1, 9)],
         default=1,

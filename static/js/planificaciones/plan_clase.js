@@ -180,34 +180,6 @@ $(document).ready(function() {
         }
     });
 
-    /**
-     * Al elegir una destreza
-     * Se cargan los indicadores
-     */
-    $('#planClaseForm').on('change', '.destrezas', function() {
-        // Obtener URL
-        var urlIndicadores = $('#planClaseForm').attr('load-indicadores-url');
-
-        var idDestrezas = $(this).attr('id');
-        var pattern = /(id_elementos_curriculares-(\d+)-)destreza/i
-        var idIndicadores = pattern.exec(idDestrezas)[1] + 'indicadores'
-
-        var destrezaId = $(`#${idDestrezas}`).val();
-        var numeroFila = pattern.exec(idDestrezas)[2];
-
-        $.ajax({
-            url: urlIndicadores,
-            data: {
-                'destreza': destrezaId,
-                'numero_fila': numeroFila,
-                'formset_name': 'elementos_curriculares'
-            },
-            success: function(data) {
-                $(`#${idIndicadores}`).html(data);
-            }
-        });
-    });
-
 
     /**
      * Botón Agregar Destrezas
@@ -278,9 +250,6 @@ $(document).ready(function() {
                             <textarea class="table-textarea textarea-full" name="proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-recursos"
                                 maxlength="200" placeholder="Recursos" cols="40" rows="10"
                                 id="id_proceso-elementos_curriculares-${numeroFila}-procesos_didacticos-0-recursos"></textarea>
-                        </td>
-                        <td class="checklist elementos-form indicadores" rowspan="1">
-                            <ul id="id_elementos_curriculares-${numeroFila}-indicadores"></ul>
                         </td>
                         <td rowspan="1" class="elementos-form">
                             <textarea class="table-textarea textarea-full" name="elementos_curriculares-${numeroFila}-actividades_evaluacion" maxlength="200"

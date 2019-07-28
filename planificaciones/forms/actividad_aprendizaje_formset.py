@@ -1,9 +1,6 @@
 from planificaciones.models.destreza import Destreza
-from planificaciones.models.indicador import Indicador
-from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 from planificaciones.models.plan_unidad import PlanUnidad
 from planificaciones.models.actividad_aprendizaje import ActividadAprendizaje
-from django.http import QueryDict
 from django.forms import BaseInlineFormSet, inlineformset_factory
 from planificaciones.widgets import EnhancedCheckboxSelectMultiple
 
@@ -15,7 +12,7 @@ class BaseActividadAprendizajeFormset(BaseInlineFormSet):
     """
 
     def __init__(self, *args, **kwargs):
-        """Inicializa los queryset de destrezas e indicadores en none
+        """Inicializa los queryset de destrezas en none
         se encarga de que reconozca los id provistos por el usuario
         en instancias"""
         super().__init__(*args, **kwargs)
@@ -27,12 +24,8 @@ class BaseActividadAprendizajeFormset(BaseInlineFormSet):
             # La siguiente linea hace que todos los campos sean obligatorios
             form.empty_permitted = False
 
-            form.fields['indicadores'].queryset = Indicador.objects\
-                .none()
             form.fields['destrezas'].queryset = Destreza.objects\
                 .none()
-            form.fields['criterios_evaluacion'].queryset = CriterioEvaluacion.\
-                objects.none()
 
             # Para convertir el id de destreza en una instancia de
             # Destreza en el formset
@@ -58,63 +51,6 @@ class BaseActividadAprendizajeFormset(BaseInlineFormSet):
                 form.fields['destrezas'].queryset = Destreza.objects\
                     .get_destrezas_by_asignatura_cursos(
                     asignatura_id, cursos_id)
-
-            # Para convertir el id de criterio en una instancia de
-            # CriterioEvaluacion en el formset
-            if 'actividades_aprendizaje-{}-destrezas'.format(idx) in form.data:
-                try:
-                    if isinstance(self.data, QueryDict):
-                        destrezas_id = list(self.data.getlist(
-                            'actividades_aprendizaje-{}-destrezas'
-                            .format(idx)))
-                    else:
-                        destrezas_id = list(self.data.get(
-                            'actividades_aprendizaje-{}-destrezas'
-                            .format(idx)))
-
-                    form.fields['criterios_evaluacion'].queryset = \
-                        CriterioEvaluacion.objects.get_criterios_by_destrezas(
-                            destrezas_id
-                    )
-                except (ValueError, TypeError):
-                    pass
-            elif form.instance.pk:
-                destrezas = form.instance.destrezas.all()
-                destrezas_id = [destreza.pk for destreza in destrezas]
-                form.fields['criterios_evaluacion'].queryset = \
-                    CriterioEvaluacion.objects.get_criterios_by_destrezas(
-                        destrezas_id
-                )
-
-            # Para convertir el id de indicador en una instancia de
-            # Indicador en el formset
-            if 'actividades_aprendizaje-{}-criterios_evaluacion'.format(idx)\
-                    in form.data:
-                try:
-                    if isinstance(self.data, QueryDict):
-                        criterios_id = list(self.data.getlist(
-                            'actividades_aprendizaje-{}-criterios_evaluacion'
-                            .format(idx)))
-                    else:
-                        criterios_id = list(self.data.get(
-                            'actividades_aprendizaje-{}-criterios_evaluacion'
-                            .format(idx)))
-
-                    form.fields['indicadores'].queryset = \
-                        Indicador.objects.get_indicadores_by_criterios(
-                            criterios_id
-                    )
-                except (ValueError, TypeError):
-                    pass
-            elif form.instance.pk:
-                criterios = form.instance.criterios_evaluacion.all()
-
-                criterios_id = [criterio.pk for criterio in criterios]
-
-                form.fields['indicadores'].queryset = \
-                    Indicador.objects.get_indicadores_by_criterios(
-                        criterios_id
-                )
 
     def total_form_count(self):
         """
@@ -144,12 +80,10 @@ class BaseActividadAprendizajeFormset(BaseInlineFormSet):
 ActividadAprendizajeFormset = inlineformset_factory(
     PlanUnidad,
     ActividadAprendizaje,
-    fields=('destrezas', 'criterios_evaluacion', 'estrategias_metodologicas',
-            'recursos', 'indicadores', 'instrumentos_evaluacion'),
+    fields=('destrezas', 'estrategias_metodologicas',
+            'recursos', 'instrumentos_evaluacion'),
     widgets={
         'destrezas': EnhancedCheckboxSelectMultiple,
-        'criterios_evaluacion': EnhancedCheckboxSelectMultiple,
-        'indicadores': EnhancedCheckboxSelectMultiple,
     },
     formset=BaseActividadAprendizajeFormset,
     max_num=10,

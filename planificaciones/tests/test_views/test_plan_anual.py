@@ -77,10 +77,6 @@ class PlanAnualTestCase(PlanificacionesTestCase):
             'desarrollo_unidades-0-destrezas': [
                 self.destreza_1.id, self.destreza_2.id],
             'desarrollo_unidades-0-orientaciones_metodologicas': 'lorem ipsum',
-            'desarrollo_unidades-0-criterios_evaluacion': [
-                self.criterio_1.id, self.criterio_2.id],
-            'desarrollo_unidades-0-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
             'desarrollo_unidades-0-semanas': 8,
 
             'desarrollo_unidades-1-unidad': self.unidad_1.id,
@@ -91,10 +87,6 @@ class PlanAnualTestCase(PlanificacionesTestCase):
             'desarrollo_unidades-1-destrezas': [
                 self.destreza_1.id, self.destreza_2.id],
             'desarrollo_unidades-1-orientaciones_metodologicas': 'lorem ipsum',
-            'desarrollo_unidades-1-criterios_evaluacion': [
-                self.criterio_1.id, self.criterio_2.id],
-            'desarrollo_unidades-1-indicadores': [
-                self.indicador_1.id, self.indicador_2.id],
             'desarrollo_unidades-1-semanas': 2,
         }
 
@@ -485,20 +477,12 @@ class TestPlanAnualDuplicateView(PlanAnualTestCase):
                                           unidad=self.unidad_1)
         desarrollo_unidad_1.destrezas.set(
             [self.destreza_1, self.destreza_2])
-        desarrollo_unidad_1.criterios_evaluacion.set(
-            [self.criterio_1, self.criterio_2])
-        desarrollo_unidad_1.indicadores.set(
-            [self.indicador_1, self.indicador_2])
 
         desarrollo_unidad_2 = mixer.blend(DesarrolloUnidad,
                                           plan_anual=self.plan_anual,
                                           unidad=self.unidad_2)
         desarrollo_unidad_2.destrezas.set(
             [self.destreza_1, self.destreza_2])
-        desarrollo_unidad_2.criterios_evaluacion.set(
-            [self.criterio_1, self.criterio_2])
-        desarrollo_unidad_2.indicadores.set(
-            [self.indicador_1, self.indicador_2])
 
         self.client.login(username='tester@tester.com',
                           password='P455w0rd_testing',)
@@ -550,8 +534,8 @@ class TestPlanAnualDuplicateView(PlanAnualTestCase):
 
         # Debe tener igual todos los campos many to many
         # al desarrollo de unidad original
-        assert desarrollo_unidad_new.indicadores.first() == self.indicador_1
-        assert desarrollo_unidad_new.indicadores.last() == self.indicador_2
+        assert desarrollo_unidad_new.destrezas.first() == self.destreza_1
+        assert desarrollo_unidad_new.destrezas.last() == self.destreza_2
 
         # Test second duplication
 

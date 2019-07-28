@@ -163,10 +163,6 @@ class PlanDestrezasDuplicateView(UserIsPremiumMixin, View):
                 .objetivos_generales.all()
             destrezas_old = plan_destrezas\
                 .destrezas.all()
-            criterios_old = plan_destrezas\
-                .criterios_evaluacion.all()
-            indicadores_old = plan_destrezas\
-                .indicadores.all()
             plan_destrezas.pk = None
             plan_destrezas.id = None
             new_name = '{} (copia)'.format(plan_destrezas.name)
@@ -180,8 +176,6 @@ class PlanDestrezasDuplicateView(UserIsPremiumMixin, View):
             plan_destrezas.objetivos.set(objetivos_old)
             plan_destrezas.objetivos_generales.set(objetivos_generales_old)
             plan_destrezas.destrezas.set(destrezas_old)
-            plan_destrezas.criterios_evaluacion.set(criterios_old)
-            plan_destrezas.indicadores.set(indicadores_old)
 
         messages.success(request, 'Plan de Destrezas duplicado exitosamente.')
         return redirect('plan_destrezas_list')

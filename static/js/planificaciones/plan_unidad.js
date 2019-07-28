@@ -144,80 +144,6 @@ $(document).ready(function() {
     });
 
     /**
-     * Al elegir las destrezas
-     * Se cargan los criterios
-     */
-    $('#planUnidadForm').on('change', '.destrezas input', function() {
-        // Obtener URL
-        var urlCriterios = $('#planUnidadForm').attr('load-criterios-url');
-
-        var idDestrezas = $(this).attr('id');
-
-        var pattern = /(id_actividades_aprendizaje-(\d+)-)destrezas/i;
-        var idCriterios = pattern.exec(idDestrezas)[1] + 'criterios_evaluacion';
-        var numeroFila = pattern.exec(idDestrezas)[2];
-
-        // Obtiene las destrezas seleccionados
-        var destrezas = $(`#id_actividades_aprendizaje-${numeroFila}-destrezas li input[type="checkbox"]`);
-        var destrezasChecked = [];
-        destrezas.each(function() {
-            if (this.checked) {
-                destrezasChecked.push(this.value)
-            }
-        })
-
-        $.ajax({
-            url: urlCriterios,
-            data: {
-                'destrezas': destrezasChecked,
-                'numero_fila': numeroFila,
-                'formset_name': 'actividades_aprendizaje'
-            },
-            success: function(data) {
-                $(`#${idCriterios}`).html(data);
-                updateTextareas(numeroFila);
-            }
-        });
-    });
-
-    /**
-     * Al elegir los criterios
-     * Se cargan los indicadores
-     */
-    $('#planUnidadForm').on('change', '.criterios input', function() {
-        // Obtener URL
-        var urlIndicadores = $('#planUnidadForm').attr('load-indicadores-url');
-
-        var idCriterios = $(this).attr('id');
-        var pattern = /(id_actividades_aprendizaje-(\d+)-)criterios/i;
-        var idIndicadores = pattern.exec(idCriterios)[1] + 'indicadores';
-        var numeroFila = pattern.exec(idCriterios)[2];
-
-        // Obtiene las criterios seleccionados
-        var criterios = $(`#id_actividades_aprendizaje-${numeroFila}-criterios_evaluacion li input[type="checkbox"]`);
-        var criteriosChecked = [];
-        criterios.each(function() {
-            if (this.checked) {
-                criteriosChecked.push(this.value)
-            }
-        })
-
-        $.ajax({
-            url: urlIndicadores,
-            data: {
-                'criterios': criteriosChecked,
-                'numero_fila': numeroFila,
-                'formset_name': 'actividades_aprendizaje'
-            },
-            success: function(data) {
-                $(`#${idIndicadores}`).html(data);
-                updateTextareas(numeroFila);
-            }
-        });
-    });
-
-
-    /**
      * Botón Agregar Actividad de Aprendizaje
      */
     $('.formset-buttons').on('click', '#agregar-actividad', function() {
@@ -232,10 +158,6 @@ $(document).ready(function() {
                             <ul id="id_actividades_aprendizaje-${rowNumber}-destrezas"></ul>
                         </td>
 
-                        <td class="checklist criterios">
-                            <ul id="id_actividades_aprendizaje-${rowNumber}-criterios_evaluacion"></ul>
-                        </td>
-
                         <td>
                             <textarea name="actividades_aprendizaje-${rowNumber}-estrategias_metodologicas"
                             id="id_actividades_aprendizaje-${rowNumber}-estrategias_metodologicas"
@@ -248,10 +170,6 @@ $(document).ready(function() {
                             id="id_actividades_aprendizaje-${rowNumber}-recursos"
                             class="table-textarea textarea-full"
                             placeholder="Recursos"></textarea>
-                        </td>
-
-                        <td class="checklist indicadores">
-                            <ul id="id_actividades_aprendizaje-${rowNumber}-indicadores"></ul>
                         </td>
 
                         <td>
@@ -328,8 +246,6 @@ $(document).ready(function() {
         $('#id_objetivos').html('<span>Seleccione una asignatura, un curso y una unidad.</span>');
         $('.destrezas ul').html('<span>Seleccione una asignatura y un curso.</span>');
         $('#id_objetivos_generales').html('');
-        $('.criterios ul').html('');
-        $('.indicadores ul').html('');
     }
 
     var updateTextareas = function(numeroFila) {
