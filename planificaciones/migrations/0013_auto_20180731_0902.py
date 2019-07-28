@@ -133,10 +133,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=1,
             titulo=(
-                "Lengua y Cultura: Descubro la intención del texto\n",
-                "Comunicación Oral: Sucedió en la ventana\n",
-                "Escritura: Reconozco los fonemas\n",
-                "Lectura: ¡Me gusta leer!\n",
+                "Lengua y Cultura: Descubro la intención del texto;"
+                "Comunicación Oral: Sucedió en la ventana;"
+                "Escritura: Reconozco los fonemas;"
+                "Lectura: ¡Me gusta leer!;"
                 "Literatura: Leo y me divierto"
             ),
             curso=segundo_egb,
@@ -145,10 +145,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=2,
             titulo=(
-                "Lengua y Cultura: Descubro la intención del texto\n",
-                "Comunicación Oral: Me presento\n",
-                "Escritura: Reconozco las grafías\n",
-                "Lectura: ¡Me gusta leer!\n",
+                "Lengua y Cultura: Descubro la intención del texto;"
+                "Comunicación Oral: Me presento;"
+                "Escritura: Reconozco las grafías;"
+                "Lectura: ¡Me gusta leer!;"
                 "Literatura: Leo y me divierto"
             ),
             curso=segundo_egb,
@@ -157,10 +157,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=3,
             titulo=(
-                "Lengua y Cultura: ¡Hablamos muchas lenguas!\n",
-                "Comunicación Oral: Comunico mis ideas\n",
-                "Escritura: Reconozco los fonemas y sus grafías\n",
-                "Lectura: Leo para conocer más\n",
+                "Lengua y Cultura: ¡Hablamos muchas lenguas!;"
+                "Comunicación Oral: Comunico mis ideas;"
+                "Escritura: Reconozco los fonemas y sus grafías;"
+                "Lectura: Leo para conocer más;"
                 "Literatura: ¡Es la hora del evento!"
             ),
             curso=segundo_egb,
@@ -169,11 +169,11 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=4,
             titulo=(
-                "Lengua y Cultura: El kichwa enriquece ",
-                "la concepción del mundo\n",
-                "Comunicación Oral: Desarrollo la conciencia lingüística\n",
-                "Escritura: Reconozco los fonemas y sus grafías\n",
-                "Lectura: Leo para aprender\n",
+                "Lengua y Cultura: El kichwa enriquece "
+                "la concepción del mundo;"
+                "Comunicación Oral: Desarrollo la conciencia lingüística;"
+                "Escritura: Reconozco los fonemas y sus grafías;"
+                "Lectura: Leo para aprender;"
                 "Literatura: ¡Es la hora del evento!"
             ),
             curso=segundo_egb,
@@ -183,10 +183,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=1,
             titulo=(
-                "Lengua y Cultura: ¿Por qué leo?\n",
-                "Comunicación Oral: Narro mis experiencias\n",
-                "Lectura: Leo para aprender\n",
-                "Escritura: ¡Aprendo a describir!\n",
+                "Lengua y Cultura: ¿Por qué leo?;"
+                "Comunicación Oral: Narro mis experiencias;"
+                "Lectura: Leo para aprender;"
+                "Escritura: ¡Aprendo a describir!;"
                 "Literatura: Leo y disfruto"
             ),
             curso=tercero_egb,
@@ -195,10 +195,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=2,
             titulo=(
-                "Lengua y Cultura: Muchas razones para leer y escribir\n",
-                "Comunicación Oral: Escucho con atención\n",
-                "Lectura: Leo para aprender\n",
-                "Escritura: ¡Aprendo a describir!\n",
+                "Lengua y Cultura: Muchas razones para leer y escribir;"
+                "Comunicación Oral: Escucho con atención;"
+                "Lectura: Leo para aprender;"
+                "Escritura: ¡Aprendo a describir!;"
                 "Literatura: Leo y disfruto"
             ),
             curso=tercero_egb,
@@ -207,10 +207,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=3,
             titulo=(
-                "Lengua y Cultura: Aprendo nuevos idiomas\n",
-                "Comunicación Oral: Aprendo a pedir y dar información\n",
-                "Lectura: Leo para informarme\n",
-                "Escritura: Aprendo a escribir carteles\n",
+                "Lengua y Cultura: Aprendo nuevos idiomas;"
+                "Comunicación Oral: Aprendo a pedir y dar información;"
+                "Lectura: Leo para informarme;"
+                "Escritura: Aprendo a escribir carteles;"
                 "Literatura: Leo y disfruto"
             ),
             curso=tercero_egb,
@@ -219,11 +219,11 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=4,
             titulo=(
-                "Lengua y Cultura: Las lenguas originarias ",
-                "enriquecen mi mundo\n",
-                "Comunicación Oral: Aprendo a dar información\n",
-                "Lectura: Llegan las noticias\n",
-                "Escritura: ¡A escribir carteles!\n",
+                "Lengua y Cultura: Las lenguas originarias "
+                "enriquecen mi mundo;"
+                "Comunicación Oral: Aprendo a dar información;"
+                "Lectura: Llegan las noticias;"
+                "Escritura: ¡A escribir carteles!;"
                 "Literatura: ¡Vivan los cuentos!"
             ),
             curso=tercero_egb,
@@ -233,10 +233,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=1,
             titulo=(
-                "Lengua y Cultura: Para qué leemos\n",
-                "Comunicación Oral: Aprendo a usar las palabras correctas\n",
-                "Lectura: Leo para conocer más\n",
-                "Escritura: Descripción de personas\n",
+                "Lengua y Cultura: Para qué leemos;"
+                "Comunicación Oral: Aprendo a usar las palabras correctas;"
+                "Lectura: Leo para conocer más;"
+                "Escritura: Descripción de personas;"
                 "Literatura: ¡Es hora de leer y escribir cuentos!"
             ),
             curso=cuarto_egb,
@@ -245,10 +245,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=2,
             titulo=(
-                "Lengua y Cultura: Los textos y su intención comunicativa\n",
-                "Comunicación Oral: Expongo oralmente\n",
-                "Lectura: ¡Leemos para conocer más!\n",
-                "Escritura: Escribimos autorretratos\n",
+                "Lengua y Cultura: Los textos y su intención comunicativa;"
+                "Comunicación Oral: Expongo oralmente;"
+                "Lectura: ¡Leemos para conocer más!;"
+                "Escritura: Escribimos autorretratos;"
                 "Literatura: ¡A leer más cuentos!"
             ),
             curso=cuarto_egb,
@@ -257,10 +257,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=3,
             titulo=(
-                "Lengua y Cultura: Diferentes lenguas del Ecuador\n",
-                "Comunicación Oral: Sigo instrucciones\n",
-                "Lectura: Leo para aprender\n",
-                "Escritura: La descripción\n",
+                "Lengua y Cultura: Diferentes lenguas del Ecuador;"
+                "Comunicación Oral: Sigo instrucciones;"
+                "Lectura: Leo para aprender;"
+                "Escritura: La descripción;"
                 "Literatura: Disfruto de la poesía"
             ),
             curso=cuarto_egb,
@@ -269,11 +269,11 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=4,
             titulo=(
-                "Lengua y Cultura: La tradición oral de ",
-                "los pueblos originarios\n",
-                "Comunicación Oral: Expreso mis sentimientos\n",
-                "Lectura: Leo para hacer las cosas bien\n",
-                "Escritura: Aprendo a narrar\n",
+                "Lengua y Cultura: La tradición oral de "
+                "los pueblos originarios;"
+                "Comunicación Oral: Expreso mis sentimientos;"
+                "Lectura: Leo para hacer las cosas bien;"
+                "Escritura: Aprendo a narrar;"
                 "Literatura: ¡La literatura te da alas!"
             ),
             curso=cuarto_egb,
@@ -283,11 +283,11 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=1,
             titulo=(
-                "Lengua y Cultura: Los textos tienen ",
-                "una intención comunicativa\n",
-                "Comunicación Oral: ¡A conversar!\n",
-                "Lectura: Leo para informarme y aprender\n",
-                "Escritura: ¡Es hora de escribir!\n",
+                "Lengua y Cultura: Los textos tienen "
+                "una intención comunicativa;"
+                "Comunicación Oral: ¡A conversar!;"
+                "Lectura: Leo para informarme y aprender;"
+                "Escritura: ¡Es hora de escribir!;"
                 "Literatura: ¡Es la hora de los cuentos populares!"
             ),
             curso=quinto_egb,
@@ -296,11 +296,11 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=2,
             titulo=(
-                "Lengua y Cultura: Los textos conservan ",
-                "y transmiten la cultura\n",
-                "Comunicación Oral: ¡Soy un narrador!\n",
-                "Lectura: Leo para conocer mejor mi país\n",
-                "Escritura: Mejoro mi habilidad para escribir\n",
+                "Lengua y Cultura: Los textos conservan "
+                "y transmiten la cultura;"
+                "Comunicación Oral: ¡Soy un narrador!;"
+                "Lectura: Leo para conocer mejor mi país;"
+                "Escritura: Mejoro mi habilidad para escribir;"
                 "Literatura: Disfruto las leyendas de mi país"
             ),
             curso=quinto_egb,
@@ -309,11 +309,11 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=3,
             titulo=(
-                "Lengua y Cultura: Indago la variedad ",
-                "lingüística de mi país\n",
-                "Comunicación Oral: El diálogo y sus formas\n",
-                "Lectura: Aprendo más sobre la megadiversidad del Ecuador\n",
-                "Escritura: Creo imágenes y fotografías con palabras\n",
+                "Lengua y Cultura: Indago la variedad "
+                "lingüística de mi país;"
+                "Comunicación Oral: El diálogo y sus formas;"
+                "Lectura: Aprendo más sobre la megadiversidad del Ecuador;"
+                "Escritura: Creo imágenes y fotografías con palabras;"
                 "Literatura: Amorfinos, coplas y otros tesoros, la poesía "
                 "popular de mi país"
             ),
@@ -323,10 +323,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=4,
             titulo=(
-                "Lengua y Cultura: La tradición oral de\n",
-                "Comunicación Oral: Expreso mis sentimientos\n",
-                "Lectura: Leo para hacer las cosas bien\n",
-                "Escritura: Aprendo a narrar\n",
+                "Lengua y Cultura: La tradición oral de;"
+                "Comunicación Oral: Expreso mis sentimientos;"
+                "Lectura: Leo para hacer las cosas bien;"
+                "Escritura: Aprendo a narrar;"
                 "Literatura: ¡La literatura te da alas!"
             ),
             curso=quinto_egb,
@@ -336,11 +336,11 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=1,
             titulo=(
-                "Lengua y Cultura: El mundo y sus diferentes lenguas\n",
+                "Lengua y Cultura: El mundo y sus diferentes lenguas;"
                 "Comunicación Oral: ¡A construir ideas, opiniones "
-                "y puntos de vista!\n",
-                "Lectura: ¡Leo para informarme y aprender!\n",
-                "Escritura: ¡Es hora de escribir!\n",
+                "y puntos de vista!;"
+                "Lectura: ¡Leo para informarme y aprender!;"
+                "Escritura: ¡Es hora de escribir!;"
                 "Literatura: ¡El mundo de los cuentos!"
             ),
             curso=sexto_egb,
@@ -349,10 +349,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=2,
             titulo=(
-                "Lengua y Cultura: Las lenguas se escriben\n",
-                "Comunicación Oral: Exposición oral\n",
-                "Lectura: Leo para aprender del pasado\n",
-                "Escritura: ¡A escribir relatos históricos!\n",
+                "Lengua y Cultura: Las lenguas se escriben;"
+                "Comunicación Oral: Exposición oral;"
+                "Lectura: Leo para aprender del pasado;"
+                "Escritura: ¡A escribir relatos históricos!;"
                 "Literatura: Refranes y fábulas"
             ),
             curso=sexto_egb,
@@ -361,10 +361,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=3,
             titulo=(
-                "Lengua y Cultura: Las funciones del lenguaje \n",
-                "Comunicación Oral: Las cosas que hacemos con las palabras\n",
-                "Lectura: Leo y desarrollo mi pensamiento crítico\n",
-                "Escritura: Aprendo a resumir\n",
+                "Lengua y Cultura: Las funciones del lenguaje ;"
+                "Comunicación Oral: Las cosas que hacemos con las palabras;"
+                "Lectura: Leo y desarrollo mi pensamiento crítico;"
+                "Escritura: Aprendo a resumir;"
                 "Literatura: Disfruto de la literatura ecuatoriana"
             ),
             curso=sexto_egb,
@@ -374,10 +374,10 @@ def create_unidades(apps, schema_editor):
             numero_unidad=4,
             titulo=(
                 "Lengua y Cultura: Los textos tienen "
-                "una intención comunicativa\n",
-                "Comunicación Oral: ¿Quiénes cambian la historia?\n"
-                "Lectura: Leo y desarrollo mi pensamiento crítico\n",
-                "Escritura: Campaña en contra de la violencia\n",
+                "una intención comunicativa;"
+                "Comunicación Oral: ¿Quiénes cambian la historia?;"
+                "Lectura: Leo y desarrollo mi pensamiento crítico;"
+                "Escritura: Campaña en contra de la violencia;"
                 "Literatura: La literatura pinta la realidad"
             ),
             curso=sexto_egb,
@@ -387,10 +387,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=1,
             titulo=(
-                "Lengua y Cultura: La lengua escrita\n"
-                "Comunicación Oral: Hago una exposición\n"
-                "Lectura: ¡Leo para informarme y aprender!\n",
-                "Escritura: ¡Es hora de escribir!\n",
+                "Lengua y Cultura: La lengua escrita;"
+                "Comunicación Oral: Hago una exposición;"
+                "Lectura: ¡Leo para informarme y aprender!;"
+                "Escritura: ¡Es hora de escribir!;"
                 "Literatura: ¡Conozco mi país mediante sus leyendas!"
             ),
             curso=septimo_egb,
@@ -400,11 +400,11 @@ def create_unidades(apps, schema_editor):
             numero_unidad=2,
             titulo=(
                 "Lengua y Cultura: El castellano se enriquece con "
-                "las lenguas originarias\n"
-                "Comunicación Oral: Sugerir, persuadir, convencer\n"
+                "las lenguas originarias;"
+                "Comunicación Oral: Sugerir, persuadir, convencer;"
                 "Lectura: Leo y aprendo de la vida de "
-                "personajes importantes\n",
-                "Escritura: ¡Me toca a mí!\n",
+                "personajes importantes;"
+                "Escritura: ¡Me toca a mí!;"
                 "Literatura: Narro con palabras e imágenes"
             ),
             curso=septimo_egb,
@@ -413,10 +413,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=3,
             titulo=(
-                "Lengua y Cultura: La escritura en el tiempo\n"
-                "Comunicación Oral: ¡Participo en un coloquio!\n"
-                "Lectura: Dialogamos por escrito\n",
-                "Escritura: ¡Escribo para convencer!\n",
+                "Lengua y Cultura: La escritura en el tiempo;"
+                "Comunicación Oral: ¡Participo en un coloquio!;"
+                "Lectura: Dialogamos por escrito;"
+                "Escritura: ¡Escribo para convencer!;"
                 "Literatura: La poesía"
             ),
             curso=septimo_egb,
@@ -425,10 +425,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=4,
             titulo=(
-                "Lengua y Cultura: La comunicación humana\n"
-                "Comunicación Oral: Describo de manera oral\n"
-                "Lectura: ¡Leo y sigo instrucciones!\n",
-                "Escritura: Escribo instrucciones\n",
+                "Lengua y Cultura: La comunicación humana;"
+                "Comunicación Oral: Describo de manera oral;"
+                "Lectura: ¡Leo y sigo instrucciones!;"
+                "Escritura: Escribo instrucciones;"
                 "Literatura: ¡Vamos al teatro!"
             ),
             curso=septimo_egb,
@@ -438,10 +438,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=1,
             titulo=(
-                "Lengua y Cultura: Una imágen vale más que mil palabras\n"
-                "Literatura: Relatos de viajes y aventuras\n"
-                "Lectura: Preguntas para conocer más\n",
-                "Escritura: Entrevistas\n",
+                "Lengua y Cultura: Una imágen vale más que mil palabras;"
+                "Literatura: Relatos de viajes y aventuras;"
+                "Lectura: Preguntas para conocer más;"
+                "Escritura: Entrevistas;"
                 "Comunicación Oral: La discusión"
             ),
             curso=octavo_egb,
@@ -450,10 +450,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=2,
             titulo=(
-                "Lengua y Cultura: Diversas culturas, diversos escritores\n"
-                "Literatura: Misterios y acertijos\n"
-                "Lectura: ¿Como me entero de lo que sucede en el mundo?\n",
-                "Escritura: Noticias\n",
+                "Lengua y Cultura: Diversas culturas, diversos escritores;"
+                "Literatura: Misterios y acertijos;"
+                "Lectura: ¿Como me entero de lo que sucede en el mundo?;"
+                "Escritura: Noticias;"
                 "Comunicación Oral: Noticias en la radio"
             ),
             curso=octavo_egb,
@@ -462,10 +462,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=3,
             titulo=(
-                "Lengua y Cultura: Los primeros escritos de la humanidad\n"
-                "Literatura: Entre fantasmas y aparecidos\n"
-                "Lectura: Más que una noticia\n",
-                "Escritura: Informar con profundidad\n",
+                "Lengua y Cultura: Los primeros escritos de la humanidad;"
+                "Literatura: Entre fantasmas y aparecidos;"
+                "Lectura: Más que una noticia;"
+                "Escritura: Informar con profundidad;"
                 "Comunicación Oral: El panel: Analizar un tema "
                 "desde diversas perspectivas"
             ),
@@ -476,10 +476,10 @@ def create_unidades(apps, schema_editor):
             numero_unidad=4,
             titulo=(
                 "Lengua y Cultura: Diferentes, pero iguales "
-                "(la igualdad es la diferencia)\n"
-                "Literatura: Viajes a mundos desconocidos\n"
-                "Lectura: Contar la realidad con recursos literarios\n",
-                "Escritura: Relato hechos de la realidad\n",
+                "(la igualdad es la diferencia);"
+                "Literatura: Viajes a mundos desconocidos;"
+                "Lectura: Contar la realidad con recursos literarios;"
+                "Escritura: Relato hechos de la realidad;"
                 "Comunicación Oral: Pongo atención en lo que digo..."
             ),
             curso=octavo_egb,
@@ -490,10 +490,10 @@ def create_unidades(apps, schema_editor):
             numero_unidad=1,
             titulo=(
                 "Lengua y Cultura: De la escritura cuneiforme "
-                "al alfabeto latino\n"
-                "Literatura: Relatos sobre dioses y héroes\n"
-                "Lectura: Los lectores opinan\n",
-                "Escritura: Escribo para opinar\n",
+                "al alfabeto latino;"
+                "Literatura: Relatos sobre dioses y héroes;"
+                "Lectura: Los lectores opinan;"
+                "Escritura: Escribo para opinar;"
                 "Comunicación Oral: Conversatorio"
             ),
             curso=noveno_egb,
@@ -502,10 +502,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=2,
             titulo=(
-                "Lengua y Cultura: Expansión del latín en Europa\n"
-                "Literatura: La poesía: ritmo y sensibilidad\n"
-                "Lectura: La ciencia al alcance de todos\n",
-                "Escritura: Escribo sobre ciencia\n",
+                "Lengua y Cultura: Expansión del latín en Europa;"
+                "Literatura: La poesía: ritmo y sensibilidad;"
+                "Lectura: La ciencia al alcance de todos;"
+                "Escritura: Escribo sobre ciencia;"
                 "Comunicación Oral: Exponemos sobre temas científicos"
             ),
             curso=noveno_egb,
@@ -514,10 +514,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=3,
             titulo=(
-                "Lengua y Cultura: De la escritura normal a la mecánica\n"
-                "Literatura: La poesía: ideas múltiples y riqueza expresiva\n"
-                "Lectura: Comentarios sobre obras artísticas\n",
-                "Escritura: Escribo comentarios sobre obras artísticas\n",
+                "Lengua y Cultura: De la escritura normal a la mecánica;"
+                "Literatura: La poesía: ideas múltiples y riqueza expresiva;"
+                "Lectura: Comentarios sobre obras artísticas;"
+                "Escritura: Escribo comentarios sobre obras artísticas;"
                 "Comunicación Oral: Exponemos sobre temas científicos"
             ),
             curso=noveno_egb,
@@ -527,10 +527,10 @@ def create_unidades(apps, schema_editor):
             numero_unidad=4,
             titulo=(
                 "Lengua y Cultura: Un mismo idioma, "
-                "distintas formas de hablar\n"
-                "Literatura: Un mundo lleno de poesía\n"
-                "Lectura: Opiniones sobre sucesos de interés público\n",
-                "Escritura: Expreso mi opinión sobre temas de la realidad\n",
+                "distintas formas de hablar;"
+                "Literatura: Un mundo lleno de poesía;"
+                "Lectura: Opiniones sobre sucesos de interés público;"
+                "Escritura: Expreso mi opinión sobre temas de la realidad;"
                 "Comunicación Oral: Los programas de entretenimiento, "
                 "¿solo entretienen?"
             ),
@@ -541,10 +541,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=1,
             titulo=(
-                "Lengua y Cultura: De la oralidad a la escritura\n"
-                "Literatura: El teatro y sus orígenes\n"
-                "Lectura: ¡Nos informamos!\n",
-                "Escritura: Escribo para informar\n",
+                "Lengua y Cultura: De la oralidad a la escritura;"
+                "Literatura: El teatro y sus orígenes;"
+                "Lectura: ¡Nos informamos!;"
+                "Escritura: Escribo para informar;"
                 "Comunicación Oral: Leer para comunicar"
             ),
             curso=decimo_egb,
@@ -554,11 +554,11 @@ def create_unidades(apps, schema_editor):
             numero_unidad=2,
             titulo=(
                 "Lengua y Cultura: La presencia afroecuatoriana "
-                "y su tradición oral\n"
+                "y su tradición oral;"
                 "Literatura: Genero dramático: La tragedia, "
-                "la comedia y otros subgéneros\n"
-                "Lectura: Publicidad y propaganda\n",
-                "Escritura: Escribo para convencer\n",
+                "la comedia y otros subgéneros;"
+                "Lectura: Publicidad y propaganda;"
+                "Escritura: Escribo para convencer;"
                 "Comunicación Oral: La conferencia"
             ),
             curso=decimo_egb,
@@ -568,10 +568,10 @@ def create_unidades(apps, schema_editor):
             numero_unidad=3,
             titulo=(
                 "Lengua y Cultura: Orígenes, transformaciones y variantes "
-                "de la lengua española\n"
-                "Literatura: El cuento ecuatoriano contemporáneo\n"
-                "Lectura: Leo para conocer y aprender\n",
-                "Escritura: Escribo para exponer, explicar, informar,...\n",
+                "de la lengua española;"
+                "Literatura: El cuento ecuatoriano contemporáneo;"
+                "Lectura: Leo para conocer y aprender;"
+                "Escritura: Escribo para exponer, explicar, informar,...;"
                 "Comunicación Oral: La defensa de un punto de vista"
             ),
             curso=decimo_egb,
@@ -580,10 +580,10 @@ def create_unidades(apps, schema_editor):
         Unidad(
             numero_unidad=4,
             titulo=(
-                "Lengua y Cultura: Lenguas en contacto\n"
-                "Literatura: El cuento latinoamericano contemporáneo\n"
-                "Lectura: Leo para comprender\n",
-                "Escritura: ¡A escribir monografías!\n",
+                "Lengua y Cultura: Lenguas en contacto;"
+                "Literatura: El cuento latinoamericano contemporáneo;"
+                "Lectura: Leo para comprender;"
+                "Escritura: ¡A escribir monografías!;"
                 "Comunicación Oral: Juego de roles"
             ),
             curso=decimo_egb,
