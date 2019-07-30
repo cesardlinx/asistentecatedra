@@ -1,6 +1,9 @@
 from django.core.validators import MaxValueValidator
 from django.db import models
+
+from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 from planificaciones.models.destreza import Destreza
+from planificaciones.models.indicador import Indicador
 from planificaciones.models.objetivo import Objetivo
 from planificaciones.models.objetivo_general import ObjetivoGeneral
 from planificaciones.models.plan_anual import PlanAnual
@@ -45,3 +48,19 @@ class DesarrolloUnidad(models.Model):
     class Meta:
         db_table = 'desarrollo_unidades'
         verbose_name_plural = "desarrollo de unidades"
+
+    @property
+    def criterios_evaluacion(self):
+        destrezas_id = [destreza.id for destreza in self.destrezas.all()]
+        return CriterioEvaluacion.objects\
+            .get_criterios_by_destrezas(destrezas_id)
+
+    @property
+    def indicadores(self):
+        indicadores = Indicador.objects.none()
+        for destreza in self.destrezas.all():
+            indicadores_destreza = Indicador.objects.\
+                get_indicadores_by_destreza(destreza.id)
+            indicadores = indicadores | indicadores_destreza
+
+        return indicadores

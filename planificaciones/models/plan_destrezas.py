@@ -3,7 +3,9 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 from django.urls import reverse
 
+from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
 from planificaciones.models.destreza import Destreza
+from planificaciones.models.indicador import Indicador
 from planificaciones.models.planificacion import Planificacion
 from planificaciones.models.unidad import Unidad
 
@@ -77,3 +79,19 @@ class PlanDestrezas(Planificacion):
     def get_absolute_url(self):
         kwargs = {'pk': self.pk, 'slug': self.slug}
         return reverse('plan_destrezas_update', kwargs=kwargs)
+
+    @property
+    def criterios_evaluacion(self):
+        destrezas_id = [destreza.id for destreza in self.destrezas.all()]
+        return CriterioEvaluacion.objects\
+            .get_criterios_by_destrezas(destrezas_id)
+
+    @property
+    def indicadores(self):
+        indicadores = Indicador.objects.none()
+        for destreza in self.destrezas.all():
+            indicadores_destreza = Indicador.objects.\
+                get_indicadores_by_destreza(destreza.id)
+            indicadores = indicadores | indicadores_destreza
+
+        return indicadores

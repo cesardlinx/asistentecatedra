@@ -344,6 +344,18 @@ class TestElementoCurricular:
         assert elemento._meta.verbose_name_plural == 'elementos curriculares',\
             'The plural name should be "elementos curriculares"'
 
+    def test_indicadores_property(self):
+        destreza = mixer.blend(Destreza)
+        elemento_curricular = mixer.blend(ElementoCurricular, destreza=destreza)
+        criterio = mixer.blend(CriterioEvaluacion)
+        indicador_1 = mixer.blend(Indicador)
+        indicador_2 = mixer.blend(Indicador)
+        criterio.indicadores.set([indicador_1, indicador_2])
+        destreza.criterios_evaluacion.set([criterio, ])
+
+        assert indicador_1 in elemento_curricular.indicadores
+        assert indicador_2 in elemento_curricular.indicadores
+
 
 class TestProcesoDidactico:
     def test_model(self):
@@ -409,6 +421,30 @@ class TestDesarrolloUnidad:
             'desarrollo de unidades', \
             'The plural name should be "desarrollo de unidades"'
 
+    def test_criterios_evaluacion_property(self):
+        desarrollo_unidad = mixer.blend(DesarrolloUnidad)
+        destreza = mixer.blend(Destreza)
+        criterio_1 = mixer.blend(CriterioEvaluacion)
+        criterio_2 = mixer.blend(CriterioEvaluacion)
+        destreza.criterios_evaluacion.set([criterio_1, criterio_2])
+        desarrollo_unidad.destrezas.set([destreza, ])
+
+        assert criterio_1 in desarrollo_unidad.criterios_evaluacion
+        assert criterio_2 in desarrollo_unidad.criterios_evaluacion
+
+    def test_indicadores_property(self):
+        desarrollo_unidad = mixer.blend(DesarrolloUnidad)
+        destreza = mixer.blend(Destreza)
+        criterio = mixer.blend(CriterioEvaluacion)
+        indicador_1 = mixer.blend(Indicador)
+        indicador_2 = mixer.blend(Indicador)
+        criterio.indicadores.set([indicador_1, indicador_2])
+        destreza.criterios_evaluacion.set([criterio, ])
+        desarrollo_unidad.destrezas.set([destreza, ])
+
+        assert indicador_1 in desarrollo_unidad.indicadores
+        assert indicador_2 in desarrollo_unidad.indicadores
+
 
 class TestPlanUnidad(TestCase):
     def setUp(self):
@@ -439,6 +475,30 @@ class TestActividadAprendizaje:
             'actividades de aprendizaje', \
             'The plural name should be "actividades de aprendizaje"'
 
+    def test_criterios_evaluacion_property(self):
+        actividad = mixer.blend(ActividadAprendizaje)
+        destreza = mixer.blend(Destreza)
+        criterio_1 = mixer.blend(CriterioEvaluacion)
+        criterio_2 = mixer.blend(CriterioEvaluacion)
+        destreza.criterios_evaluacion.set([criterio_1, criterio_2])
+        actividad.destrezas.set([destreza, ])
+
+        assert criterio_1 in actividad.criterios_evaluacion
+        assert criterio_2 in actividad.criterios_evaluacion
+
+    def test_indicadores_property(self):
+        actividad = mixer.blend(ActividadAprendizaje)
+        destreza = mixer.blend(Destreza)
+        criterio = mixer.blend(CriterioEvaluacion)
+        indicador_1 = mixer.blend(Indicador)
+        indicador_2 = mixer.blend(Indicador)
+        criterio.indicadores.set([indicador_1, indicador_2])
+        destreza.criterios_evaluacion.set([criterio, ])
+        actividad.destrezas.set([destreza, ])
+
+        assert indicador_1 in actividad.indicadores
+        assert indicador_2 in actividad.indicadores
+
 
 class TestPlanDestrezas(TestCase):
     def setUp(self):
@@ -454,3 +514,27 @@ class TestPlanDestrezas(TestCase):
             planificacion.id, planificacion.slug)
         assert url == planificacion.get_absolute_url(), \
             'Should get url of updating plan destrezas'
+
+    def test_criterios_evaluacion_property(self):
+        plan_destrezas = mixer.blend(PlanDestrezas)
+        destreza = mixer.blend(Destreza)
+        criterio_1 = mixer.blend(CriterioEvaluacion)
+        criterio_2 = mixer.blend(CriterioEvaluacion)
+        destreza.criterios_evaluacion.set([criterio_1, criterio_2])
+        plan_destrezas.destrezas.set([destreza, ])
+
+        assert criterio_1 in plan_destrezas.criterios_evaluacion
+        assert criterio_2 in plan_destrezas.criterios_evaluacion
+
+    def test_indicadores_property(self):
+        plan_destrezas = mixer.blend(PlanDestrezas)
+        destreza = mixer.blend(Destreza)
+        criterio = mixer.blend(CriterioEvaluacion)
+        indicador_1 = mixer.blend(Indicador)
+        indicador_2 = mixer.blend(Indicador)
+        criterio.indicadores.set([indicador_1, indicador_2])
+        destreza.criterios_evaluacion.set([criterio, ])
+        plan_destrezas.destrezas.set([destreza, ])
+
+        assert indicador_1 in plan_destrezas.indicadores
+        assert indicador_2 in plan_destrezas.indicadores

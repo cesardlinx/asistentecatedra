@@ -1,4 +1,7 @@
 from django.db import models
+
+from planificaciones.models.indicador import Indicador
+
 from .destreza import Destreza
 from .plan_clase import PlanClase
 
@@ -25,3 +28,9 @@ class ElementoCurricular(models.Model):
 
     def __str__(self):
         return 'Destreza: {}'.format(self.destreza.codigo)
+
+    @property
+    def indicadores(self):
+        indicadores = Indicador.objects.\
+            get_indicadores_by_destreza(self.destreza.id)
+        return indicadores
