@@ -19,7 +19,7 @@ from planificaciones.models.proceso_didactico import ProcesoDidactico
 
 from planificaciones.views.plan_clase_views import (
     PlanClaseListView, plan_clase_create, plan_clase_update,
-    PlanClaseDeleteView, PlanClaseDuplicateView)
+    PlanClaseDeleteView, PlanClaseDuplicateView, PlanClasePdfView)
 
 
 User = get_user_model()
@@ -552,3 +552,36 @@ class TestPlanClaseDuplicateView(PlanClaseTestCase):
         assert plan_clase_new.name == '{} (copia 3)'.format(
             self.plan_clase.name)
         assert plan_clase_new.tema == self.plan_clase.tema
+
+
+class TestPlanClasePdfView(PlanClaseTestCase):
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = PlanClasePdfView.as_view()(
+            request, pk=self.plan_clase.pk)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_when_user_doesnt_own_plan(self):
+        request = RequestFactory().post('/', self.data)
+        request.user = self.user
+        response = PlanClasePdfView.as_view()(
+            request, pk=self.another_plan.pk)
+        assert response.status_code == 405, 'Should return a Not Allowed'
+
+    def test_get_pdf(self):
+        """Tests that an authenticated user can't access by get method"""
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = PlanClasePdfView.as_view()(
+            request, pk=self.plan_clase.pk)
+        assert response.status_code == 200, \
+            'Should return a not allowed response'
+        assert response.template_name[0] == \
+            'planificaciones/pdfs/plan_clase_pdf.html'
+        assert response._headers.get(
+            'content-type') == ('Content-Type', 'application/pdf'), \
+            'Should return a pdf'
+        assert self.plan_clase.name in response.rendered_content, \
+            'Should show info about the "plan de clase"'

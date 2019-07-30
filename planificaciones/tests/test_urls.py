@@ -11,7 +11,7 @@ from planificaciones.views.planificaciones_view import \
     PlanificacionesTemplateView
 from planificaciones.views.plan_clase_views import (
     PlanClaseListView, plan_clase_create, plan_clase_update,
-    PlanClaseDeleteView, PlanClaseDuplicateView)
+    PlanClaseDeleteView, PlanClaseDuplicateView, PlanClasePdfView)
 from planificaciones.views.plan_anual_views import (
     PlanAnualListView, PlanAnualCreateView, PlanAnualUpdateView,
     PlanAnualDeleteView, PlanAnualDuplicateView)
@@ -89,7 +89,7 @@ class TestPlanAnualUrls:
         path = reverse('plan_anual_create')
         view = resolve(path)
         assert view.func.view_class == PlanAnualCreateView, \
-            'Should resolve to the view plan_anual_create'
+            'Should resolve to the view PlanAnualCreateView'
 
     def test_plan_anual_update(self):
         plan = mixer.blend(PlanAnual)
@@ -99,7 +99,7 @@ class TestPlanAnualUrls:
         })
         view = resolve(path)
         assert view.func.view_class == PlanAnualUpdateView, \
-            'Should resolve to the view plan_anual_update'
+            'Should resolve to the view PlanAnualUpdateView'
 
     def test_plan_anual_delete(self):
         plan = mixer.blend(PlanAnual)
@@ -131,7 +131,7 @@ class TestPlanUnidadUrls:
         path = reverse('plan_unidad_create')
         view = resolve(path)
         assert view.func.view_class == PlanUnidadCreateView, \
-            'Should resolve to the view plan_unidad_create'
+            'Should resolve to the view PlanUnidadCreateView'
 
     def test_plan_unidad_update(self):
         plan = mixer.blend(PlanUnidad)
@@ -141,7 +141,7 @@ class TestPlanUnidadUrls:
         })
         view = resolve(path)
         assert view.func.view_class == PlanUnidadUpdateView, \
-            'Should resolve to the view plan_unidad_update'
+            'Should resolve to the view PlanUnidadUpdateView'
 
     def test_plan_unidad_delete(self):
         plan = mixer.blend(PlanUnidad)
@@ -173,7 +173,7 @@ class TestPlanDestrezasUrls:
         path = reverse('plan_destrezas_create')
         view = resolve(path)
         assert view.func.view_class == PlanDestrezasCreateView, \
-            'Should resolve to the view plan_destrezas_create'
+            'Should resolve to the view PlanDestrezasCreateView'
 
     def test_plan_destrezas_update(self):
         plan = mixer.blend(PlanDestrezas)
@@ -183,7 +183,7 @@ class TestPlanDestrezasUrls:
         })
         view = resolve(path)
         assert view.func.view_class == PlanDestrezasUpdateView, \
-            'Should resolve to the view plan_destrezas_update'
+            'Should resolve to the view PlanDestrezasUpdateView'
 
     def test_plan_destrezas_delete(self):
         plan = mixer.blend(PlanDestrezas)
@@ -209,23 +209,33 @@ class TestAjaxUrls:
         path = reverse('ajax_load_cursos', kwargs={'template': 'select'})
         view = resolve(path)
         assert view.func.view_class == LoadCursosView, \
-            'Should resolve to the view load_cursos'
+            'Should resolve to the view LoadCursosView'
 
     def test_ajax_load_unidades(self):
         path = reverse('ajax_load_unidades')
         view = resolve(path)
         assert view.func.view_class == LoadUnidadesView, \
-            'Should resolve to the view load_unidades'
+            'Should resolve to the view LoadUnidadesView'
 
     def test_ajax_load_objetivos(self):
         path = reverse('ajax_load_objetivos', kwargs={'option': 'area'})
         view = resolve(path)
         assert view.func.view_class == LoadObjetivosView, \
-            'Should resolve to the view load_objetivos'
+            'Should resolve to the view LoadObjetivosView'
 
     def test_ajax_load_destrezas(self):
         path = reverse('ajax_load_destrezas',
                        kwargs={'template': 'select'})
         view = resolve(path)
         assert view.func.view_class == LoadDestrezasView, \
-            'Should resolve to the view load_destrezas'
+            'Should resolve to the view LoadDestrezasView'
+
+
+class TestPdfUrls:
+    def test_plan_clase_pdf(parameter_list):
+        plan = mixer.blend(PlanClase)
+        path = reverse('plan_clase_pdf',
+                       kwargs={'pk': plan.pk})
+        view = resolve(path)
+        assert view.func.view_class == PlanClasePdfView, \
+            'Should resolve to the view PlanClasePdfView'

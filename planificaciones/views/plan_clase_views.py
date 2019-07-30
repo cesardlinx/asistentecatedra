@@ -1,3 +1,5 @@
+from django_xhtml2pdf.views import PdfMixin
+from django.views.generic.detail import DetailView
 import logging
 
 from django.contrib import messages
@@ -15,7 +17,6 @@ from django.views.generic.list import ListView
 from planificaciones.forms.elemento_curricular_formset import \
     ElementoCurricularFormset
 from planificaciones.forms.plan_clase_form import PlanClaseForm
-
 from planificaciones.models.elemento_curricular import ElementoCurricular
 from planificaciones.models.plan_clase import PlanClase
 
@@ -188,3 +189,15 @@ class PlanClaseDuplicateView(LoginRequiredMixin, View):
                     proceso.save()
         messages.success(request, 'Plan de clase duplicado exitosamente.')
         return redirect('plan_clase_list')
+
+
+class PlanClasePdfView(LoginRequiredMixin, PdfMixin, DetailView):
+    model = PlanClase
+    template_name = "planificaciones/pdfs/plan_clase_pdf.html"
+    context_object_name = 'plan'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.object.name
+        context['school_logo'] = self.request.user.get_logo
+        return context

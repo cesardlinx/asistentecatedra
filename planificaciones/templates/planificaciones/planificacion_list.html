@@ -61,12 +61,9 @@
                                         <span class="fas fa-edit"></span>
                                     </a>
 
-                                    <form action="">
-                                        {% csrf_token %}
-                                        <button class="icon-button word" type="submit" title="Exportar a word">
-                                            <span class="fas fa-file-word"></span>
-                                        </button>
-                                    </form>
+                                    <a class="icon edit" href="{% url 'plan_clase_pdf' pk=plan.pk %}" title="Exportar a PDF">
+                                        <span class="fas fa-file-pdf"></span>
+                                    </a>
 
                                     {% if type == 'clase' %}
                                         <form method="POST" action="{% url 'plan_clase_duplicate' pk=plan.pk %}">

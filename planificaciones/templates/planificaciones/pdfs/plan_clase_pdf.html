@@ -1,0 +1,256 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+</head>
+
+<style>
+    * {
+        margin: 0;
+        box-sizing: border-box;
+        padding: 0;
+    }
+
+    @page {
+        size: landscape;
+        margin: 1cm;
+    }
+
+    table, td, th {
+        text-align: left;
+        padding: 1em 1em 1em .2em;
+    }
+
+    table {
+        border-collapse: collapse;
+    }
+
+    table.border {
+        border: 1px solid #000;
+    }
+
+    .table-header {
+        font-weight: bold;
+    }
+
+     /* titles */
+    .title {
+        text-align: center;
+        margin: 0 auto 1em;
+    }
+
+
+
+    .subtitle {
+        margin-bottom: 1em;
+    }
+
+    /* paragraphs */
+    p {
+        line-height: 1.5em;
+    }
+
+    /* sections */
+    /* images */
+    .logo {
+        display: block;
+    }
+
+    .logo-left {
+        width: 120px;
+    }
+
+    .logo-right {
+        width: 200px;
+    }
+
+
+</style>
+
+<body>
+    <table>
+        <tr>
+            <td>
+                <img class="logo logo-left" src="{{ school_logo }}">
+            </td>
+            <td colspan="3">
+                <h3 class="title">MICROPLANIFICACIÓN CURRICULAR</h3>
+                <h3 class="title">
+                    PLAN DE CLASE No {% if plan.numero_plan %}{{ plan.numero_plan }}{% endif %}
+                </h3>
+            </td>
+            <td>
+                <img class="logo logo-right" src="{% static 'img/ministerio.jpg' %}">
+            </td>
+        </tr>
+        <tr>
+            <td><h4 class="subtitle">1. DATOS INFORMATIVOS</h4></td>
+        </tr>
+        <tr>
+            <td>
+                <p><strong>Docente(s): </strong>{{ plan.docentes }}</p>
+
+            </td>
+            <td>
+                <p><strong>Area: </strong>{{ plan.asignatura.area }}</p>
+
+            </td>
+            <td>
+                <p><strong>Asignatura: </strong>{{ plan.asignatura }}</p>
+
+            </td>
+            <td>
+                <p><strong>Curso(s): </strong>
+                {% for curso in plan.cursos.all %}
+                    {% if forloop.last %}
+                        {{ curso }}
+                    {% else %}
+                        {{ curso }},
+                    {% endif %}
+                {% endfor %}
+                 </p>
+            </td>
+            <td>
+                <p><strong>Paralelo(s): </strong>{{ plan.paralelos }}</p>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p><strong>Fecha: </strong>{{ plan.fecha|date:"d/m/Y" }}</p>
+
+            </td>
+            <td>
+                <p><strong>No. de estudiantes: </strong>{{ plan.numero_estudiantes }}</p>
+
+            </td>
+            <td>
+                <p><strong>Tema: </strong>{{ plan.tema }}</p>
+
+            </td>
+            <td>
+                <p><strong>Períodos: </strong>{{ plan.periodos }}</p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5">
+                <p><strong>Metodología: </strong>{{ plan.metodologia }}</p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5">
+                <p><strong>Técnica: </strong>{{ plan.tecnica }}</p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5">
+                <p>
+                    <strong>Objetivo(s) de la Unidad de Aprendizaje:</strong>
+                    <ul>
+                        {% for objetivo in plan.objetivos.all %}
+                            <li>{{ objetivo }}</li>
+                        {% endfor %}
+                        {% for objetivo in plan.objetivos_generales.all %}
+                            <li>{{ objetivo }}</li>
+                        {% endfor %}
+                    </ul>
+                </p>
+            </td>
+        </tr>
+    </table>
+    <h4 class="subtitle">2. RELACIÓN DE ELEMENTOS CURRICULARES</h4>
+    <table class="border">
+        <tr class="table-header">
+            <td style="text-align:center;" rowspan="2" >DESTREZA CON CRITERIO DE DESEMPEÑO</td>
+            <td style="text-align:center;" rowspan="2" >CONOCIMIENTOS ASOCIADOS</td>
+            <td style="text-align:center;" rowspan="2" colspan="2">PROCESO DIDÁCTICO</td>
+            <td style="text-align:center;" rowspan="2" >TIEMPO</td>
+            <td style="text-align:center;" rowspan="2" >RECURSOS</td>
+            <td style="text-align:center;" colspan="2">EVALUACION</td>
+        </tr>
+        <tr class="table-header">
+            <td style="text-align:center;">INDICADORES DE LOGRO</td>
+            <td style="text-align:center;">ACTIVIDADES DE EVALUACIÓN</td>
+        </tr>
+        {% for elemento in plan.elementos_curriculares.all %}
+            <tr>
+                <td rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.destreza }}</td>
+                <td rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.conocimientos_asociados }}</td>
+                <td colspan="2">
+                    <p>{{ elemento.procesos_didacticos.first.name }}</p>
+                    <p>{{ elemento.procesos_didacticos.first.description }}</p>
+                </td>
+                <td>{{ elemento.procesos_didacticos.first.tiempo }}</td>
+                <td>{{ elemento.procesos_didacticos.first.recursos }}</td>
+                <td rowspan="{{ elemento.procesos_didacticos.all | length }}">
+                    <ul>
+                        {% for indicador in elemento.indicadores.all %}
+                            <li>{{ indicador }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.actividades_evaluacion }}</td>
+            </tr>
+            {% for proceso in elemento.procesos_didacticos.all %}
+                {% if forloop.counter != 1 %}
+                    <tr>
+                        <td colspan="2">
+                            <p>{{ proceso.name }}</p>
+                            <p>{{ proceso.description }}</p>
+                        </td>
+                        <td>{{ proceso.tiempo }}</td>
+                        <td>{{ proceso.recursos }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </table>
+    <table>
+        <tr>
+            <td>
+                <h4 class="subtitle">3. BIBLIOGRAFÍA</h4>
+                {{ plan.bibliografia | safe }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h4 class="subtitle">4. OBSERVACIONES</h4>
+                {{ plan.observaciones | safe }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h4 class="subtitle">5. CONTENIDO CIENTÍFICO</h4>
+                {{ plan.contenido_cientifico | safe }}
+            </td>
+        <tr>
+            <td>
+                <h4 class="subtitle">6. DESCRIPCIÓN DE MATERIAL DIDÁCTICO</h4>
+                {{ plan.material_didactico | safe }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h4 class="subtitle">7. INSTRUMENTO DE EVALUACIÓN</h4>
+                {{ plan.instrumento_evaluacion | safe }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h4 class="subtitle">8. ELABORADO POR:</h4>
+                {{ plan.elaborado_por }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h4 class="subtitle">9. APROBADO POR:</h4>
+                {{ plan.aprobado_por }}
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
