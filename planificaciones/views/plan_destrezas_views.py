@@ -27,6 +27,7 @@ class PlanDestrezasListView(UserIsPremiumMixin, ListView):
     template_name = 'planificaciones/planificacion_list.html'
     ordering = '-updated_at'
     context_object_name = 'planes'
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = PlanDestrezas.objects.filter(

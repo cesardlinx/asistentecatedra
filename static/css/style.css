@@ -2191,13 +2191,13 @@ footer {
   }
 }
 
-.pagination .pag-wrapper button {
+.pagination .pag-wrapper a {
   display: block;
   margin: 0 auto;
 }
 
 @media only screen and (min-width: 576px) {
-  .pagination .pag-wrapper button {
+  .pagination .pag-wrapper a {
     display: inline-block;
   }
 }

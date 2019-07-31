@@ -59,7 +59,7 @@
                                 {% endif %}
                                 </td>
                                 <td class="resp-column-lg">{{ plan.paralelos }}</td>
-                                <td class="resp-column-sm">{{ plan.created_at }}</td>
+                                <td class="resp-column-sm">{{ plan.created_at | date:"d/m/Y H:i:s"}}</td>
                                 <td>
 
                                     {% if type == 'clase' %}
@@ -147,17 +147,29 @@
 
                 </tbody>
             </table>
-            <div class="pagination">
-                <div class="pag-wrapper">
-                    <button type="button" class="secondary-button">
-                        <span class="fas fa-arrow-left"></span> Página Anterior
-                    </button>
-                    <p>Página 1 de 1</p>
-                    <button type="button" class="primary-button">
-                        Página Siguiente <span class="fas fa-arrow-right"></span>
-                    </button>
+
+            {% if is_paginated %}
+                <div class="pagination">
+                    <div class="pag-wrapper">
+
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}" class="secondary-button">
+                                <span class="fas fa-arrow-left"></span> Página Anterior
+                            </a>
+                        {% endif %}
+
+                        <p>Página {{ page_obj.number }} de {{ paginator.num_pages }}</p>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="primary-button">
+                                Página Siguiente <span class="fas fa-arrow-right"></span>
+                            </a>
+                        {% endif %}
+
+                    </div>
                 </div>
-            </div>
+            {% endif %}
+
         </section>
     </section>
 {% endblock %}
