@@ -14,7 +14,7 @@ from planificaciones.views.plan_clase_views import (
     PlanClaseDeleteView, PlanClaseDuplicateView, PlanClasePdfView)
 from planificaciones.views.plan_anual_views import (
     PlanAnualListView, PlanAnualCreateView, PlanAnualUpdateView,
-    PlanAnualDeleteView, PlanAnualDuplicateView)
+    PlanAnualDeleteView, PlanAnualDuplicateView, PlanAnualPdfView)
 from planificaciones.views.plan_unidad_views import (
     PlanUnidadListView, PlanUnidadCreateView, PlanUnidadUpdateView,
     PlanUnidadDeleteView, PlanUnidadDuplicateView)
@@ -239,3 +239,11 @@ class TestPdfUrls:
         view = resolve(path)
         assert view.func.view_class == PlanClasePdfView, \
             'Should resolve to the view PlanClasePdfView'
+
+    def test_plan_anual_pdf(parameter_list):
+        plan = mixer.blend(PlanAnual)
+        path = reverse('plan_anual_pdf',
+                       kwargs={'pk': plan.pk})
+        view = resolve(path)
+        assert view.func.view_class == PlanAnualPdfView, \
+            'Should resolve to the view PlanAnualPdfView'

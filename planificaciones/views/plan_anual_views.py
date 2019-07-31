@@ -7,14 +7,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
-from django.views.generic import DeleteView
+from django.views.generic import DeleteView, DetailView
 from django.views.generic.list import ListView
+from django_xhtml2pdf.views import PdfMixin
 
 from planificaciones.forms.desarrollo_unidad_formset import \
     DesarrolloUnidadFormset
 from planificaciones.forms.plan_anual_form import PlanAnualForm
 from planificaciones.mixins import UserIsPremiumMixin
-
 from planificaciones.models.desarrollo_unidad import DesarrolloUnidad
 from planificaciones.models.plan_anual import PlanAnual
 
@@ -211,3 +211,19 @@ class PlanAnualDuplicateView(UserIsPremiumMixin, View):
 
         messages.success(request, 'Plan Anual duplicado exitosamente.')
         return redirect('plan_anual_list')
+
+
+class PlanAnualPdfView(UserIsPremiumMixin, PdfMixin, DetailView):
+    model = PlanAnual
+    template_name = "planificaciones/pdfs/plan_anual_pdf.html"
+    context_object_name = 'plan'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.object.name
+        context['school_logo'] = self.request.user.get_logo
+        context['school_name'] = self.request.user.institution
+        ejes_transversales = self.object.ejes_transversales.split('\n')
+        ejes_transversales = [eje.strip() for eje in ejes_transversales]
+        context['ejes_transversales'] = ejes_transversales
+        return context

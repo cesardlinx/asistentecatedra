@@ -10,7 +10,8 @@ from .views.plan_anual_views import (PlanAnualListView,
                                      PlanAnualCreateView,
                                      PlanAnualUpdateView,
                                      PlanAnualDeleteView,
-                                     PlanAnualDuplicateView)
+                                     PlanAnualDuplicateView,
+                                     PlanAnualPdfView)
 from .views.plan_unidad_views import (PlanUnidadListView,
                                       PlanUnidadCreateView,
                                       PlanUnidadUpdateView,
@@ -91,5 +92,7 @@ urlpatterns = [
           LoadDestrezasView.as_view(),
           name="ajax_load_destrezas"),
      path('plan_clase/pdf/<int:pk>/', PlanClasePdfView.as_view(),
-          name='plan_clase_pdf')
+          name='plan_clase_pdf'),
+     path('plan_anual/pdf/<int:pk>/', PlanAnualPdfView.as_view(),
+          name='plan_anual_pdf'),
 ]

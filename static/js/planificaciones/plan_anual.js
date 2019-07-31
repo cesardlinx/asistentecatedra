@@ -300,7 +300,7 @@ $(document).ready(function() {
                         </td>
 
                         <td class="checklist destrezas">
-                            <ul id="id_desarrollo_unidades-${rowNumber}-destrezas" class="scrollable-list special-field"></ul>
+                            <ul id="id_desarrollo_unidades-${rowNumber}-destrezas"></ul>
                         </td>
 
                         <td>

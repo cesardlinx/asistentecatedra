@@ -55,12 +55,3 @@ class DesarrolloUnidad(models.Model):
         return CriterioEvaluacion.objects\
             .get_criterios_by_destrezas(destrezas_id)
 
-    @property
-    def indicadores(self):
-        indicadores = Indicador.objects.none()
-        for destreza in self.destrezas.all():
-            indicadores_destreza = Indicador.objects.\
-                get_indicadores_by_destreza(destreza.id)
-            indicadores = indicadores | indicadores_destreza
-
-        return indicadores

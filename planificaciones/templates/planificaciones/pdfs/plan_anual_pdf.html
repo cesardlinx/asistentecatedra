@@ -1,0 +1,239 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'css/style_pdfs.css' %}">
+</head>
+
+<body>
+    <table class="bordered">
+        <tr>
+            <td align="center">
+                <img class="logo logo-left" src="{{ school_logo }}">
+            </td>
+            <td colspan="5">
+                <h3 class="title" style="font-size: 15px;">
+                    {% if school_name %}
+                        {{ school_name.upper }}
+                    {% else %}
+                        No tiene agregado el nombre de su institución en su perfil.
+                    {% endif %}
+                </h3>
+            </td>
+            <td align="center">
+                <img class="logo logo-right" src="{% static 'img/ministerio.jpg' %}">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7"><h4 class="title">PLANIFICACIÓN CURRICULAR ANUAL</h4></td>
+        </tr>
+        <tr>
+            <td colspan="7" class="colored"><h4 class="subtitle">1. DATOS INFORMATIVOS</h4></td>
+        </tr>
+        <tr>
+            <td>
+                <p><strong>Area: </strong></p>
+            </td>
+            <td>
+                <p>{{ plan.asignatura.area }}</p>
+            </td>
+            <td>
+                <p><strong>Asignatura: </strong></p>
+            </td>
+            <td>
+                <p>{{ plan.asignatura }}</p>
+            </td>
+            <td>
+                <p><strong>Año Lectivo: </strong></p>
+            </td>
+            <td colspan="2">
+                <p>{{ plan.ano_lectivo }}</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p><strong>Docente(s): </strong></p>
+            </td>
+            <td colspan="6">
+                <p>{{ plan.docentes }}</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p><strong>Curso: </strong></p>
+            </td>
+            <td>
+                <p>{{ plan.curso }}</p>
+            </td>
+            <td>
+                <p><strong>Paralelo(s): </strong></p>
+            </td>
+            <td>
+                <p>{{ plan.paralelos }}</p>
+            </td>
+            <td>
+                <p><strong>Nivel Educativo: </strong></p>
+            </td>
+            <td colspan="2">
+                <p>{{ plan.curso.subnivel }}</p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" class="colored"><h4 class="subtitle">2. TIEMPO</h4></td>
+        </tr>
+        <tr>
+            <td style="text-align:center;" colspan="2">
+                <p><strong>Carga horaria semanal</strong></p>
+            </td>
+            <td style="text-align:center;">
+                <p><strong>No. de semanas de trabajo</strong></p>
+            </td>
+            <td style="text-align:center;">
+                <p><strong>Evaluación del aprendizaje e Imprevistos</strong></p>
+            </td>
+            <td style="text-align:center;">
+                <p><strong>Total de semanas de clases</strong></p>
+            </td>
+            <td style="text-align:center;" colspan="2">
+                <p><strong>Total de períodos</strong></p>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align:center;" colspan="2">{{ plan.carga_horaria }}</td>
+            <td style="text-align:center;">{{ plan.semanas_trabajo }}</td>
+            <td style="text-align:center;">{{ plan.semanas_imprevistos }}</td>
+            <td style="text-align:center;">{{ plan.total_semanas }}</td>
+            <td style="text-align:center;" colspan="2">{{ plan.total_periodos }}</td>
+        </tr>
+        <tr>
+            <td colspan="7" class="colored"><h4 class="subtitle">3. OBJETIVOS GENERALES</h4></td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <p><strong>Objetivos del Área</strong></p>
+            </td>
+            <td colspan="4">
+                <p><strong>Objetivos del Grado/Curso</strong></p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <ul>
+                    {% for objetivo in plan.objetivos_generales.all %}
+                        <li>{{ objetivo }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td colspan="4">
+                <ul>
+                    {% for objetivo in plan.objetivos_curso.all %}
+                        <li>{{ objetivo }}</li>
+                    {% endfor %}
+                    {% for objetivo in plan.objetivos_generales_curso.all %}
+                        <li>{{ objetivo }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        <tr>
+           <td class="colored"><h4 class="subtitle">4. EJES TRANSVERSALES</h4></td>
+           <td colspan="6">
+           {% for eje in ejes_transversales %}
+                <p>{{ eje }}</p>
+           {% endfor %}
+           </td>
+        </tr>
+        <tr>
+           <td colspan="7" class="colored"><h4 class="subtitle">5. DESARROLLO DE UNIDADES DE PLANIFICACIÓN</h4></td>
+        </tr>
+        <tr class="table-header">
+            <td style="text-align:center;">No.</td>
+            <td style="text-align:center;">Título de la unidad de planificación</td>
+            <td style="text-align:center;">Objetivos específicos de la unidad de planificación</td>
+            <td style="text-align:center;">Contenidos</td>
+            <td style="text-align:center;">Orientaciones Metodológicas</td>
+            <td style="text-align:center;">Evaluación</td>
+            <td style="text-align:center;">Duración en semanas</td>
+        </tr>
+        {% for desarrollo_unidad in plan.desarrollo_unidades.all %}
+        <tr>
+            <td valign="top" style="text-align:center;">{{ desarrollo_unidad.unidad.numero_unidad }}</td>
+            <td valign="top">{{ desarrollo_unidad.unidad.titulo }}</td>
+            <td valign="top">
+                <ul>
+                    {% for objetivo in desarrollo_unidad.objetivos.all %}
+                        <li>{{ objetivo }}</li>
+                    {% endfor %}
+                    {% for objetivo in desarrollo_unidad.objetivos_generales.all %}
+                        <li>{{ objetivo }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td valign="top">
+                <ul>
+                    {% for destreza in desarrollo_unidad.destrezas.all %}
+                        <li>{{ destreza }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td valign="top">
+                {{ desarrollo_unidad.orientaciones_metodologicas }}
+            </td>
+            <td valign="top">
+                <ul>
+                    {% for criterio in desarrollo_unidad.criterios_evaluacion.all %}
+                        <li>{{ criterio }}</li>
+                        {% for indicador in criterio.indicadores.all %}
+                        <li>{{ indicador }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </td>
+            <td valign="top">
+                {{ plan.semanas }}
+            </td>
+        </tr>
+        {% endfor %}
+        <tr>
+           <td colspan="7" class="colored"><h4 class="subtitle">6. BIBLIOGRAFÍA</h4></td>
+        </tr>
+        <tr>
+           <td colspan="7">{{ plan.bibliografia | safe }}</td>
+        </tr>
+        <tr>
+            <td colspan="7" class="colored"><h4 class="subtitle">7. OBSERVACIONES</h4></td>
+        </tr>
+        <tr>
+           <td colspan="7">
+            {% if observaciones %}
+                {{ plan.observaciones }}
+            {% endif %}
+           </td>
+        </tr>
+        <tr>
+            <td colspan="3" class="colored"><strong>ELABORADO</strong></td>
+            <td colspan="2" class="colored"><strong>REVISADO</strong></td>
+            <td colspan="2" class="colored"><strong>APROBADO</strong></td>
+        </tr>
+        <tr>
+            <td colspan="3"><strong>Docente(s): </strong>{{ plan.elaborado_por.first_name }} {{ plan.elaborado_por.last_name }}</td>
+            <td colspan="2"><strong>Nombre: </strong>{{ plan.revisado_por }}</td>
+            <td colspan="2"><strong>Nombre: </strong>{{ plan.aprobado_por }}</td>
+        </tr>
+        <tr>
+            <td colspan="3"><strong>Firma: </strong></td>
+            <td colspan="2"><strong>Firma: </strong></td>
+            <td colspan="2"><strong>Firma: </strong></td>
+        </tr>
+        <tr>
+            <td colspan="3"><strong>Fecha: </strong></td>
+            <td colspan="2"><strong>Fecha: </strong></td>
+            <td colspan="2"><strong>Fecha: </strong></td>
+        </tr>
+    </table>
+</body>
+</html>

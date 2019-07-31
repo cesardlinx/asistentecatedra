@@ -1,0 +1,62 @@
+ * {
+   margin: 0;
+   box-sizing: border-box;
+   padding: 0;
+ }
+
+ @page {
+   size: landscape;
+   margin: 1cm;
+ }
+
+ table,
+ td,
+ th {
+   text-align: left;
+   padding: 1em;
+ }
+
+ table {
+   border-collapse: collapse;
+ }
+
+ table.bordered {
+   border: 1px solid #000;
+ }
+
+ .table-header {
+   font-weight: bold;
+ }
+
+ td.colored {
+     background-color: #dae5f4;
+ }
+
+ /* titles */
+ .title {
+   text-align: center;
+   margin: 0 auto 1em;
+ }
+
+ .subtitle {
+   margin-bottom: 1em;
+ }
+
+ /* paragraphs */
+ p {
+   line-height: 1.5em;
+ }
+
+ /* sections */
+ /* images */
+ .logo {
+   display: block;
+ }
+
+ .logo-left {
+   width: 120px;
+ }
+
+ .logo-right {
+   width: 200px;
+ }

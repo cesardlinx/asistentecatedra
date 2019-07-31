@@ -346,7 +346,8 @@ class TestElementoCurricular:
 
     def test_indicadores_property(self):
         destreza = mixer.blend(Destreza)
-        elemento_curricular = mixer.blend(ElementoCurricular, destreza=destreza)
+        elemento_curricular = mixer.blend(ElementoCurricular,
+                                          destreza=destreza)
         criterio = mixer.blend(CriterioEvaluacion)
         indicador_1 = mixer.blend(Indicador)
         indicador_2 = mixer.blend(Indicador)
@@ -431,19 +432,6 @@ class TestDesarrolloUnidad:
 
         assert criterio_1 in desarrollo_unidad.criterios_evaluacion
         assert criterio_2 in desarrollo_unidad.criterios_evaluacion
-
-    def test_indicadores_property(self):
-        desarrollo_unidad = mixer.blend(DesarrolloUnidad)
-        destreza = mixer.blend(Destreza)
-        criterio = mixer.blend(CriterioEvaluacion)
-        indicador_1 = mixer.blend(Indicador)
-        indicador_2 = mixer.blend(Indicador)
-        criterio.indicadores.set([indicador_1, indicador_2])
-        destreza.criterios_evaluacion.set([criterio, ])
-        desarrollo_unidad.destrezas.set([destreza, ])
-
-        assert indicador_1 in desarrollo_unidad.indicadores
-        assert indicador_2 in desarrollo_unidad.indicadores
 
 
 class TestPlanUnidad(TestCase):

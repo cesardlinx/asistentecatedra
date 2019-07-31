@@ -6,70 +6,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'css/style_pdfs.css' %}">
 </head>
-
-<style>
-    * {
-        margin: 0;
-        box-sizing: border-box;
-        padding: 0;
-    }
-
-    @page {
-        size: landscape;
-        margin: 1cm;
-    }
-
-    table, td, th {
-        text-align: left;
-        padding: 1em 1em 1em .2em;
-    }
-
-    table {
-        border-collapse: collapse;
-    }
-
-    table.border {
-        border: 1px solid #000;
-    }
-
-    .table-header {
-        font-weight: bold;
-    }
-
-     /* titles */
-    .title {
-        text-align: center;
-        margin: 0 auto 1em;
-    }
-
-
-
-    .subtitle {
-        margin-bottom: 1em;
-    }
-
-    /* paragraphs */
-    p {
-        line-height: 1.5em;
-    }
-
-    /* sections */
-    /* images */
-    .logo {
-        display: block;
-    }
-
-    .logo-left {
-        width: 120px;
-    }
-
-    .logo-right {
-        width: 200px;
-    }
-
-
-</style>
 
 <body>
     <table>
@@ -163,7 +101,7 @@
         </tr>
     </table>
     <h4 class="subtitle">2. RELACIÓN DE ELEMENTOS CURRICULARES</h4>
-    <table class="border">
+    <table class="bordered">
         <tr class="table-header">
             <td style="text-align:center;" rowspan="2" >DESTREZA CON CRITERIO DE DESEMPEÑO</td>
             <td style="text-align:center;" rowspan="2" >CONOCIMIENTOS ASOCIADOS</td>
@@ -178,32 +116,32 @@
         </tr>
         {% for elemento in plan.elementos_curriculares.all %}
             <tr>
-                <td rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.destreza }}</td>
-                <td rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.conocimientos_asociados }}</td>
-                <td colspan="2">
+                <td valign="top" rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.destreza }}</td>
+                <td valign="top" rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.conocimientos_asociados }}</td>
+                <td valign="top" colspan="2">
                     <p>{{ elemento.procesos_didacticos.first.name }}</p>
                     <p>{{ elemento.procesos_didacticos.first.description }}</p>
                 </td>
-                <td>{{ elemento.procesos_didacticos.first.tiempo }}</td>
-                <td>{{ elemento.procesos_didacticos.first.recursos }}</td>
-                <td rowspan="{{ elemento.procesos_didacticos.all | length }}">
+                <td valign="top">{{ elemento.procesos_didacticos.first.tiempo }}</td>
+                <td valign="top">{{ elemento.procesos_didacticos.first.recursos }}</td>
+                <td valign="top" rowspan="{{ elemento.procesos_didacticos.all | length }}">
                     <ul>
                         {% for indicador in elemento.indicadores.all %}
                             <li>{{ indicador }}</li>
                         {% endfor %}
                     </ul>
                 </td>
-                <td rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.actividades_evaluacion }}</td>
+                <td valign="top" rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.actividades_evaluacion }}</td>
             </tr>
             {% for proceso in elemento.procesos_didacticos.all %}
                 {% if forloop.counter != 1 %}
                     <tr>
-                        <td colspan="2">
+                        <td  valign="top" colspan="2">
                             <p>{{ proceso.name }}</p>
                             <p>{{ proceso.description }}</p>
                         </td>
-                        <td>{{ proceso.tiempo }}</td>
-                        <td>{{ proceso.recursos }}</td>
+                        <td valign="top">{{ proceso.tiempo }}</td>
+                        <td valign="top">{{ proceso.recursos }}</td>
                     </tr>
                 {% endif %}
             {% endfor %}
