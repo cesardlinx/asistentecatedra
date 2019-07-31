@@ -1,0 +1,216 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'css/style_pdfs.css' %}">
+</head>
+
+<body>
+    <table class="bordered">
+        <tr>
+            <td align="center">
+                <img class="logo logo-left" src="{{ school_logo }}">
+            </td>
+            <td colspan="8">
+                <h3 class="title" style="font-size: 15px; font-style: italic;">
+                    {% if school_name %}
+                        {{ school_name.upper }}
+                    {% else %}
+                        No tiene agregado el nombre de su institución en su perfil.
+                    {% endif %}
+                </h3>
+            </td>
+            <td align="center">
+                {{ plan.ano_lectivo }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="10"><h4 class="title">PLANIFICACIÓN DE DESTREZAS CON CRITERIO DE DESEMPEÑO</h4></td>
+        </tr>
+        <tr>
+            <td colspan="10" class="colored"><h4 class="subtitle">1. DATOS INFORMATIVOS</h4></td>
+        </tr>
+        <tr>
+            <td>
+                <p><strong>Docente(s): </strong></p>
+            </td>
+            <td>
+                <p>{{ plan.docentes }}</p>
+            </td>
+            <td>
+                <p><strong>Area: </strong></p>
+            </td>
+            <td>
+                <p>{{ plan.asignatura.area }}</p>
+            </td>
+            <td>
+                <p><strong>Asignatura: </strong></p>
+            </td>
+            <td>
+                <p>{{ plan.asignatura }}</p>
+            </td>
+            <td>
+                <p><strong>Curso: </strong></p>
+            </td>
+            <td>
+                <p>{{ plan.curso }}</p>
+            </td>
+            <td>
+                <p><strong>Paralelo(s): </strong></p>
+            </td>
+            <td>
+                <p>{{ plan.paralelos }}</p>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                 <p><strong>No. de unidad de planificación: </strong></p>
+            </td>
+            <td>
+                {{ plan.unidad.numero_unidad }}
+            </td>
+            {% if plan.asignatura.name == 'Lengua y Literatura' %}
+            <td colspan="3">
+                {% for subunidad in subunidades %}
+                <p>{{ subunidad }}</p>
+                {% endfor %}
+            </td>
+            {% else %}
+            <td colspan="3">
+                 {{ plan.unidad.titulo }}
+            </td>
+            {% endif %}
+            <td>
+                <p><strong>Objetivos específicos de la unidad de planificación: </strong></p>
+            </td>
+            <td colspan="4">
+                <ul>
+                    {% for objetivo in plan.objetivos.all %}
+                    <li>{{ objetivo }}</li>
+                    {% endfor %}
+                    {% for objetivo in plan.objetivos_generales.all %}
+                    <li>{{ objetivo }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="10" class="colored"><h4 class="subtitle">2. PLANIFICACIÓN</h4></td>
+        </tr>
+
+        <tr class="table-header">
+            <td colspan="5" style="text-align:center;">DESTREZAS CON CRITERIOS DE DESEMPEÑO A SER DESARROLLADAS</td>
+            <td colspan="5" style="text-align:center;">CRITERIOS DE EVALUACIÓN</td>
+        </tr>
+
+        <tr>
+            <td colspan="5">
+                <ul>
+                    {% for destreza in plan.destrezas.all %}
+                    <li>{{ destreza }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td colspan="5">
+                <ul>
+                    {% for criterio in plan.criterios_evaluacion.all %}
+                    <li>{{ criterio }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <p><strong>EJES TRANSVERSALES</strong></p>
+
+            </td>
+            <td colspan="3">{{ plan.ejes_transversales }}</td>
+            <td>
+                <p><strong>PERÍODOS</strong></p>
+            </td>
+            <td>{{ plan.periodos }}</td>
+            <td>
+                <p><strong>SEMANA DE INICIO</strong ></p>
+            </td>
+            <td colspan="2">{{ plan.semana_inicio }}</td>
+        </tr>
+
+        <tr class="table-header">
+            <td colspan="4" style="text-align:center;">Estrategias metodológicas</td>
+            <td colspan="2" style="text-align:center;">Recursos</td>
+            <td colspan="2" style="text-align:center;">Indicadores de logro</td>
+            <td colspan="2" style="text-align:center;">Actividades de evaluación / Técnicas / Instrumentos</td>
+        </tr>
+
+        <tr>
+            <td colspan="4">
+                {{ plan.estrategias_metodologicas }}
+            </td>
+            <td colspan="2">
+                {{ plan.recursos }}
+            </td>
+            <td colspan="2">
+                <ul>
+                    {% for indicador in plan.indicadores.all %}
+                        <li>{{ indicador }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td colspan="2">
+                {{ plan.actividades_evaluacion }}
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="10" class="colored"><h4 class="subtitle">3. ADAPTACIONES CURRICULARES</h4></td>
+        </tr>
+        <tr>
+            <td  colspan="5"style="text-align:center;">
+                <p><strong>Especificación de la necesidad educativa</strong></p>
+            </td>
+            <td  colspan="5"style="text-align:center;">
+                <p><strong>Especificación de la adaptación a ser aplicada</strong></p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5">{{ plan.necesidad_adaptacion }}</td>
+            <td colspan="5">{{ plan.adaptacion_curricular }}</td>
+        </tr>
+        <tr>
+            <td class="footer-cell" colspan="4" class="colored"><strong>ELABORADO</strong></td>
+            <td class="footer-cell" colspan="3" class="colored"><strong>REVISADO</strong></td>
+            <td class="footer-cell" colspan="3" class="colored"><strong>APROBADO</strong></td>
+        </tr>
+        <tr>
+            <td class="footer-cell" colspan="4"><strong>Docente(s): </strong>{{ plan.elaborado_por.first_name }} {{ plan.elaborado_por.last_name }}</td>
+            <td class="footer-cell" colspan="3"><strong>Nombre: </strong>
+                {% if plan.revisado_por %}
+                    {{ plan.revisado_por }}
+                {% endif %}
+            </td>
+            <td class="footer-cell" colspan="3"><strong>Nombre: </strong>
+                {% if plan.aprobado_por %}
+                    {{ plan.aprobado_por }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="footer-cell" colspan="4"><strong>Firma: </strong></td>
+            <td class="footer-cell" colspan="3"><strong>Firma: </strong></td>
+            <td class="footer-cell" colspan="3"><strong>Firma: </strong></td>
+        </tr>
+        <tr>
+            <td class="footer-cell" colspan="4"><strong>Fecha: </strong></td>
+            <td class="footer-cell" colspan="3"><strong>Fecha: </strong></td>
+            <td class="footer-cell" colspan="3"><strong>Fecha: </strong></td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -16,7 +16,7 @@ from planificaciones.tests.planificaciones_testcase import \
 
 from planificaciones.views.plan_destrezas_views import (
     PlanDestrezasListView, PlanDestrezasCreateView, PlanDestrezasUpdateView,
-    PlanDestrezasDeleteView, PlanDestrezasDuplicateView)
+    PlanDestrezasDeleteView, PlanDestrezasDuplicateView, PlanDestrezasPdfView)
 
 User = get_user_model()
 pytestmark = pytest.mark.django_db
@@ -529,3 +529,45 @@ class TestPlanDestrezasDuplicateView(PlanDestrezasTestCase):
         assert plan_destrezas_new.name == '{} (copia 3)'.format(
             self.plan_destrezas.name)
         assert plan_destrezas_new.curso == self.plan_destrezas.curso
+
+
+class TestPlanDestrezasPdfView(PlanDestrezasTestCase):
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = PlanDestrezasPdfView.as_view()(
+            request, pk=self.plan_destrezas.pk)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_premium(self):
+        """Tests that only premium users can access"""
+        request = RequestFactory().get('/')
+        request.user = self.common_user
+        response = PlanDestrezasPdfView.as_view()(request)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert reverse('planificaciones') == response.url, \
+            'Should not be callable by a normal user'
+
+    def test_when_user_doesnt_own_plan(self):
+        request = RequestFactory().post('/', self.data)
+        request.user = self.user
+        response = PlanDestrezasPdfView.as_view()(
+            request, pk=self.another_plan.pk)
+        assert response.status_code == 405, 'Should return a Not Allowed'
+
+    def test_get_pdf(self):
+        """Tests that an authenticated user can't access by get method"""
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = PlanDestrezasPdfView.as_view()(
+            request, pk=self.plan_destrezas.pk)
+        assert response.status_code == 200, \
+            'Should return a not allowed response'
+        assert response.template_name[0] == \
+            'planificaciones/pdfs/plan_destrezas_pdf.html'
+        assert response._headers.get(
+            'content-type') == ('Content-Type', 'application/pdf'), \
+            'Should return a pdf'
+        assert self.plan_destrezas.name in response.rendered_content, \
+            'Should show info about the "plan destrezas"'

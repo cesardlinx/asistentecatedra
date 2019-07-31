@@ -20,7 +20,7 @@ from planificaciones.views.plan_unidad_views import (
     PlanUnidadDeleteView, PlanUnidadDuplicateView, PlanUnidadPdfView)
 from planificaciones.views.plan_destrezas_views import (
     PlanDestrezasListView, PlanDestrezasCreateView, PlanDestrezasUpdateView,
-    PlanDestrezasDeleteView, PlanDestrezasDuplicateView)
+    PlanDestrezasDeleteView, PlanDestrezasDuplicateView, PlanDestrezasPdfView)
 from planificaciones.views.ajax_views import (
     LoadCursosView, LoadDestrezasView,
     LoadObjetivosView, LoadUnidadesView)
@@ -255,3 +255,11 @@ class TestPdfUrls:
         view = resolve(path)
         assert view.func.view_class == PlanUnidadPdfView, \
             'Should resolve to the view PlanUnidadPdfView'
+
+    def test_plan_destrezas_pdf(self):
+        plan = mixer.blend(PlanDestrezas)
+        path = reverse('plan_destrezas_pdf',
+                       kwargs={'pk': plan.pk})
+        view = resolve(path)
+        assert view.func.view_class == PlanDestrezasPdfView, \
+            'Should resolve to the view PlanDestrezasPdfView'
