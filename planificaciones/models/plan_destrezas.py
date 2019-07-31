@@ -77,8 +77,7 @@ class PlanDestrezas(Planificacion):
         verbose_name_plural = "planes de destrezas"
 
     def get_absolute_url(self):
-        kwargs = {'pk': self.pk, 'slug': self.slug}
-        return reverse('plan_destrezas_update', kwargs=kwargs)
+        return reverse('plan_destrezas_pdf', kwargs={'pk': self.pk})
 
     @property
     def criterios_evaluacion(self):

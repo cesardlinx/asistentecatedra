@@ -59,5 +59,4 @@ class PlanClase(Planificacion):
         verbose_name_plural = "planes de clase"
 
     def get_absolute_url(self):
-        kwargs = {'pk': self.pk, 'slug': self.slug}
-        return reverse('plan_clase_update', kwargs=kwargs)
+        return reverse('plan_clase_pdf', kwargs={'pk': self.pk})

@@ -71,5 +71,4 @@ class PlanUnidad(Planificacion):
         verbose_name_plural = "planes de unidad"
 
     def get_absolute_url(self):
-        kwargs = {'pk': self.pk, 'slug': self.slug}
-        return reverse('plan_unidad_update', kwargs=kwargs)
+        return reverse('plan_unidad_pdf', kwargs={'pk': self.pk})

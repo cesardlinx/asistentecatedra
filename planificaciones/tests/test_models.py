@@ -1,29 +1,31 @@
 import pytest
-from mixer.backend.django import mixer
-from django.utils.text import Truncator
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.urls import reverse
+from django.utils.text import Truncator
+from mixer.backend.django import mixer
+
+from planificaciones.models.actividad_aprendizaje import ActividadAprendizaje
 from planificaciones.models.area import Area
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.bloque_curricular import BloqueCurricular
-from planificaciones.models.nivel import Nivel
-from planificaciones.models.subnivel import Subnivel
-from planificaciones.models.curso import Curso
-from planificaciones.models.objetivo_general import ObjetivoGeneral
-from planificaciones.models.objetivo import Objetivo
-from planificaciones.models.unidad import Unidad
-from planificaciones.models.destreza import Destreza
 from planificaciones.models.criterio_evaluacion import CriterioEvaluacion
-from planificaciones.models.indicador import Indicador
-from planificaciones.models.plan_clase import PlanClase
-from planificaciones.models.elemento_curricular import ElementoCurricular
-from planificaciones.models.proceso_didactico import ProcesoDidactico
-from planificaciones.models.plan_anual import PlanAnual
-from planificaciones.models.planificacion import Planificacion
+from planificaciones.models.curso import Curso
 from planificaciones.models.desarrollo_unidad import DesarrolloUnidad
-from planificaciones.models.plan_unidad import PlanUnidad
-from planificaciones.models.actividad_aprendizaje import ActividadAprendizaje
+from planificaciones.models.destreza import Destreza
+from planificaciones.models.elemento_curricular import ElementoCurricular
+from planificaciones.models.indicador import Indicador
+from planificaciones.models.nivel import Nivel
+from planificaciones.models.objetivo import Objetivo
+from planificaciones.models.objetivo_general import ObjetivoGeneral
+from planificaciones.models.plan_anual import PlanAnual
+from planificaciones.models.plan_clase import PlanClase
 from planificaciones.models.plan_destrezas import PlanDestrezas
+from planificaciones.models.plan_unidad import PlanUnidad
+from planificaciones.models.planificacion import Planificacion
+from planificaciones.models.proceso_didactico import ProcesoDidactico
+from planificaciones.models.subnivel import Subnivel
+from planificaciones.models.unidad import Unidad
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
@@ -321,8 +323,7 @@ class TestPlanClase:
 
     def test_get_absolute_url(self):
         planificacion = mixer.blend(PlanClase)
-        url = '/planificaciones/plan_clase/update/{}/{}/'.format(
-            planificacion.id, planificacion.slug)
+        url = reverse('plan_clase_pdf', kwargs={'pk': planificacion.pk})
         assert url == planificacion.get_absolute_url(), \
             'Should get url of updating plan de clase'
 
@@ -404,8 +405,7 @@ class TestPlanAnual(TestCase):
 
     def test_get_absolute_url(self):
         planificacion = mixer.blend(PlanAnual)
-        url = '/planificaciones/plan_anual/update/{}/{}/'.format(
-            planificacion.id, planificacion.slug)
+        url = reverse('plan_anual_pdf', kwargs={'pk': planificacion.pk})
         assert url == planificacion.get_absolute_url(), \
             'Should get url of updating plan anual'
 
@@ -446,8 +446,7 @@ class TestPlanUnidad(TestCase):
 
     def test_get_absolute_url(self):
         planificacion = mixer.blend(PlanUnidad)
-        url = '/planificaciones/plan_unidad/update/{}/{}/'.format(
-            planificacion.id, planificacion.slug)
+        url = reverse('plan_unidad_pdf', kwargs={'pk': planificacion.pk})
         assert url == planificacion.get_absolute_url(), \
             'Should get url of updating plan de unidad'
 
@@ -498,10 +497,9 @@ class TestPlanDestrezas(TestCase):
 
     def test_get_absolute_url(self):
         planificacion = mixer.blend(PlanDestrezas)
-        url = '/planificaciones/plan_destrezas/update/{}/{}/'.format(
-            planificacion.id, planificacion.slug)
+        url = reverse('plan_destrezas_pdf', kwargs={'pk': planificacion.pk})
         assert url == planificacion.get_absolute_url(), \
-            'Should get url of updating plan destrezas'
+            'Should get url of updating plan de destrezas'
 
     def test_criterios_evaluacion_property(self):
         plan_destrezas = mixer.blend(PlanDestrezas)

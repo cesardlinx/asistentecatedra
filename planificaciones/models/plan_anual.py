@@ -71,8 +71,7 @@ class PlanAnual(Planificacion):
         verbose_name_plural = "planes anuales"
 
     def get_absolute_url(self):
-        kwargs = {'pk': self.pk, 'slug': self.slug}
-        return reverse('plan_anual_update', kwargs=kwargs)
+        return reverse('plan_anual_pdf', kwargs={'pk': self.pk})
 
     @property
     def total_semanas(self):
