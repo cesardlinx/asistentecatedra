@@ -60,3 +60,15 @@ class PlanClase(Planificacion):
 
     def get_absolute_url(self):
         return reverse('plan_clase_pdf', kwargs={'pk': self.pk})
+
+    def get_update_url(self):
+        return reverse('plan_clase_update',
+                       kwargs={'pk': self.pk, 'slug': self.slug})
+
+    def get_duplicate_url(self):
+        return reverse('plan_clase_duplicate',
+                       kwargs={'pk': self.pk})
+
+    def get_delete_url(self):
+        return reverse('plan_clase_delete',
+                       kwargs={'pk': self.pk})

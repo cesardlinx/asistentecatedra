@@ -72,3 +72,15 @@ class PlanUnidad(Planificacion):
 
     def get_absolute_url(self):
         return reverse('plan_unidad_pdf', kwargs={'pk': self.pk})
+
+    def get_update_url(self):
+        return reverse('plan_unidad_update',
+                       kwargs={'pk': self.pk, 'slug': self.slug})
+
+    def get_duplicate_url(self):
+        return reverse('plan_unidad_duplicate',
+                       kwargs={'pk': self.pk})
+
+    def get_delete_url(self):
+        return reverse('plan_unidad_delete',
+                       kwargs={'pk': self.pk})

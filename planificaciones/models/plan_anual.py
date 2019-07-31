@@ -80,3 +80,15 @@ class PlanAnual(Planificacion):
     @property
     def total_periodos(self):
         return self.carga_horaria * self.semanas_trabajo
+
+    def get_update_url(self):
+        return reverse('plan_anual_update',
+                       kwargs={'pk': self.pk, 'slug': self.slug})
+
+    def get_duplicate_url(self):
+        return reverse('plan_anual_duplicate',
+                       kwargs={'pk': self.pk})
+
+    def get_delete_url(self):
+        return reverse('plan_anual_delete',
+                       kwargs={'pk': self.pk})

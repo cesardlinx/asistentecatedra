@@ -329,7 +329,29 @@ class TestPlanClase:
         planificacion = mixer.blend(PlanClase)
         url = reverse('plan_clase_pdf', kwargs={'pk': planificacion.pk})
         assert url == planificacion.get_absolute_url(), \
-            'Should get url of updating plan de clase'
+            'Should get url of plan de clase detail'
+
+    def test_get_update_url(self):
+        planificacion = mixer.blend(PlanClase)
+        url = reverse('plan_clase_update',
+                      kwargs={'pk': planificacion.pk,
+                              'slug': planificacion.slug})
+        assert url == planificacion.get_update_url(), \
+            'Should get url of plan de clase update'
+
+    def test_get_duplicate_url(self):
+        planificacion = mixer.blend(PlanClase)
+        url = reverse('plan_clase_duplicate',
+                      kwargs={'pk': planificacion.pk})
+        assert url == planificacion.get_duplicate_url(), \
+            'Should get url of plan de clase duplication'
+
+    def test_get_delete_url(self):
+        planificacion = mixer.blend(PlanClase)
+        url = reverse('plan_clase_delete',
+                      kwargs={'pk': planificacion.pk})
+        assert url == planificacion.get_delete_url(), \
+            'Should get plan de clase delete url'
 
 
 class TestElementoCurricular:
@@ -411,7 +433,29 @@ class TestPlanAnual(TestCase):
         planificacion = mixer.blend(PlanAnual)
         url = reverse('plan_anual_pdf', kwargs={'pk': planificacion.pk})
         assert url == planificacion.get_absolute_url(), \
-            'Should get url of updating plan anual'
+            'Should get url of plan anual detail'
+
+    def test_get_update_url(self):
+        planificacion = mixer.blend(PlanAnual)
+        url = reverse('plan_anual_update',
+                      kwargs={'pk': planificacion.pk,
+                              'slug': planificacion.slug})
+        assert url == planificacion.get_update_url(), \
+            'Should get url of plan anual update'
+
+    def test_get_duplicate_url(self):
+        planificacion = mixer.blend(PlanAnual)
+        url = reverse('plan_anual_duplicate',
+                      kwargs={'pk': planificacion.pk})
+        assert url == planificacion.get_duplicate_url(), \
+            'Should get url of plan anual duplication'
+
+    def test_get_delete_url(self):
+        planificacion = mixer.blend(PlanAnual)
+        url = reverse('plan_anual_delete',
+                      kwargs={'pk': planificacion.pk})
+        assert url == planificacion.get_delete_url(), \
+            'Should get plan anual delete url'
 
 
 class TestDesarrolloUnidad:
@@ -452,7 +496,29 @@ class TestPlanUnidad(TestCase):
         planificacion = mixer.blend(PlanUnidad)
         url = reverse('plan_unidad_pdf', kwargs={'pk': planificacion.pk})
         assert url == planificacion.get_absolute_url(), \
-            'Should get url of updating plan de unidad'
+            'Should get url of plan de unidad detail'
+
+    def test_get_update_url(self):
+        planificacion = mixer.blend(PlanUnidad)
+        url = reverse('plan_unidad_update',
+                      kwargs={'pk': planificacion.pk,
+                              'slug': planificacion.slug})
+        assert url == planificacion.get_update_url(), \
+            'Should get url of plan de unidad update'
+
+    def test_get_duplicate_url(self):
+        planificacion = mixer.blend(PlanUnidad)
+        url = reverse('plan_unidad_duplicate',
+                      kwargs={'pk': planificacion.pk})
+        assert url == planificacion.get_duplicate_url(), \
+            'Should get url of plan de unidad duplication'
+
+    def test_get_delete_url(self):
+        planificacion = mixer.blend(PlanUnidad)
+        url = reverse('plan_unidad_delete',
+                      kwargs={'pk': planificacion.pk})
+        assert url == planificacion.get_delete_url(), \
+            'Should get plan de unidad delete url'
 
 
 class TestActividadAprendizaje:
@@ -499,12 +565,6 @@ class TestPlanDestrezas(TestCase):
         assert isinstance(self.plan, PlanDestrezas), \
             'Should be instance of PlanDestrezas'
 
-    def test_get_absolute_url(self):
-        planificacion = mixer.blend(PlanDestrezas)
-        url = reverse('plan_destrezas_pdf', kwargs={'pk': planificacion.pk})
-        assert url == planificacion.get_absolute_url(), \
-            'Should get url of updating plan de destrezas'
-
     def test_criterios_evaluacion_property(self):
         plan_destrezas = mixer.blend(PlanDestrezas)
         destreza = mixer.blend(Destreza)
@@ -528,3 +588,31 @@ class TestPlanDestrezas(TestCase):
 
         assert indicador_1 in plan_destrezas.indicadores
         assert indicador_2 in plan_destrezas.indicadores
+
+    def test_get_absolute_url(self):
+        planificacion = mixer.blend(PlanDestrezas)
+        url = reverse('plan_destrezas_pdf', kwargs={'pk': planificacion.pk})
+        assert url == planificacion.get_absolute_url(), \
+            'Should get url of plan de destrezas detail'
+
+    def test_get_update_url(self):
+        planificacion = mixer.blend(PlanDestrezas)
+        url = reverse('plan_destrezas_update',
+                      kwargs={'pk': planificacion.pk,
+                              'slug': planificacion.slug})
+        assert url == planificacion.get_update_url(), \
+            'Should get url of plan de destrezas update'
+
+    def test_get_duplicate_url(self):
+        planificacion = mixer.blend(PlanDestrezas)
+        url = reverse('plan_destrezas_duplicate',
+                      kwargs={'pk': planificacion.pk})
+        assert url == planificacion.get_duplicate_url(), \
+            'Should get url of plan de destrezas duplication'
+
+    def test_get_delete_url(self):
+        planificacion = mixer.blend(PlanDestrezas)
+        url = reverse('plan_destrezas_delete',
+                      kwargs={'pk': planificacion.pk})
+        assert url == planificacion.get_delete_url(), \
+            'Should get plan de destrezas delete url'

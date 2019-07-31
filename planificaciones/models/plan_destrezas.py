@@ -94,3 +94,15 @@ class PlanDestrezas(Planificacion):
             indicadores = indicadores | indicadores_destreza
 
         return indicadores
+
+    def get_update_url(self):
+        return reverse('plan_destrezas_update',
+                       kwargs={'pk': self.pk, 'slug': self.slug})
+
+    def get_duplicate_url(self):
+        return reverse('plan_destrezas_duplicate',
+                       kwargs={'pk': self.pk})
+
+    def get_delete_url(self):
+        return reverse('plan_destrezas_delete',
+                       kwargs={'pk': self.pk})
