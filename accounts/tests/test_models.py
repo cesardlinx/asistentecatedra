@@ -60,6 +60,9 @@ class TestUser(TestCase):
             'Normal user should not be premium by default'
         assert isinstance(user, User), 'Should be an instance of User'
         slug = 'david-padilla'
+        assert user.full_name == '{} {}'.format(
+            user.first_name,
+            user.last_name), "It should return the user's full name"
         assert user.get_absolute_url() == '/accounts/profile/{0}/{1}/'\
                                           .format(user.pk, slug)
         assert user.username == user.email, 'The username should be the email'

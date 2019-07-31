@@ -116,7 +116,7 @@
         </tr>
         {% for elemento in plan.elementos_curriculares.all %}
             <tr>
-                <td valign="top" rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.destreza }}</td>
+                <td valign="top" rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.destreza.complete }}</td>
                 <td valign="top" rowspan="{{ elemento.procesos_didacticos.all | length }}">{{ elemento.conocimientos_asociados }}</td>
                 <td valign="top" colspan="2">
                     <p>{{ elemento.procesos_didacticos.first.name }}</p>
@@ -180,13 +180,15 @@
         <tr>
             <td>
                 <h4 class="subtitle">8. ELABORADO POR:</h4>
-                {{ plan.elaborado_por }}
+                {{ plan.elaborado_por.full_name }}
             </td>
         </tr>
         <tr>
             <td>
                 <h4 class="subtitle">9. APROBADO POR:</h4>
-                {{ plan.aprobado_por }}
+                {% if plan.aprobado_por %}
+                    {{ plan.aprobado_por }}
+                {% endif %}
             </td>
         </tr>
     </table>

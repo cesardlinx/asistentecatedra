@@ -74,7 +74,7 @@
             <td>
                 {{ plan.unidad.numero_unidad }}
             </td>
-            {% if plan.asignatura.name == 'Lengua y Literatura' %}
+            {% if plan.asignatura.name == 'Lengua y Literatura' and plan.curso.subnivel.name != 'Bachillerato General Unificado' %}
             <td colspan="3">
                 {% for subunidad in subunidades %}
                 <p>{{ subunidad }}</p>
@@ -125,7 +125,7 @@
             <td colspan="5">
                 <ul>
                     {% for destreza in actividad.destrezas.all %}
-                    <li>{{ destreza }}</li>
+                    <li>{{ destreza.complete }}</li>
                     {% endfor %}
                 </ul>
             </td>
@@ -170,12 +170,24 @@
             <td colspan="10" class="colored"><h4 class="subtitle">3. ADAPTACIONES CURRICULARES</h4></td>
         </tr>
         <tr>
-            <td  colspan="5"style="text-align:center;">Especificación de la necesidad educativa</td>
-            <td  colspan="5"style="text-align:center;">Especificación de la adaptación a ser aplicada</td>
+            <td  colspan="5"style="text-align:center;">
+                <p><strong>Especificación de la necesidad educativa</strong></p>
+            </td>
+            <td  colspan="5"style="text-align:center;">
+                <p><strong>Especificación de la adaptación a ser aplicada</strong></p>
+            </td>
         </tr>
         <tr>
-            <td colspan="5">{{ plan.necesidad_adaptacion }}</td>
-            <td colspan="5">{{ plan.adaptacion_curricular }}</td>
+            <td colspan="5">
+                {% if plan.necesidad_adaptacion %}
+                    {{ plan.necesidad_adaptacion }}
+                {% endif %}
+            </td>
+            <td colspan="5">
+                {% if plan.adaptacion_curricular %}
+                    {{ plan.adaptacion_curricular }}
+                {% endif %}
+            </td>
         </tr>
         <tr>
             <td class="footer-cell" colspan="4" class="colored"><strong>ELABORADO</strong></td>
@@ -183,7 +195,7 @@
             <td class="footer-cell" colspan="3" class="colored"><strong>APROBADO</strong></td>
         </tr>
         <tr>
-            <td class="footer-cell" colspan="4"><strong>Docente(s): </strong>{{ plan.elaborado_por.first_name }} {{ plan.elaborado_por.last_name }}</td>
+            <td class="footer-cell" colspan="4"><strong>Docente(s): </strong>{{ plan.elaborado_por.full_name }}</td>
             <td class="footer-cell" colspan="3"><strong>Nombre: </strong>
                 {% if plan.revisado_por %}
                     {{ plan.revisado_por }}

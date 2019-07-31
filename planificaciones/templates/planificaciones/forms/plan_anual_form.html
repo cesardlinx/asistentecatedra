@@ -65,7 +65,14 @@
 
                 <div class="form-group">
                     {{ form.objetivos_generales|add_label_class:"form-label" }}
-                    {{ form.objetivos_generales }}
+                    {% if form.objetivos_generales.errors %}
+                        <div class="error">
+                            {{ form.objetivos_generales }}
+                            {% include 'forms/field_errors.html' with field=form.objetivos_generales%}
+                        </div>
+                    {% else %}
+                        {{ form.objetivos_generales }}
+                    {% endif %}
                 </div>
 
                 <div class="form-group">

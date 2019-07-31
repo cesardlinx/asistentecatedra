@@ -35,6 +35,7 @@ class PlanUnidadForm(forms.ModelForm):
             'docentes': 'Docente/s',
             'objetivos': 'Objetivos de Unidad',
             'periodos': 'Períodos',
+            'tiempo': 'Tiempo (semanas)',
             'necesidad_adaptacion': 'Especificación de la necesidad '
                                     'educativa (opcional)',
             'adaptacion_curricular': 'Especificación de la adaptación a ser '

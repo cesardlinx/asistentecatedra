@@ -249,6 +249,11 @@ class User(AbstractUser):
         self.save()
 
     @property
+    def full_name(self):
+        """Gets the user's full name"""
+        return '{} {}'.format(self.first_name, self.last_name)
+
+    @property
     def get_logo(self):
         """
         Gets the logo url if exists, otherwise takes the default logo

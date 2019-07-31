@@ -218,6 +218,10 @@ class TestDestreza:
             destreza.codigo,
             truncated_description.chars(110)
         ), 'The representation should be codigo and a truncated description'
+        assert destreza.complete == '{} - {}'.format(
+            destreza.codigo,
+            destreza.description
+        ), 'The complete property should return the complete description'
         assert destreza._meta.db_table == 'destrezas', \
             'The table should be named "destrezas"'
         assert destreza._meta.verbose_name_plural == 'destrezas', \

@@ -25,7 +25,7 @@
                 </h3>
             </td>
             <td align="center">
-                <img class="logo logo-right" src="{% static 'img/ministerio.jpg' %}">
+                {{ plan.ano_lectivo }}
             </td>
         </tr>
         <tr>
@@ -48,17 +48,9 @@
                 <p>{{ plan.asignatura }}</p>
             </td>
             <td>
-                <p><strong>Año Lectivo: </strong></p>
-            </td>
-            <td colspan="2">
-                <p>{{ plan.ano_lectivo }}</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
                 <p><strong>Docente(s): </strong></p>
             </td>
-            <td colspan="6">
+            <td colspan="2">
                 <p>{{ plan.docentes }}</p>
             </td>
         </tr>
@@ -176,7 +168,7 @@
             <td valign="top">
                 <ul>
                     {% for destreza in desarrollo_unidad.destrezas.all %}
-                        <li>{{ destreza }}</li>
+                        <li>{{ destreza.complete }}</li>
                     {% endfor %}
                 </ul>
             </td>
@@ -194,7 +186,11 @@
                 </ul>
             </td>
             <td valign="top">
-                {{ plan.semanas }}
+                {% if desarrollo_unidad.semanas == 1 %}
+                    {{ desarrollo_unidad.semanas }} semana
+                {% else %}
+                    {{ desarrollo_unidad.semanas }} semanas
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
@@ -215,24 +211,32 @@
            </td>
         </tr>
         <tr>
-            <td colspan="3" class="colored"><strong>ELABORADO</strong></td>
-            <td colspan="2" class="colored"><strong>REVISADO</strong></td>
-            <td colspan="2" class="colored"><strong>APROBADO</strong></td>
+            <td class="footer-cell" colspan="3" class="colored"><strong>ELABORADO</strong></td>
+            <td class="footer-cell" colspan="2" class="colored"><strong>REVISADO</strong></td>
+            <td class="footer-cell" colspan="2" class="colored"><strong>APROBADO</strong></td>
         </tr>
         <tr>
-            <td colspan="3"><strong>Docente(s): </strong>{{ plan.elaborado_por.first_name }} {{ plan.elaborado_por.last_name }}</td>
-            <td colspan="2"><strong>Nombre: </strong>{{ plan.revisado_por }}</td>
-            <td colspan="2"><strong>Nombre: </strong>{{ plan.aprobado_por }}</td>
+            <td class="footer-cell" colspan="3"><strong>Docente(s): </strong>{{ plan.elaborado_por.full_name }}</td>
+            <td class="footer-cell" colspan="2"><strong>Nombre: </strong>
+                {% if plan.revisado_por %}
+                    {{ plan.revisado_por }}
+                {% endif %}
+            </td>
+            <td class="footer-cell" colspan="2"><strong>Nombre: </strong>
+                {% if plan.aprobado_por %}
+                    {{ plan.aprobado_por }}
+                {% endif %}
+            </td>
         </tr>
         <tr>
-            <td colspan="3"><strong>Firma: </strong></td>
-            <td colspan="2"><strong>Firma: </strong></td>
-            <td colspan="2"><strong>Firma: </strong></td>
+            <td class="footer-cell" colspan="3"><strong>Firma: </strong></td>
+            <td class="footer-cell" colspan="2"><strong>Firma: </strong></td>
+            <td class="footer-cell" colspan="2"><strong>Firma: </strong></td>
         </tr>
         <tr>
-            <td colspan="3"><strong>Fecha: </strong></td>
-            <td colspan="2"><strong>Fecha: </strong></td>
-            <td colspan="2"><strong>Fecha: </strong></td>
+            <td class="footer-cell" colspan="3"><strong>Fecha: </strong></td>
+            <td class="footer-cell" colspan="2"><strong>Fecha: </strong></td>
+            <td class="footer-cell" colspan="2"><strong>Fecha: </strong></td>
         </tr>
     </table>
 </body>

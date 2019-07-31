@@ -60,7 +60,14 @@
 
                 <div class="form-group">
                     {{ form.destrezas|add_label_class:"form-label" }}
-                    {{ form.destrezas }}
+                    {% if form.destrezas.errors %}
+                        <div class="error">
+                            {{ form.destrezas }}
+                            {% include 'forms/field_errors.html' with field=form.destrezas%}
+                        </div>
+                    {% else %}
+                        {{ form.destrezas }}
+                    {% endif %}
                 </div>
 
                 <div class="form-group">
