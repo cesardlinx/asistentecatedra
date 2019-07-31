@@ -7,14 +7,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
-from django.views.generic import DeleteView
+from django.views.generic import DeleteView, DetailView
 from django.views.generic.list import ListView
+from django_xhtml2pdf.views import PdfMixin
 
 from planificaciones.forms.actividad_aprendizaje_formset import \
     ActividadAprendizajeFormset
 from planificaciones.forms.plan_unidad_form import PlanUnidadForm
 from planificaciones.mixins import UserIsPremiumMixin
-
 from planificaciones.models.actividad_aprendizaje import ActividadAprendizaje
 from planificaciones.models.plan_unidad import PlanUnidad
 
@@ -210,3 +210,18 @@ class PlanUnidadDuplicateView(UserIsPremiumMixin, View):
 
         messages.success(request, 'Plan de Unidad duplicado exitosamente.')
         return redirect('plan_unidad_list')
+
+
+class PlanUnidadPdfView(UserIsPremiumMixin, PdfMixin, DetailView):
+    model = PlanUnidad
+    template_name = "planificaciones/pdfs/plan_unidad_pdf.html"
+    context_object_name = 'plan'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.object.name
+        context['school_logo'] = self.request.user.get_logo
+        context['school_name'] = self.request.user.institution
+        if self.object.asignatura.name == 'Lengua y Literatura':
+            context['subunidades'] = self.object.unidad.titulo.split(';')
+        return context

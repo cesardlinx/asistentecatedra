@@ -18,7 +18,7 @@ from planificaciones.tests.planificaciones_testcase import \
 
 from planificaciones.views.plan_unidad_views import (
     PlanUnidadListView, PlanUnidadCreateView, PlanUnidadUpdateView,
-    PlanUnidadDeleteView, PlanUnidadDuplicateView)
+    PlanUnidadDeleteView, PlanUnidadDuplicateView, PlanUnidadPdfView)
 
 User = get_user_model()
 pytestmark = pytest.mark.django_db
@@ -540,3 +540,45 @@ class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
         assert plan_unidad_new.name == '{} (copia 3)'.format(
             self.plan_unidad.name)
         assert plan_unidad_new.curso == self.plan_unidad.curso
+
+
+class TestPlanUnidadPdfView(PlanUnidadTestCase):
+    def test_anonymous(self):
+        """Tests that an anonymous user can't access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = PlanUnidadPdfView.as_view()(
+            request, pk=self.plan_unidad.pk)
+        assert 'login' in response.url, 'Should not be callable by anonymous'
+
+    def test_premium(self):
+        """Tests that only premium users can access"""
+        request = RequestFactory().get('/')
+        request.user = self.common_user
+        response = PlanUnidadPdfView.as_view()(request)
+        assert response.status_code == 302, 'Should return a redirection'
+        assert reverse('planificaciones') == response.url, \
+            'Should not be callable by a normal user'
+
+    def test_when_user_doesnt_own_plan(self):
+        request = RequestFactory().post('/', self.data)
+        request.user = self.user
+        response = PlanUnidadPdfView.as_view()(
+            request, pk=self.another_plan.pk)
+        assert response.status_code == 405, 'Should return a Not Allowed'
+
+    def test_get_pdf(self):
+        """Tests that an authenticated user can't access by get method"""
+        request = RequestFactory().get('/')
+        request.user = self.user
+        response = PlanUnidadPdfView.as_view()(
+            request, pk=self.plan_unidad.pk)
+        assert response.status_code == 200, \
+            'Should return a not allowed response'
+        assert response.template_name[0] == \
+            'planificaciones/pdfs/plan_unidad_pdf.html'
+        assert response._headers.get(
+            'content-type') == ('Content-Type', 'application/pdf'), \
+            'Should return a pdf'
+        assert self.plan_unidad.name in response.rendered_content, \
+            'Should show info about the "plan unidad"'

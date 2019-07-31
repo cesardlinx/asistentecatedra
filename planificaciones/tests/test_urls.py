@@ -17,7 +17,7 @@ from planificaciones.views.plan_anual_views import (
     PlanAnualDeleteView, PlanAnualDuplicateView, PlanAnualPdfView)
 from planificaciones.views.plan_unidad_views import (
     PlanUnidadListView, PlanUnidadCreateView, PlanUnidadUpdateView,
-    PlanUnidadDeleteView, PlanUnidadDuplicateView)
+    PlanUnidadDeleteView, PlanUnidadDuplicateView, PlanUnidadPdfView)
 from planificaciones.views.plan_destrezas_views import (
     PlanDestrezasListView, PlanDestrezasCreateView, PlanDestrezasUpdateView,
     PlanDestrezasDeleteView, PlanDestrezasDuplicateView)
@@ -232,7 +232,7 @@ class TestAjaxUrls:
 
 
 class TestPdfUrls:
-    def test_plan_clase_pdf(parameter_list):
+    def test_plan_clase_pdf(self):
         plan = mixer.blend(PlanClase)
         path = reverse('plan_clase_pdf',
                        kwargs={'pk': plan.pk})
@@ -240,10 +240,18 @@ class TestPdfUrls:
         assert view.func.view_class == PlanClasePdfView, \
             'Should resolve to the view PlanClasePdfView'
 
-    def test_plan_anual_pdf(parameter_list):
+    def test_plan_anual_pdf(self):
         plan = mixer.blend(PlanAnual)
         path = reverse('plan_anual_pdf',
                        kwargs={'pk': plan.pk})
         view = resolve(path)
         assert view.func.view_class == PlanAnualPdfView, \
             'Should resolve to the view PlanAnualPdfView'
+
+    def test_plan_unidad_pdf(self):
+        plan = mixer.blend(PlanUnidad)
+        path = reverse('plan_unidad_pdf',
+                       kwargs={'pk': plan.pk})
+        view = resolve(path)
+        assert view.func.view_class == PlanUnidadPdfView, \
+            'Should resolve to the view PlanUnidadPdfView'

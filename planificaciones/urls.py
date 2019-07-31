@@ -16,7 +16,8 @@ from .views.plan_unidad_views import (PlanUnidadListView,
                                       PlanUnidadCreateView,
                                       PlanUnidadUpdateView,
                                       PlanUnidadDeleteView,
-                                      PlanUnidadDuplicateView)
+                                      PlanUnidadDuplicateView,
+                                      PlanUnidadPdfView)
 from .views.plan_destrezas_views import (PlanDestrezasListView,
                                          PlanDestrezasCreateView,
                                          PlanDestrezasUpdateView,
@@ -95,4 +96,6 @@ urlpatterns = [
           name='plan_clase_pdf'),
      path('plan_anual/pdf/<int:pk>/', PlanAnualPdfView.as_view(),
           name='plan_anual_pdf'),
+     path('plan_unidad/pdf/<int:pk>/', PlanUnidadPdfView.as_view(),
+          name='plan_unidad_pdf'),
 ]

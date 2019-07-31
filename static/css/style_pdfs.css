@@ -32,6 +32,10 @@
      background-color: #dae5f4;
  }
 
+ td.footer-cell {
+   padding: 0.4em;
+ }
+
  /* titles */
  .title {
    text-align: center;
