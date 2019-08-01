@@ -80,3 +80,29 @@ def send_invoice_email(user_mail_subject, user, plan, amount_paid,
     user_email.attach_alternative(user_email_html, 'text/html')
 
     user_email.send()
+
+
+def send_refund_email(user_mail_subject, user, amount_refunded, card_brand,
+                      last4):
+    """
+    Send refund email to user
+    """
+    # User email sending
+
+    user_email_html = render_to_string(
+        'asistente/emails/refund_email.html',
+        {
+            'user': user,
+            'amount_refunded': amount_refunded,
+            'card_brand': card_brand,
+            'last4': last4,
+        }
+    )
+    user_email_body = strip_tags(user_email_html)
+    user_email = EmailMultiAlternatives(
+        user_mail_subject, user_email_body, to=[user.email]
+    )
+
+    user_email.attach_alternative(user_email_html, 'text/html')
+
+    user_email.send()

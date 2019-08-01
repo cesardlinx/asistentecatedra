@@ -21,18 +21,23 @@ class TestCancelSubscriptionView(TestCase):
     def setUp(self):
         customer_create_patch = patch('accounts.models.stripe.Customer.create')
         customer_modify_patch = patch('accounts.models.stripe.Customer.modify')
+        refund_create_patch = patch('accounts.models.stripe.Refund.create')
         subscription_create_patch = patch(
             'accounts.models.stripe.Subscription.create')
         subscription_retrieve_patch = patch(
             'accounts.models.stripe.Subscription.retrieve')
+
         self.customer_create = customer_create_patch.start()
         self.customer_modify = customer_modify_patch.start()
+        self.refund_create = refund_create_patch.start()
         self.subscription_create = subscription_create_patch.start()
         self.subscription_retrieve = subscription_retrieve_patch.start()
 
         self.customer_create.return_value = {'id': '12345'}
 
-        self.subscription_mock = MagicMock(id='123456')
+        self.subscription_mock = MagicMock(id='123456',
+                                           current_period_start=1564617600,
+                                           current_period_end=1567296000)
         self.subscription_mock.delete = MagicMock()
         self.subscription_retrieve.return_value = self.subscription_mock
         self.subscription_create.return_value = self.subscription_mock
@@ -125,19 +130,22 @@ class TestCancelSubscriptionView(TestCase):
 
     @patch('accounts.models.Subscription.created_date')
     @patch('accounts.models.Subscription.next_billing_date')
+    @patch('accounts.models.Subscription.last_billing_date')
     def test_invalid_request_error(self,
-                                   subscription_billing,
+                                   last_billing_date,
+                                   next_billing_date,
                                    subscription_date):
         """
-        Test the raise of an  InvalidRequestError when a subscription
+        Test the raise of an InvalidRequestError when a subscription
         cancellation is in progress
         """
         # Se parchea estos dos métodos de Subscription porque al final
         # retorna el template que correponde al perfil, el mismo que usa estos
         # dos métodos, el mismo que usa el método subscription_retrieve que
         # para este test también es un mock
+        last_billing_date.return_value = '05/06/2019'
+        next_billing_date.return_value = '05/07/2019'
         subscription_date.return_value = '05/05/2019'
-        subscription_billing.return_value = '05/05/2019'
 
         self.subscription_retrieve.side_effect = error.\
             InvalidRequestError('error', 2)
@@ -149,15 +157,18 @@ class TestCancelSubscriptionView(TestCase):
 
     @patch('accounts.models.Subscription.created_date')
     @patch('accounts.models.Subscription.next_billing_date')
+    @patch('accounts.models.Subscription.last_billing_date')
     def test_api_connection_error(self,
-                                  subscription_billing,
+                                  last_billing_date,
+                                  next_billing_date,
                                   subscription_date):
         """
         Test the raise of an  APIConnectionError when a subscription
         cancellation is in progress
         """
+        last_billing_date.return_value = '05/06/2019'
+        next_billing_date.return_value = '05/07/2019'
         subscription_date.return_value = '05/05/2019'
-        subscription_billing.return_value = '05/05/2019'
 
         self.subscription_retrieve.side_effect = error.\
             APIConnectionError('error')
@@ -169,15 +180,19 @@ class TestCancelSubscriptionView(TestCase):
 
     @patch('accounts.models.Subscription.created_date')
     @patch('accounts.models.Subscription.next_billing_date')
+    @patch('accounts.models.Subscription.last_billing_date')
     def test_stripe_error(self,
-                          subscription_billing,
+                          last_billing_date,
+                          next_billing_date,
                           subscription_date):
+
         """
         Test the raise of an StripeError when a subscription
         cancellation is in progress
         """
+        last_billing_date.return_value = '05/06/2019'
+        next_billing_date.return_value = '05/07/2019'
         subscription_date.return_value = '05/05/2019'
-        subscription_billing.return_value = '05/05/2019'
 
         self.subscription_retrieve.side_effect = error.StripeError('error')
 
@@ -188,15 +203,18 @@ class TestCancelSubscriptionView(TestCase):
 
     @patch('accounts.models.Subscription.created_date')
     @patch('accounts.models.Subscription.next_billing_date')
+    @patch('accounts.models.Subscription.last_billing_date')
     def test_generic_error(self,
-                           subscription_billing,
+                           last_billing_date,
+                           next_billing_date,
                            subscription_date):
         """
         Test the raise of a generic Exception when a subscription
         cancellation is in progress
         """
+        last_billing_date.return_value = '05/06/2019'
+        next_billing_date.return_value = '05/07/2019'
         subscription_date.return_value = '05/05/2019'
-        subscription_billing.return_value = '05/05/2019'
 
         self.subscription_retrieve.side_effect = Exception('error')
 

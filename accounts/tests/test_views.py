@@ -984,10 +984,20 @@ class TestUserDeleteView(AuthTestCase):
         assert response.status_code == 302, 'Should return a redirection'
         assert response.url == '/', 'Should redirect to home'
 
-    def test_soft_delete(self):
+    @patch('accounts.models.stripe.Refund.create')
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_soft_delete(self, subscription_retrieve,
+                         refund_create):
         """
         Test that user soft delete works
         """
+        # mocking
+        subscription_mock = MagicMock(
+            id='123456', current_period_start=1564617600,
+            current_period_end=1567296000)
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
+
         self.client.login(
             username='tester@tester.com',
             password='P455w0rd_testing'

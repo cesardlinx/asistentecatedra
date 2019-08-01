@@ -144,7 +144,7 @@ class TestCheckoutView(TestCase):
         assert 'Su petición ha sido realizada con éxito. revise su correo '\
                'para verificar que se realizado correctamente el pago.' \
             == messages[0].message
-        assert 'alert-info' == messages[0].tags, \
+        assert 'alert-success' == messages[0].tags, \
             'There should be a success message'
 
     @patch('accounts.models.stripe.Customer.modify', autospec=True)
@@ -195,7 +195,7 @@ class TestCheckoutView(TestCase):
         assert 'Su petición ha sido realizada con éxito. revise su correo '\
                'para verificar que se realizado correctamente el pago.' \
             == messages[0].message
-        assert 'alert-info' == messages[0].tags, \
+        assert 'alert-success' == messages[0].tags, \
             'There should be a success message'
 
     @patch('accounts.models.stripe.Customer.modify', autospec=True)

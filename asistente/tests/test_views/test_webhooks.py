@@ -95,6 +95,7 @@ class TestWebhooksView(TestCase):
         event.type = 'invoice.payment_succeeded'
         event.data.object.lines.data[0].plan.nickname = 'MENSUAL'
         event.data.object.amount_paid = 499
+        event.data.object.charge = 'ch-123456'
         event.data.object.customer = 'customer_id'
         self.event.return_value = event
 
@@ -113,6 +114,8 @@ class TestWebhooksView(TestCase):
 
         self.user.refresh_from_db()
         assert self.user.is_premium is True, 'User should be premium'
+        assert self.user.active_subscription.stripe_charge_id == 'ch-123456', \
+            'Active subscriptions should have the last charge id'
 
         # Email sending
         assert len(mail.outbox) == 1, 'Should send 1 email'
@@ -129,8 +132,16 @@ class TestWebhooksView(TestCase):
             "The user's email should be in email's field TO "
         assert '4,99' in user_email.body, 'The amount should be in email'
 
+    @patch('accounts.models.stripe.Refund.create')
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_invoice_payment_failed_event(self, subscription_retrieve,
+                                          refund_create):
+        subscription_mock = MagicMock(
+            id='123456', current_period_start=1564617600,
+            current_period_end=1567296000)
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
 
-    def test_invoice_payment_failed_event(self):
         # event mock
         event = MagicMock()
         event.type = 'invoice.payment_failed'
@@ -305,6 +316,40 @@ class TestWebhooksView(TestCase):
             in user_email.subject
         assert 'Pago Único' in user_email.body, \
             "Plan type should be in email body"
+        assert self.user.email in user_email.to, \
+            "The user's email should be in email's field TO "
+
+    def test_charge_refunded(self):
+        # event mock
+        event = MagicMock()
+        event.type = 'charge.refunded'
+        event.data.object.customer = 'customer_id'
+        event.data.object.amount_refunded = 5972
+        event.data.object.source.brand = 'Visa'
+        event.data.object.source.last4 = 2024
+        self.event.return_value = event
+
+        response = stripe_webhooks_view(self.request)
+
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert event.type in str(self.logger), \
+            'Should return a log with the event type info'
+
+        assert response.status_code == 200, \
+            'Should return an status code of 200 to stripe'
+
+        self.user.refresh_from_db()
+        assert self.user.is_premium is False, 'User should not be premium'
+
+        # Email sending
+        assert len(mail.outbox) == 1, 'Should send 1 email'
+
+        user_email = mail.outbox[0]
+
+        assert self.user.first_name in user_email.body, \
+            "Email body should contain user's first name"
+        assert "Asistente de Cátedra | Reembolso" \
+            in user_email.subject
         assert self.user.email in user_email.to, \
             "The user's email should be in email's field TO "
 

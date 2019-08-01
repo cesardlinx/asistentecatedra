@@ -219,6 +219,20 @@ class User(AbstractUser):
         if active_subscription:
             active_subscription.cancel_subscription()
 
+            # refunds the ammount for the days left to finish the period
+            next_billing_date = active_subscription.next_billing_date
+            last_billing_date = active_subscription.last_billing_date
+            today = datetime.now()
+            days_left = abs((next_billing_date - today).days)
+            total_days = abs((next_billing_date - last_billing_date).days)
+            amount_day = active_subscription.plan.price / total_days
+            amount = round(days_left * amount_day)
+
+            stripe.Refund.create(
+                charge=active_subscription.stripe_charge_id,
+                amount=amount,
+            )
+
         try:
             # Gets the subscription to free plan if exists
             free_subscription = Subscription.objects.get(
@@ -439,6 +453,14 @@ class Subscription(models.Model):
                 self.stripe_subscription_id)
             return datetime.fromtimestamp(subscription.created)
         return self.user.date_joined
+
+    @property
+    def last_billing_date(self):
+        if self.user.is_premium:
+            subscription = stripe.Subscription.retrieve(
+                self.stripe_subscription_id)
+            return datetime.fromtimestamp(subscription.current_period_start)
+        return False
 
     @property
     def next_billing_date(self):

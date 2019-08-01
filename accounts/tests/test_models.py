@@ -1,5 +1,7 @@
 import os
-from unittest.mock import patch, MagicMock
+from datetime import datetime
+from unittest.mock import MagicMock, patch
+
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -215,19 +217,23 @@ class TestUser(TestCase):
         assert self.user.active_plan == self.free_plan, \
             "The user's active plan should be the free plan"
 
+    @patch('accounts.models.stripe.Refund.create')
     @patch('accounts.models.stripe.Customer.modify')
     @patch('accounts.models.stripe.Subscription.create')
     @patch('accounts.models.stripe.Subscription.retrieve')
     def test_cancel_active_subscription(self,
                                         subscription_retrieve,
                                         subscription_create,
-                                        customer_modify):
-        subscription_mock = MagicMock(id='123456')
+                                        customer_modify,
+                                        refund_create):
+        subscription_mock = MagicMock(
+            id='123456', current_period_start=1564617600,
+            current_period_end=1567296000)
         subscription_mock.delete = MagicMock()
         subscription_retrieve.return_value = subscription_mock
         subscription_create.return_value = subscription_mock
 
-        user = mixer.blend(User)
+        user = mixer.blend(User, is_premium=True)
 
         monthly_plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
         yearly_plan = mixer.blend('accounts.Plan', plan_type='ANUAL')
@@ -449,20 +455,25 @@ class TestSubscription:
         assert new_subscription.plan == plan, \
             'The new subscription has the free plan'
 
+    @patch('accounts.models.stripe.Refund.create')
     @patch('accounts.models.stripe.Customer.modify')
     @patch('accounts.models.stripe.Subscription.create')
     @patch('accounts.models.stripe.Subscription.retrieve')
     def test_cancel_subscription(self,
                                  subscription_retrieve,
                                  subscription_create,
-                                 customer_modify):
-        subscription_mock = MagicMock(id='123456')
+                                 customer_modify,
+                                 refund_create):
+
+        subscription_mock = MagicMock(
+            id='123456', current_period_start=1564617600,
+            current_period_end=1567296000)
         subscription_mock.delete = MagicMock()
         subscription_retrieve.return_value = subscription_mock
         subscription_create.return_value = subscription_mock
 
         plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
-        user = mixer.blend(User)
+        user = mixer.blend(User, is_premium=True)
 
         subscription = Subscription(
             user=user,
@@ -477,11 +488,65 @@ class TestSubscription:
             'subscription should not be active'
         subscription_mock.delete.call_count == 1, \
             'Should call delete once in stripe'
+        refund_create.call_count == 1, \
+            'Should call refund once in stripe'
 
-    def test_created_parameter(self):
-        # TODO: Compĺete tests for created parameter
-        pass
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_created_parameter(self, subscription_retrieve):
+        subscription_mock = MagicMock(created=1564617600)
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
 
-    def test_next_billing_date_parameter(self):
-        # TODO: Compĺete tests for next_billing_date parameter
-        pass
+        plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
+        user = mixer.blend(User, is_premium=True)
+
+        subscription = Subscription(
+            user=user,
+            plan=plan,
+            stripe_subscription_id='123456'
+        )
+        subscription.save()
+
+        assert datetime.fromtimestamp(subscription_mock.created) == \
+            subscription.created_date, \
+            'The created date property should return the date'
+
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_next_billing_date_parameter(self, subscription_retrieve):
+        subscription_mock = MagicMock(current_period_end=1564617600)
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
+
+        plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
+        user = mixer.blend(User, is_premium=True)
+
+        subscription = Subscription(
+            user=user,
+            plan=plan,
+            stripe_subscription_id='123456'
+        )
+        subscription.save()
+
+        assert datetime.fromtimestamp(subscription_mock.current_period_end) \
+            == subscription.next_billing_date, \
+            'The created date property should return the date'
+
+    @patch('accounts.models.stripe.Subscription.retrieve')
+    def test_last_billing_date_parameter(self, subscription_retrieve):
+        subscription_mock = MagicMock(current_period_start=1564617600)
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
+
+        plan = mixer.blend('accounts.Plan', plan_type='MENSUAL')
+        user = mixer.blend(User, is_premium=True)
+
+        subscription = Subscription(
+            user=user,
+            plan=plan,
+            stripe_subscription_id='123456'
+        )
+        subscription.save()
+
+        assert datetime.fromtimestamp(subscription_mock.current_period_start) \
+            == subscription.last_billing_date, \
+            'The created date property should return the date'

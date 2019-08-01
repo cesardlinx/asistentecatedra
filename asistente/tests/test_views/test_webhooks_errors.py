@@ -105,6 +105,7 @@ class TestWebhooksViewsErrors(TestCase):
         event.type = 'invoice.payment_succeeded'
         event.data.object.lines.data[0].plan.nickname = 'MENSUAL'
         event.data.object.amount_paid = 499
+        event.data.object.charge = 'ch-123456'
         event.data.object.customer = 'customer_id'
         self.event.return_value = event
 
@@ -114,6 +115,8 @@ class TestWebhooksViewsErrors(TestCase):
 
         self.user.refresh_from_db()
         assert self.user.is_premium is True, 'User should be premium'
+        assert self.user.active_subscription.stripe_charge_id == 'ch-123456', \
+            'Active subscriptions should have the last charge id'
 
     @patch('asistente.views.send_invoice_email')
     def test_invoice_payment_succeeded_smtp_error(self, invoice_emails):
@@ -126,6 +129,7 @@ class TestWebhooksViewsErrors(TestCase):
         event.type = 'invoice.payment_succeeded'
         event.data.object.lines.data[0].plan.nickname = 'MENSUAL'
         event.data.object.amount_paid = 499
+        event.data.object.charge = 'ch-123456'
         event.data.object.customer = 'customer_id'
         self.event.return_value = event
 
@@ -135,13 +139,25 @@ class TestWebhooksViewsErrors(TestCase):
 
         self.user.refresh_from_db()
         assert self.user.is_premium is True, 'User should be premium'
+        assert self.user.active_subscription.stripe_charge_id == 'ch-123456', \
+            'Active subscriptions should have the last charge id'
 
+    @patch('accounts.models.stripe.Refund.create')
+    @patch('accounts.models.stripe.Subscription.retrieve')
     @patch('asistente.views.send_invoice_email')
-    def test_invoice_payment_failed_badheader_error(self, invoice_emails):
+    def test_invoice_payment_failed_badheader_error(self, invoice_emails,
+                                                    subscription_retrieve,
+                                                    refund_create):
         """
         Test when there is a BadHeaderError while sending emails after
         getting an invoice payment failed event
         """
+        subscription_mock = MagicMock(
+            id='123456', current_period_start=1564617600,
+            current_period_end=1567296000)
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
+
         # event mock
         event = MagicMock()
         event.type = 'invoice.payment_failed'
@@ -160,12 +176,22 @@ class TestWebhooksViewsErrors(TestCase):
         self.user.refresh_from_db()
         assert self.user.is_premium is False, 'User should not be premium'
 
+    @patch('accounts.models.stripe.Refund.create')
+    @patch('accounts.models.stripe.Subscription.retrieve')
     @patch('asistente.views.send_invoice_email')
-    def test_invoice_payment_failed_smtp_error(self, invoice_emails):
+    def test_invoice_payment_failed_smtp_error(self, invoice_emails,
+                                               subscription_retrieve,
+                                               refund_create):
         """
         Test when there is a SMTPException while sending emails after
         getting an invoice payment failed event
         """
+        subscription_mock = MagicMock(
+            id='123456', current_period_start=1564617600,
+            current_period_end=1567296000)
+        subscription_mock.delete = MagicMock()
+        subscription_retrieve.return_value = subscription_mock
+
         # event mock
         event = MagicMock()
         event.type = 'invoice.payment_failed'
@@ -318,6 +344,44 @@ class TestWebhooksViewsErrors(TestCase):
         event.data.object.description = 'PAGO ÚNICO'
         event.data.object.customer = 'customer_id'
         event.data.object.amount = 11976
+        self.event.return_value = event
+
+        subscription_emails.side_effect = smtplib.SMTPException('Error')
+
+        self.make_email_error_tests('SMTPException')
+
+    @patch('asistente.views.send_refund_email')
+    def test_charge_refunded_badheader_error(self, subscription_emails):
+        """
+        Test when there is a BadHeaderError while sending emails after
+        getting a charge refunded event
+        """
+        # event mock
+        event = MagicMock()
+        event.type = 'charge.refunded'
+        event.data.object.customer = 'customer_id'
+        event.data.object.amount = 5972
+        event.data.object.source.brand = 'Visa'
+        event.data.object.source.last4 = 2024
+        self.event.return_value = event
+
+        subscription_emails.side_effect = BadHeaderError('Error')
+
+        self.make_email_error_tests('BadHeaderError')
+
+    @patch('asistente.views.send_refund_email')
+    def test_charge_refunded_smtp_error(self, subscription_emails):
+        """
+        Test when there is a SMTPException while sending emails after
+        getting a charge refunded event
+        """
+        # event mock
+        event = MagicMock()
+        event.type = 'charge.refunded'
+        event.data.object.customer = 'customer_id'
+        event.data.object.amount = 5972
+        event.data.object.source.brand = 'Visa'
+        event.data.object.source.last4 = 2024
         self.event.return_value = event
 
         subscription_emails.side_effect = smtplib.SMTPException('Error')
