@@ -40,6 +40,11 @@
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{{ user.get_absolute_url }}">Perfil</a>
                                 <a class="dropdown-item" href="{% url 'password_change' %}">Cambiar Contraseña</a>
+
+                                {% if not user.email_confirmed %}
+                                    <a class="dropdown-item" href="{% url 'send_confirmation'  %}">Confirmar correo</a>
+                                {% endif %}
+
                                 <a class="dropdown-item" href="{% url 'logout'  %}">Cerrar Sesión</a>
 
                                 {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' %}

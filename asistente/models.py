@@ -119,7 +119,7 @@ def libro_delete(sender, instance, **kwargs):
 
 class Pregunta(models.Model):
     question = models.CharField(max_length=92)
-    answer = models.CharField(max_length=200)
+    answer = models.TextField(max_length=600)
 
     class Meta:
         db_table = 'preguntas'

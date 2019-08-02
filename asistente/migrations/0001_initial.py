@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('question', models.CharField(max_length=92)),
-                ('answer', models.CharField(max_length=200)),
+                ('answer', models.TextField(max_length=600)),
             ],
             options={
                 'verbose_name_plural': 'preguntas',
