@@ -168,11 +168,13 @@ class PlanClaseDuplicateView(LoginRequiredMixin, View):
             cursos_old = plan_clase.cursos.all()
             plan_clase.pk = None
             plan_clase.id = None
-            new_name = '{} (copia)'.format(plan_clase.name)
+            new_name = '{} (copia)'.format(plan_clase.name[:42])
             counter = 1
             while PlanClase.objects.filter(name=new_name).exists():
                 counter += 1
-                new_name = '{0} (copia {1})'.format(plan_clase.name, counter)
+                tail_name = '(copia {})'.format(counter)
+                new_name = '{0} {1}'.format(
+                    plan_clase.name[:49 - len(tail_name)], tail_name)
             plan_clase.name = new_name
             plan_clase.save()
             plan_clase.objetivos.set(objetivos_old)

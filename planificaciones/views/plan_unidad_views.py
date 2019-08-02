@@ -192,11 +192,13 @@ class PlanUnidadDuplicateView(UserIsPremiumMixin, View):
                 .objetivos_generales.all()
             plan_unidad.pk = None
             plan_unidad.id = None
-            new_name = '{} (copia)'.format(plan_unidad.name)
+            new_name = '{} (copia)'.format(plan_unidad.name[:42])
             counter = 1
             while PlanUnidad.objects.filter(name=new_name).exists():
                 counter += 1
-                new_name = '{0} (copia {1})'.format(plan_unidad.name, counter)
+                tail_name = '(copia {})'.format(counter)
+                new_name = '{0} {1}'.format(
+                    plan_unidad.name[:49 - len(tail_name)], tail_name)
             plan_unidad.name = new_name
             plan_unidad.save()
             plan_unidad.objetivos.set(objetivos_old)

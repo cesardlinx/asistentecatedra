@@ -1,11 +1,10 @@
 from django.db import models
 from django.template.defaultfilters import slugify
-from django.urls import reverse
 
 
 class Planificacion(models.Model):
-    name = models.CharField(max_length=40)
-    slug = models.SlugField()
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50)
     docentes = models.CharField(max_length=255)
     paralelos = models.CharField(max_length=20)
     aprobado_por = models.CharField(max_length=50, blank=True, null=True)
@@ -21,5 +20,5 @@ class Planificacion(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        self.slug = slugify(self.name)[:50]
         super().save(*args, **kwargs)

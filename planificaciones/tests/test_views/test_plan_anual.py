@@ -561,6 +561,39 @@ class TestPlanAnualDuplicateView(PlanAnualTestCase):
             self.plan_anual.name)
         assert plan_anual_new.curso == self.plan_anual.curso
 
+    def test_when_name_too_long(self):
+        """Tests a plan with a name too long has been duplicated"""
+
+        self.plan_anual.objetivos_curso.set([self.objetivo_1, self.objetivo_2])
+        self.plan_anual.objetivos_generales_curso.set(
+            [self.general_1, self.general_2])
+        self.plan_anual.objetivos_generales.set(
+            [self.general_1, self.general_2])
+
+        self.plan_anual.name = \
+            'lorem ipsum dolor.sit amet (copia) (cop... (copia)'
+        self.plan_anual.save()
+
+        desarrollo_unidad_1 = mixer.blend(DesarrolloUnidad,
+                                          plan_anual=self.plan_anual,
+                                          unidad=self.unidad_1)
+        desarrollo_unidad_1.destrezas.set(
+            [self.destreza_1, self.destreza_2])
+
+        desarrollo_unidad_2 = mixer.blend(DesarrolloUnidad,
+                                          plan_anual=self.plan_anual,
+                                          unidad=self.unidad_2)
+        desarrollo_unidad_2.destrezas.set(
+            [self.destreza_1, self.destreza_2])
+
+        self.client.login(username='tester@tester.com',
+                          password='P455w0rd_testing',)
+        url = reverse('plan_anual_duplicate',
+                      kwargs={'pk': self.plan_anual.pk})
+        response = self.client.post(url, {}, follow=True)
+
+        assert response.status_code == 200, 'Should return a success code'
+
 
 class TestPlanAnualPdfView(PlanAnualTestCase):
     def test_anonymous(self):

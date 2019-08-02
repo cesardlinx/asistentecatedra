@@ -166,12 +166,13 @@ class PlanDestrezasDuplicateView(UserIsPremiumMixin, View):
                 .destrezas.all()
             plan_destrezas.pk = None
             plan_destrezas.id = None
-            new_name = '{} (copia)'.format(plan_destrezas.name)
+            new_name = '{} (copia)'.format(plan_destrezas.name[:42])
             counter = 1
             while PlanDestrezas.objects.filter(name=new_name).exists():
                 counter += 1
-                new_name = '{0} (copia {1})'.format(plan_destrezas.name,
-                                                    counter)
+                tail_name = '(copia {})'.format(counter)
+                new_name = '{0} {1}'.format(
+                    plan_destrezas.name[:49 - len(tail_name)], tail_name)
             plan_destrezas.name = new_name
             plan_destrezas.save()
             plan_destrezas.objetivos.set(objetivos_old)

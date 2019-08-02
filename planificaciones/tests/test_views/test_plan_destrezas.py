@@ -530,6 +530,28 @@ class TestPlanDestrezasDuplicateView(PlanDestrezasTestCase):
             self.plan_destrezas.name)
         assert plan_destrezas_new.curso == self.plan_destrezas.curso
 
+    def test_when_name_too_long(self):
+        """Tests a plan with a name too long has been duplicated"""
+
+        self.plan_destrezas.objetivos.set(
+            [self.objetivo_1, self.objetivo_2])
+        self.plan_destrezas.objetivos_generales.set(
+            [self.general_1, self.general_2])
+        self.plan_destrezas.destrezas.set(
+            [self.destreza_1, self.destreza_2])
+
+        self.plan_destrezas.name = \
+            'lorem ipsum dolor.sit amet (copia) (cop... (copia)'
+        self.plan_destrezas.save()
+
+        self.client.login(username='tester@tester.com',
+                          password='P455w0rd_testing',)
+        url = reverse('plan_destrezas_duplicate',
+                      kwargs={'pk': self.plan_destrezas.pk})
+        response = self.client.post(url, {}, follow=True)
+
+        assert response.status_code == 200, 'Should return a success code'
+
 
 class TestPlanDestrezasPdfView(PlanDestrezasTestCase):
     def test_anonymous(self):

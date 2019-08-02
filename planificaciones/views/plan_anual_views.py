@@ -192,11 +192,13 @@ class PlanAnualDuplicateView(UserIsPremiumMixin, View):
             objetivos_area_old = plan_anual.objetivos_generales.all()
             plan_anual.pk = None
             plan_anual.id = None
-            new_name = '{} (copia)'.format(plan_anual.name)
+            new_name = '{} (copia)'.format(plan_anual.name[:42])
             counter = 1
             while PlanAnual.objects.filter(name=new_name).exists():
                 counter += 1
-                new_name = '{0} (copia {1})'.format(plan_anual.name, counter)
+                tail_name = '(copia {})'.format(counter)
+                new_name = '{0} {1}'.format(
+                    plan_anual.name[:49 - len(tail_name)], tail_name)
             plan_anual.name = new_name
             plan_anual.save()
             plan_anual.objetivos_curso.set(objetivos_old)
