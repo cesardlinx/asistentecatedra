@@ -24,6 +24,24 @@ class TestAsistenteUrls:
         assert view.func.view_class == views.AyudaListView, \
             'Should resolve to the view AyudaListView'
 
+    def test_condiciones(self):
+        path = reverse('condiciones')
+        view = resolve(path)
+        assert view.func.view_class == views.CondicionesTemplateView, \
+            'Should resolve to the view CondicionesTemplateView'
+
+    def test_privacidad(self):
+        path = reverse('privacidad')
+        view = resolve(path)
+        assert view.func.view_class == views.PrivacidadTemplateView, \
+            'Should resolve to the view PrivacidadTemplateView'
+
+    def test_cookies(self):
+        path = reverse('cookies')
+        view = resolve(path)
+        assert view.func.view_class == views.CookiesTemplateView, \
+            'Should resolve to the view CookiesTemplateView'
+
     def test_premium(self):
         path = reverse('premium')
         view = resolve(path)

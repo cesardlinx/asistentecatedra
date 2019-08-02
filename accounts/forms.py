@@ -16,9 +16,9 @@ class SignupForm(UserCreationForm):
 
     terms = forms.BooleanField(
         label=mark_safe(
-            'Acepto las <a href="#" class="terms">Condiciones de Servicio</a> '
-            'y la <a href="#" class="terms">Política de Privacidad</a> de '
-            'Asistente de Cátedra'),
+            'Acepto las <a href="/condiciones/" class="terms">Condiciones de '
+            'Servicio</a> y la <a href="/privacidad/" class="terms">Política '
+            'de Privacidad</a> de Asistente de Cátedra'),
         required=True
     )
 

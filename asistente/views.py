@@ -61,6 +61,21 @@ class PremiumListView(NotPremiumUserRequiredMixin, ListView):
     template_name = 'asistente/premium.html'
 
 
+class CondicionesTemplateView(TemplateView):
+    """Vista para los términos y condiciones"""
+    template_name = 'asistente/condiciones.html'
+
+
+class PrivacidadTemplateView(TemplateView):
+    """Vista para el aviso de privacidad"""
+    template_name = 'asistente/privacidad.html'
+
+
+class CookiesTemplateView(TemplateView):
+    """Vista para el aviso de manejo de cookies"""
+    template_name = 'asistente/cookies.html'
+
+
 class ChangePlanListView(NotPerpetualNotPremiumUserRequiredMixin,
                          ListView):
     """
@@ -413,7 +428,7 @@ def handler404(request, exception, template_name='asistente/errors/404.html'):
     return response
 
 
-def handler500(request, exception, template_name='asistente/errors/500.html'):
+def handler500(request, template_name='asistente/errors/500.html'):
     response = render(request, template_name)
     response.status_code = 500
     return response

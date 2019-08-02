@@ -97,6 +97,42 @@ class TestPremiumView:
         assert '/' == response.url, 'Should not be callable by premium user'
 
 
+class TestCondicionesView:
+    def test_anonymous(self):
+        """Tests that an anonymous user can access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.CondicionesTemplateView.as_view()(request)
+        assert response.status_code == 200, 'Should be callable by anonymous'
+        assert 'asistente/condiciones}.html' in \
+            response.template_name, \
+            'Condiciones template should be rendered in the view'
+
+
+class TestPrivacidadView:
+    def test_anonymous(self):
+        """Tests that an anonymous user can access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.PrivacidadTemplateView.as_view()(request)
+        assert response.status_code == 200, 'Should be callable by anonymous'
+        assert 'asistente/privacidad.html' in \
+            response.template_name, \
+            'Privacidad template should be rendered in the view'
+
+
+class TestCookiesView:
+    def test_anonymous(self):
+        """Tests that an anonymous user can access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.CookiesTemplateView.as_view()(request)
+        assert response.status_code == 200, 'Should be callable by anonymous'
+        assert 'asistente/cookies.html' in \
+            response.template_name, \
+            'Cookies template should be rendered in the view'
+
+
 class TestChangePlanView:
     def test_anonymous(self):
         """Tests that an anonymous user can't access the view"""
