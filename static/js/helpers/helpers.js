@@ -58,6 +58,8 @@ var fieldUnhighlight = function(element, errorClass, validClass) {
     }
 };
 
+// function to make a textarea to take the parent height
+// inside or out a formset
 var updateTextareasSize = function(numeroFila, formsetName, fields) {
     $.each(fields, function(i, field) {
         var textareaElement;
@@ -69,6 +71,27 @@ var updateTextareasSize = function(numeroFila, formsetName, fields) {
         var cellHeight = textareaElement.parent().height();
         textareaElement.height(cellHeight);
     });
+};
+
+var getValueFromMultipleInput = function(type, identifier) {
+    if (type === 'checkbox') {
+        var inputs = $(`#id_${identifier} li input[type="checkbox"]`);
+        var inputsChecked = [];
+        inputs.each(function() {
+            if (this.checked) {
+                inputsChecked.push(this.value)
+            }
+        });
+        return inputsChecked
+    } else if (type === 'select') {
+        var inputs = $(`.${identifier}`);
+
+        var inputsSelected = [];
+        inputs.each(function() {
+            inputsSelected.push(this.value);
+        });
+        return inputsSelected
+    }
 };
 
 

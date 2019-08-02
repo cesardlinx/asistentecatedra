@@ -14,7 +14,7 @@ $(document).ready(function() {
 
     /**
      * Al elegir una asignatura
-     * se cargan los cursos
+     * se cargan los cursos y los objetivos de area
      */
     var cargarCursos = function() {
         var asignaturaId = $('#id_asignatura').val();

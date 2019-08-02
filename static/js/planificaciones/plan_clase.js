@@ -81,13 +81,7 @@ $(document).ready(function() {
         var asignaturaId = $('#id_asignatura').val();
 
         // Obtiene los cursos seleccionados
-        var cursos = $('#id_cursos li input[type="checkbox"]');
-        var cursosChecked = [];
-        cursos.each(function(){
-            if (this.checked) {
-                cursosChecked.push(this.value)
-            }
-        });
+        var cursosChecked = getValueFromMultipleInput('checkbox', 'cursos');
 
         // Cargar objetivos y objetivos generales
         if (asignaturaId) {
@@ -134,9 +128,17 @@ $(document).ready(function() {
                                             </li>`
                             listaObjetivos += template;
                         });
+                        var objetivos = getValueFromMultipleInput('checkbox', 'objetivos');
                         $('#id_objetivos').html(listaObjetivos)
-                    } else {
 
+                        // select again the ones that were selected before if there is any
+                        $('#id_objetivos li input[type="checkbox"]').each(function() {
+                            if (objetivos.includes(this.value)) {
+                                this.checked = true;
+                            }
+                        });
+
+                    } else {
                         $('#id_objetivos').html('')
                     }
 
@@ -151,7 +153,16 @@ $(document).ready(function() {
                                                     </li>`
                             listaObjetivosGenerales += templateGenerales;
                         });
+                        var objetivosGeneralesChecked = getValueFromMultipleInput('checkbox', 'objetivos_generales');
                         $('#id_objetivos_generales').html(listaObjetivosGenerales)
+
+                        // select again the ones that were selected before if there is any
+                        $('#id_objetivos_generales li input[type="checkbox"]').each(function() {
+                            if (objetivosGeneralesChecked.includes(this.value)) {
+                                this.checked = true;
+                            }
+                        });
+
                     } else {
                         $('#id_objetivos_generales').html('')
                     }
@@ -174,7 +185,15 @@ $(document).ready(function() {
                     'formset_name': 'elementos_curriculares'
                 },
                 success: function(data) { // `data` is the return of the `load_destrezas` view function
+                    var destrezasSelected = getValueFromMultipleInput('select', 'destrezas');
                     $('.destrezas').html(data);
+
+                    // select again the ones that were selected before if there is any
+                    $('.destrezas').each(function(i) {
+                        if (destrezasSelected[i] !== 'Elija una destreza.') {
+                            this.value = destrezasSelected[i];
+                        }
+                    });
                 }
             });
         }
