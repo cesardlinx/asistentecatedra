@@ -1,0 +1,17 @@
+{% extends 'info.html' %}
+
+{% load static %}
+
+{% block content %}
+    <section class="recursos-profesor">
+        <section class="container">
+            <h3 class="main-title">{% block title %}ERROR 500{% endblock %}</h3>
+            <section class="flat-content">
+                {% block info %}
+                    <p>Lo sentimos, al parecer ha habido un problema con su solicitud.</p>
+                    <p>Estamos trabajando para solucionar cualquier inconveniente.</p>
+                {% endblock %}
+            </section>
+        </section>
+    </section>
+{% endblock %}

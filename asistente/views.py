@@ -1,5 +1,6 @@
-import smtplib
 import logging
+import smtplib
+
 import stripe
 from django.conf import settings
 from django.contrib import messages
@@ -8,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import BadHeaderError
 from django.db import transaction
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import (get_object_or_404, redirect, render)
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
@@ -19,8 +20,8 @@ from accounts.mixins import (NotPerpetualNotPremiumUserRequiredMixin,
                              NotPremiumUserRequiredMixin)
 from accounts.models import Plan, Subscription
 
-from .helpers import (send_subscription_emails, send_invoice_email,
-                      send_refund_email)
+from .helpers import (send_invoice_email, send_refund_email,
+                      send_subscription_emails)
 from .models import Libro, Pregunta
 
 User = get_user_model()
@@ -404,3 +405,15 @@ def stripe_webhooks_view(request):
             return HttpResponse(status=400)
 
     return HttpResponse(status=200)
+
+
+def handler404(request, exception, template_name='asistente/errors/404.html'):
+    response = render(request, template_name)
+    response.status_code = 404
+    return response
+
+
+def handler500(request, exception, template_name='asistente/errors/500.html'):
+    response = render(request, template_name)
+    response.status_code = 500
+    return response

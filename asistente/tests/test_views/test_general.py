@@ -1,14 +1,17 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
 from mixer.backend.django import mixer
-from unittest.mock import patch, MagicMock
+
+from accounts.models import Subscription
 from accounts.tests.conftest import clean_test_files
 from asistente import views
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.curso import Curso
-from accounts.models import Subscription
+
 User = get_user_model()
 
 pytestmark = pytest.mark.django_db
@@ -155,3 +158,10 @@ class TestChangePlanView:
             response.template_name, \
             'Change Plan template should be rendered in the view'
 
+
+class TestErrorViews(TestCase):
+    def test_404_handler(self):
+        response = self.client.get('/something/')
+        assert response.status_code == 404, 'Should return a 404 error'
+        assert response.templates[0].name == 'asistente/errors/404.html', \
+            'Should return the 404.html template'

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <section class="recursos-profesor">
+        <section class="container">
+            <h3 class="main-title">{% block title %}{% endblock title %}</h3>
+            <section class="flat-content">
+               {% block info %}{% endblock info %}
+            </section>
+        </section>
+    </section>
+{% endblock %}

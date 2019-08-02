@@ -1,0 +1,17 @@
+{% extends 'info.html' %}
+
+{% load static %}
+
+{% block content %}
+    <section class="recursos-profesor">
+        <section class="container">
+            <h3 class="main-title">{% block title %}Ooops... ERROR 404{% endblock %}</h3>
+            <section class="flat-content">
+                {% block info %}
+                    <p>Lo sentimos, pero la página que buscas no existe.</p>
+                    <p>Ve a la página principal y sigue tu camino desde allí.</p>
+                {% endblock %}
+            </section>
+        </section>
+    </section>
+{% endblock %}
