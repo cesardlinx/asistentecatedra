@@ -104,7 +104,7 @@ class TestCondicionesView:
         request.user = AnonymousUser()
         response = views.CondicionesTemplateView.as_view()(request)
         assert response.status_code == 200, 'Should be callable by anonymous'
-        assert 'asistente/condiciones}.html' in \
+        assert 'asistente/condiciones.html' in \
             response.template_name, \
             'Condiciones template should be rendered in the view'
 
