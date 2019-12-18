@@ -44,7 +44,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 tests_media/
-
+pytest.ini
 
 # Translations
 *.mo

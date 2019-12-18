@@ -1,5 +1,6 @@
 
 import logging
+
 import stripe
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
@@ -14,7 +15,7 @@ from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.generic import DeleteView, UpdateView
 from django.views.generic.edit import CreateView
@@ -201,7 +202,7 @@ def confirm_email_view(request, uidb64, token):
     electrónico para confirmar el email
     """
     try:
-        uid = force_text(urlsafe_base64_decode(uidb64))
+        uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None

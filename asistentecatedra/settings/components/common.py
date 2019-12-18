@@ -10,7 +10,7 @@ MESSAGE_TAGS = {
 }
 
 # Internationalization
-LANGUAGE_CODE = 'es-ec'
+LANGUAGE_CODE = 'es-co'
 
 TIME_ZONE = 'America/Guayaquil'
 
