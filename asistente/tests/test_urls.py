@@ -48,6 +48,12 @@ class TestAsistenteUrls:
         assert view.func.view_class == views.PremiumListView, \
             'Should resolve to the view PremiumListView'
 
+    def test_contact(self):
+        path = reverse('contacto')
+        view = resolve(path)
+        assert view.func.view_class == views.ContactView, \
+            'Should resolve to the view ContactView'
+
     def test_checkout(self):
         plan = mixer.blend('accounts.Plan', plan_type='MONTHLY')
         path = reverse('checkout',

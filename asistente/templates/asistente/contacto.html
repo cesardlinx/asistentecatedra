@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block titulo %}
+    Asistente de Cátedra | Contacto
+{% endblock titulo %}
+
+{% block content %}
+
+    <section class="auth">
+        <section class="container">
+            <div class="auth-img">
+                <img class="imagen" src="{% static 'img/logo_grande.png' %}" alt="Asistente de Cátedra">
+            </div>
+            <h3>Bienvenido a "Asistente de Cátedra"</h3>
+            <form method="POST" novalidate id="contactForm">
+                {% csrf_token %}
+                {% include "forms/floating_input.html" with field=form.name %}
+                {% include "forms/floating_input.html" with field=form.email %}
+                {% include "forms/floating_input.html" with field=form.subject %}
+                {% include "forms/floating_input.html" with field=form.message %}
+                <div class="form-check">
+                    {% render_field form.terms class="form-check-input" %}
+                    {{ form.terms | add_label_class:"form-check-label" }}
+                </div>
+                <button type="submit" class="primary-button submit-btn">Enviar Mensaje</button>
+            </form>
+        </section>
+    </section>
+
+{% endblock content %}
+
+{% block scripts %}
+    <script src="{% static 'jquery-validation/dist/jquery.validate.min.js' %}"></script>
+    <script src="{% static 'jquery-validation/dist/localization/messages_es.min.js' %}"></script>
+    <script src="{% static 'js-cookie/src/js.cookie.js' %}"></script>
+    <script src="{% static 'js/helpers/validators.js' %}"></script>
+    <script src="{% static 'js/asistente/contacto.js' %}"></script>
+{% endblock scripts %}

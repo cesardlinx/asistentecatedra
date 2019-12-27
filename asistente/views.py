@@ -6,12 +6,16 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.mail import BadHeaderError
+from django.core.mail import BadHeaderError, EmailMultiAlternatives
 from django.db import transaction
 from django.http import HttpResponse
-from django.shortcuts import (get_object_or_404, redirect, render)
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.urls import reverse_lazy
+from django.utils.html import strip_tags
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import FormView
 from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 
@@ -20,6 +24,7 @@ from accounts.mixins import (NotPerpetualNotPremiumUserRequiredMixin,
                              NotPremiumUserRequiredMixin)
 from accounts.models import Plan, Subscription
 
+from .forms import ContactForm
 from .helpers import (send_invoice_email, send_refund_email,
                       send_subscription_emails)
 from .models import Libro, Pregunta
@@ -52,6 +57,46 @@ class AyudaListView(ListView):
     template_name = 'asistente/ayuda.html'
     model = Pregunta
     context_object_name = 'preguntas'
+
+
+class ContactView(FormView):
+    """Contacto"""
+    form_class = ContactForm
+    template_name = 'asistente/contacto.html'
+    success_url = reverse_lazy('home')
+
+    def form_valid(self, form):
+        # Email sending
+        mail_subject = form.cleaned_data['subject']
+        html_email_body = render_to_string(
+            'asistente/emails/contact_email.html', {
+                'name': form.cleaned_data['name'],
+                'email': form.cleaned_data['email'],
+                'message': form.cleaned_data['message']
+            }
+        )
+        text_email_body = strip_tags(html_email_body)
+        to_email = settings.SUPERUSER_EMAIL
+
+        email = EmailMultiAlternatives(
+            mail_subject, text_email_body, to=[to_email])
+        email.attach_alternative(html_email_body, "text/html")
+        email.send(fail_silently=True)
+
+        messages.success(
+            self.request, 'Tu mensaje ha sido enviado exitosamente.')
+        logger.info('Message from {} sent'.format(
+            form.cleaned_data['email']))
+
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(
+            self.request,
+            'Ha habido un error y tu mensaje no ha sido enviado.')
+        logger.error('Error trying to send message from {}.'.format(
+            form.data['email']))
+        return super().form_invalid(form)
 
 
 class PremiumListView(NotPremiumUserRequiredMixin, ListView):

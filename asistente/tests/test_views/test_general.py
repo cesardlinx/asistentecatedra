@@ -1,9 +1,13 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.messages.api import get_messages
+from django.core import mail
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 from mixer.backend.django import mixer
 
 from accounts.models import Subscription
@@ -11,6 +15,7 @@ from accounts.tests.conftest import clean_test_files
 from asistente import views
 from planificaciones.models.asignatura import Asignatura
 from planificaciones.models.curso import Curso
+from testfixtures import LogCapture
 
 User = get_user_model()
 
@@ -95,6 +100,92 @@ class TestPremiumView:
         response = views.PremiumListView.as_view()(request)
         assert response.status_code == 302, 'User should be redirected'
         assert '/' == response.url, 'Should not be callable by premium user'
+
+
+class TestContactView(TestCase):
+    def setUp(self):
+        self.logger = LogCapture()
+
+    def test_anonymous(self):
+        """Tests that an anonymous user can access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.ContactView.as_view()(request)
+        assert response.status_code == 200, 'Should be callable by anonymous'
+        assert 'asistente/contacto.html' in \
+            response.template_name, \
+            'Contact template should be rendered in the view'
+
+    def test_email_sent_when_valid_data(self):
+        """Test app sends email"""
+        response = self.client.post(reverse('contacto'), {
+            'name': 'some user',
+            'email': 'someuser@tester.com',
+            'subject': 'Questions',
+            'message': 'I have a lot of questions'
+        }, follow=True)
+
+        assert response.status_code == 200, 'Should be successful'
+        self.assertRedirects(response, reverse('home'))
+
+        assert len(mail.outbox) == 1, 'should send the email'
+        email = mail.outbox[0]
+        assert settings.SUPERUSER_EMAIL in email.to, 'my email should be here'
+        assert 'someuser@tester.com' in email.body, \
+               'the email from the person should be here'
+        assert 'Questions' in email.subject, 'the subject must appear'
+        assert 'I have a lot of questions' in email.body, \
+               'the text must appear'
+
+        messages = list(get_messages(response.wsgi_request))
+        assert len(messages) == 1, 'There should be one message'
+        assert 'Tu mensaje ha sido enviado exitosamente.'\
+               == messages[0].message, \
+               'Should return a success message'
+        assert messages[0].tags == 'alert-success', \
+            'There should be a success message.'
+
+        assert 'INFO' in str(self.logger), 'Should return an info log'
+        assert 'Message from someuser@tester.com sent' in str(self.logger), \
+            'Log from confirmation sending'
+
+    def test_email_sent_when_invalid_data(self):
+        """Test app wont send email"""
+        response = self.client.post(reverse('contacto'), {
+            'name': 'some user',
+            'email': 'someuser',
+            'subject': 'Questions',
+            'message': 'I have a lot of questions'
+        }, follow=True)
+
+        assert response.status_code == 200, 'Should be successful'
+
+        assert len(mail.outbox) == 0, 'should send the email'
+
+        messages = list(get_messages(response.wsgi_request))
+        assert len(messages) == 1, 'There should be one message'
+        assert 'Ha habido un error y tu mensaje no ha sido enviado.'\
+               == messages[0].message, \
+               'Should return a success message'
+        assert messages[0].tags == 'alert-danger', \
+            'There should be an error message.'
+
+        assert 'ERROR' in str(self.logger), 'Should return an info log'
+        assert 'Error trying to send message from someuser' in \
+            str(self.logger), 'Log from error in sending'
+
+    def tearDown(self):
+        self.logger.uninstall()
+
+    # def test_email_sent_when_invalid_data(self):
+    #     """Test app sends email"""
+    #     response = self.client.post(reverse('contact'), {
+    #         'name': 'some user',
+    #         'email': 'someuse',
+    #         'subject': 'Hire you',
+    #         'message': 'I want to hire you so badly'
+    #     })
+    #     assert response.status_code == 400
 
 
 class TestCondicionesView:
