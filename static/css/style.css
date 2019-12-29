@@ -26,6 +26,10 @@ body {
   min-height: 100vh;
 }
 
+ol li {
+  margin-bottom: 1em;
+}
+
 .primary-button {
   display: block;
   text-align: center;

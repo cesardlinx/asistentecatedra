@@ -8,21 +8,14 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from mixer.backend.django import mixer
 from accounts import views
-from unittest.mock import patch
 
 pytestmark = pytest.mark.django_db
 User = get_user_model()
 
 
 class TestAccountsUrls(TestCase):
-    @patch('accounts.models.stripe')
-    def setUp(self, mock_stripe):
-        mock_stripe.Customer.create.return_value = {'id': '12345'}
-
-        self.user = User.objects.create_user(
-            email='tester@tester.com',
-            password='P455w0rd_testing'
-        )
+    def setUp(self):
+        self.user = mixer.blend(User)
 
     def test_signup(self):
         path = reverse('signup')

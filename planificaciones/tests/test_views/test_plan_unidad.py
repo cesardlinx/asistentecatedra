@@ -29,10 +29,6 @@ class PlanUnidadTestCase(PlanificacionesTestCase):
         """Creates data for testing Planes de Unidad"""
         super().setUp()
 
-        self.mock_stripe = patch('accounts.models.stripe')
-        stripe = self.mock_stripe.start()
-        stripe.Customer.create.return_value = {'id': '12345'}
-
         self.logger = LogCapture()
 
         self.user = User.objects.create_user(
@@ -41,7 +37,6 @@ class PlanUnidadTestCase(PlanificacionesTestCase):
             first_name='David',
             last_name='Padilla',
             institution='Colegio Benalcazar',
-            is_premium=True
         )
 
         self.data = {
@@ -79,7 +74,7 @@ class PlanUnidadTestCase(PlanificacionesTestCase):
 
         self.plan_unidad = mixer.blend(PlanUnidad, elaborado_por=self.user)
 
-        another_user = mixer.blend(User, is_premium=True)
+        another_user = mixer.blend(User)
         self.another_plan = mixer.blend(PlanUnidad, elaborado_por=another_user)
 
         self.common_user = mixer.blend(User)
@@ -96,15 +91,6 @@ class TestPlanUnidadListView(PlanUnidadTestCase):
         request.user = AnonymousUser()
         response = PlanUnidadListView.as_view()(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
-
-    def test_premium(self):
-        """Tests that only premium users can access"""
-        request = RequestFactory().get('/')
-        request.user = self.common_user
-        response = PlanUnidadListView.as_view()(request)
-        assert response.status_code == 302, 'Should return a redirection'
-        assert reverse('planificaciones') == response.url, \
-            'Should not be callable by a normal user'
 
     def test_get(self):
         """Tests that an authenticated user can access the view"""
@@ -130,15 +116,6 @@ class TestPlanUnidadCreateView(PlanUnidadTestCase):
         request.user = AnonymousUser()
         response = PlanUnidadCreateView.as_view()(request)
         assert 'login' in response.url, 'Should not be callable by anonymous'
-
-    def test_premium(self):
-        """Tests that only premium users can access"""
-        request = RequestFactory().get('/')
-        request.user = self.common_user
-        response = PlanUnidadCreateView.as_view()(request)
-        assert response.status_code == 302, 'Should return a redirection'
-        assert reverse('planificaciones') == response.url, \
-            'Should not be callable by a normal user'
 
     def test_get(self):
         """Tests that an authenticated user can access the view"""
@@ -225,16 +202,6 @@ class TestPlanUnidadUpdateView(PlanUnidadTestCase):
         response = PlanUnidadUpdateView.as_view()(
             request, pk=self.plan_unidad.pk, slug=self.plan_unidad.slug)
         assert 'login' in response.url, 'Should not be callable by anonymous'
-
-    def test_premium(self):
-        """Tests that only premium users can access"""
-        request = RequestFactory().get('/')
-        request.user = self.common_user
-        response = PlanUnidadUpdateView.as_view()(
-            request, pk=self.plan_unidad.pk, slug=self.plan_unidad.slug)
-        assert response.status_code == 302, 'Should return a redirection'
-        assert reverse('planificaciones') == response.url, \
-            'Should not be callable by a normal user'
 
     def test_get_when_user_doesnt_own_plan(self):
         request = RequestFactory().get('/')
@@ -352,16 +319,6 @@ class TestPlanUnidadDeleteView(PlanUnidadTestCase):
                                                   pk=self.plan_unidad.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
 
-    def test_premium(self):
-        """Tests that only premium users can access"""
-        request = RequestFactory().get('/')
-        request.user = self.common_user
-        response = PlanUnidadDeleteView.as_view()(request,
-                                                  pk=self.plan_unidad.pk)
-        assert response.status_code == 302, 'Should return a redirection'
-        assert reverse('planificaciones') == response.url, \
-            'Should not be callable by a normal user'
-
     def test_post_when_user_doesnt_own_plan(self):
         request = RequestFactory().post('/', self.data)
         request.user = self.user
@@ -418,16 +375,6 @@ class TestPlanUnidadDuplicateView(PlanUnidadTestCase):
         response = PlanUnidadDuplicateView.as_view()(
             request, pk=self.plan_unidad.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
-
-    def test_premium(self):
-        """Tests that only premium users can access"""
-        request = RequestFactory().get('/')
-        request.user = self.common_user
-        response = PlanUnidadDuplicateView.as_view()(
-            request, pk=self.plan_unidad.pk)
-        assert response.status_code == 302, 'Should return a redirection'
-        assert reverse('planificaciones') == response.url, \
-            'Should not be callable by a normal user'
 
     def test_get(self):
         """Tests that an authenticated user can't access by get method"""
@@ -580,15 +527,6 @@ class TestPlanUnidadPdfView(PlanUnidadTestCase):
         response = PlanUnidadPdfView.as_view()(
             request, pk=self.plan_unidad.pk)
         assert 'login' in response.url, 'Should not be callable by anonymous'
-
-    def test_premium(self):
-        """Tests that only premium users can access"""
-        request = RequestFactory().get('/')
-        request.user = self.common_user
-        response = PlanUnidadPdfView.as_view()(request)
-        assert response.status_code == 302, 'Should return a redirection'
-        assert reverse('planificaciones') == response.url, \
-            'Should not be callable by a normal user'
 
     def test_when_user_doesnt_own_plan(self):
         request = RequestFactory().post('/', self.data)

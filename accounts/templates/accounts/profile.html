@@ -29,11 +29,6 @@
                                         src="{{ user.get_photo }}"
                                         alt="Usuario"
                                         title="Haga click para cambiar de imágen">
-
-                                    {% if user.is_premium %}
-                                        <span class="premium-badge premium-badge-top">PREMIUM</span>
-                                    {% endif %}
-
                                 </div>
 
                                 <form id="photoForm"
@@ -50,35 +45,6 @@
                                 </p>
                             </div>
                         </div>
-
-                        {% if not user.is_superuser %}
-                            <div class="profile-container">
-                                <h4 class="subscription-card-title">Subscripción</h4>
-                                <div class="user-info-wrapper">
-                                    <p class="info-item">
-                                        <strong>Tipo de Plan:</strong> {{ user.active_plan }}
-                                    </p>
-                                    <p class="info-item">
-                                        <strong>Miembro desde:</strong> {{ user.date_joined }}
-                                    </p>
-
-                                    {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' %}
-                                        <p class="info-item">
-                                            <strong>Premium desde:</strong> {{ user.active_subscription.created_date }}
-                                        </p>
-                                        <p class="info-item">
-                                            <strong>Siguiente pago:</strong> {{ user.active_subscription.next_billing_date }}
-                                        </p>
-                                        <p class="info-item">
-                                            <strong>Último pago:</strong> {{ user.active_subscription.last_billing_date }}
-                                        </p>
-                                    {% endif %}
-
-                                </div>
-                            </div>
-                        {% endif %}
-
-
                     </div>
 
 
@@ -147,14 +113,7 @@
                                         Eliminar Cuenta
                                     </button>
                                 </form>
-                                {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' and not user.is_superuser%}
-                                    <form action="{% url 'cancel_subscription' %}" method="post" id="cancelSubscriptionForm">
-                                        {% csrf_token %}
-                                        <button class="secondary-button delete-btn" id="cancelSubscription">
-                                            Cancelar Subscripción Premium
-                                        </button>
-                                    </form>
-                                {% endif %}
+
                                 <button class="primary-button" id="guardarCambios">
                                     Guardar Cambios
                                 </button>

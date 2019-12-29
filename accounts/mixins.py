@@ -1,10 +1,7 @@
 import requests
 from django.conf import settings
-from django.contrib.auth.mixins import AccessMixin, UserPassesTestMixin
-from django.contrib.auth.views import redirect_to_login
+from django.contrib.auth.mixins import AccessMixin
 from django.shortcuts import redirect
-
-from accounts.models import Plan
 
 
 class CheckRecaptchaMixin:
@@ -49,100 +46,4 @@ class AnonymousRequiredMixin(AccessMixin):
         if request.user.is_authenticated:
             return redirect('home')
         return super().dispatch(request, *args, **kwargs)
-
-
-class NotPremiumUserRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        try:
-            return not self.request.user.is_premium
-        except AttributeError:
-            return True
-
-    def handle_no_permission(self):
-        if self.request.user.is_authenticated:
-            return redirect('home')
-        return redirect_to_login(
-            self.request.get_full_path(),
-            self.get_login_url(),
-            self.get_redirect_field_name()
-        )
-
-
-class PremiumUserRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        try:
-            return self.request.user.is_premium
-        except AttributeError:
-            return True
-
-    def handle_no_permission(self):
-        if self.request.user.is_authenticated:
-            return redirect('home')
-        return redirect_to_login(
-            self.request.get_full_path(),
-            self.get_login_url(),
-            self.get_redirect_field_name()
-        )
-
-
-class NotPerpetualNotPremiumUserRequiredMixin(AccessMixin):
-
-    def dispatch(self, request, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            # get if user is perpetual
-            try:
-                plan = Plan.objects.get(plan_type='PAGO ÚNICO')
-                user_is_perpetual = self.request.user.is_premium and \
-                    self.request.user.active_plan == plan
-            except Plan.DoesNotExist:
-                user_is_perpetual = False
-            except Exception:
-                user_is_perpetual = False
-
-            if user_is_perpetual:
-                # If user is perpetual
-                return redirect('home')
-            elif not self.request.user.is_premium:
-                # If user is no premium
-                return redirect('premium')
-            else:
-                # Give access
-                return super().dispatch(request, *args, **kwargs)
-        else:
-            # Redirect to login
-            return redirect_to_login(
-                self.request.get_full_path(),
-                self.get_login_url(),
-                self.get_redirect_field_name()
-            )
-
-
-class NotPerpetualPremiumUserRequiredMixin(AccessMixin):
-
-    def dispatch(self, request, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            # get if user is perpetual
-            try:
-                plan = Plan.objects.get(plan_type='PAGO ÚNICO')
-                user_is_perpetual = self.request.user.is_premium and \
-                    self.request.user.active_plan == plan
-            except Plan.DoesNotExist:
-                user_is_perpetual = False
-            except Exception:
-                user_is_perpetual = False
-
-            if user_is_perpetual:
-                # If user is perpetual
-                return redirect('home')
-            else:
-                # Give access
-                return super().dispatch(request, *args, **kwargs)
-        else:
-            # Redirect to login
-            return redirect_to_login(
-                self.request.get_full_path(),
-                self.get_login_url(),
-                self.get_redirect_field_name()
-            )
-
 

@@ -1,7 +1,6 @@
 
 import logging
 
-import stripe
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
@@ -11,7 +10,6 @@ from django.contrib.auth.views import (LoginView, PasswordChangeView,
                                        PasswordResetConfirmView,
                                        PasswordResetView)
 from django.contrib.sites.shortcuts import get_current_site
-from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -131,19 +129,8 @@ class UserDeleteView(LoginRequiredMixin, DeleteView):
         self.object = self.get_object()
 
         try:
-            with transaction.atomic():
-                # Cancel subscription
-                self.object.cancel_active_subscription()
-                self.object.soft_delete()
-                # User is no longer premium
-                self.object.is_premium = False
-                self.object.save()
-        except stripe.error.StripeError as e:
-            # General Stripe Error
-            logger.error('StripeError: ' + e.user_message)
-            messages.error(request, 'Ha ocurrido un error al tratar de '
-                           'eliminar su cuenta.')
-            return HttpResponseRedirect(request.path_info)
+            self.object.soft_delete()
+
         except Exception as e:
             # Display a very generic error to the user, and maybe send
             # yourself an email

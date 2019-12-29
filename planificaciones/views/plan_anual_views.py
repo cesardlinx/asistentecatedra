@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -14,7 +15,6 @@ from django_xhtml2pdf.views import PdfMixin
 from planificaciones.forms.desarrollo_unidad_formset import \
     DesarrolloUnidadFormset
 from planificaciones.forms.plan_anual_form import PlanAnualForm
-from planificaciones.mixins import UserIsPremiumMixin
 from planificaciones.models.desarrollo_unidad import DesarrolloUnidad
 from planificaciones.models.plan_anual import PlanAnual
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 """ PLANES ANUALES"""
 
 
-class PlanAnualListView(UserIsPremiumMixin, ListView):
+class PlanAnualListView(LoginRequiredMixin, ListView):
     """Vista para listado de planes anuales"""
     template_name = 'planificaciones/planificacion_list.html'
     ordering = '-updated_at'
@@ -48,9 +48,8 @@ class PlanAnualListView(UserIsPremiumMixin, ListView):
         return context
 
 
-class PlanAnualCreateView(UserIsPremiumMixin, View):
+class PlanAnualCreateView(LoginRequiredMixin, View):
     """Vista para la creación de planes anuales"""
-
     def get(self, request, *args, **kwargs):
         form = PlanAnualForm()
         unidades_formset = DesarrolloUnidadFormset(
@@ -96,7 +95,7 @@ class PlanAnualCreateView(UserIsPremiumMixin, View):
                       context)
 
 
-class PlanAnualUpdateView(UserIsPremiumMixin, View):
+class PlanAnualUpdateView(LoginRequiredMixin, View):
     """Vista para la edición de planes anuales"""
 
     def get(self, request, *args, **kwargs):
@@ -154,7 +153,7 @@ class PlanAnualUpdateView(UserIsPremiumMixin, View):
                       context)
 
 
-class PlanAnualDeleteView(UserIsPremiumMixin, DeleteView):
+class PlanAnualDeleteView(LoginRequiredMixin, DeleteView):
     """Vista para borrar un plan anual"""
     model = PlanAnual
     success_url = reverse_lazy('plan_anual_list')
@@ -173,7 +172,7 @@ class PlanAnualDeleteView(UserIsPremiumMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class PlanAnualDuplicateView(UserIsPremiumMixin, View):
+class PlanAnualDuplicateView(LoginRequiredMixin, View):
     """Vista para realizar una copia de un plan anual"""
 
     def post(self, request, *args, **kwargs):
@@ -216,7 +215,7 @@ class PlanAnualDuplicateView(UserIsPremiumMixin, View):
         return redirect('plan_anual_list')
 
 
-class PlanAnualPdfView(UserIsPremiumMixin, PdfMixin, DetailView):
+class PlanAnualPdfView(LoginRequiredMixin, PdfMixin, DetailView):
     model = PlanAnual
     template_name = "planificaciones/pdfs/plan_anual_pdf.html"
     context_object_name = 'plan'

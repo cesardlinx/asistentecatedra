@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -30,10 +28,6 @@ class PlanClaseTestCase(PlanificacionesTestCase):
     def setUp(self):
         """Creates data for testing Planes de Clase"""
         super().setUp()
-
-        self.mock_stripe = patch('accounts.models.stripe')
-        stripe = self.mock_stripe.start()
-        stripe.Customer.create.return_value = {'id': '12345'}
 
         self.logger = LogCapture()
 

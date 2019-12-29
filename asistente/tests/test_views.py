@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock, patch
-
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,7 +8,6 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from mixer.backend.django import mixer
 
-from accounts.models import Subscription
 from accounts.tests.conftest import clean_test_files
 from asistente import views
 from planificaciones.models.asignatura import Asignatura
@@ -79,27 +76,6 @@ class TestAyudaView(TestCase):
         pregunta = mixer.blend('asistente.Pregunta')
         self.assertContains(self.response, pregunta.question)
         self.assertContains(self.response, pregunta.answer)
-
-
-class TestPremiumView:
-    def test_anonymous(self):
-        """Tests that an anonymous user can access the view"""
-        request = RequestFactory().get('/')
-        request.user = AnonymousUser()
-        response = views.PremiumListView.as_view()(request)
-        assert response.status_code == 200, 'Should be callable by anonymous'
-        assert 'asistente/premium.html' in \
-            response.template_name, \
-            'Premium template should be rendered in the view'
-
-    def test_premium_user_cant_access(self):
-        """Tests that a premium user can't access"""
-        user = mixer.blend(User, is_premium=True)
-        request = RequestFactory().get('/')
-        request.user = user
-        response = views.PremiumListView.as_view()(request)
-        assert response.status_code == 302, 'User should be redirected'
-        assert '/' == response.url, 'Should not be callable by premium user'
 
 
 class TestContactView(TestCase):
@@ -177,16 +153,6 @@ class TestContactView(TestCase):
     def tearDown(self):
         self.logger.uninstall()
 
-    # def test_email_sent_when_invalid_data(self):
-    #     """Test app sends email"""
-    #     response = self.client.post(reverse('contact'), {
-    #         'name': 'some user',
-    #         'email': 'someuse',
-    #         'subject': 'Hire you',
-    #         'message': 'I want to hire you so badly'
-    #     })
-    #     assert response.status_code == 400
-
 
 class TestCondicionesView:
     def test_anonymous(self):
@@ -222,68 +188,6 @@ class TestCookiesView:
         assert 'asistente/cookies.html' in \
             response.template_name, \
             'Cookies template should be rendered in the view'
-
-
-class TestChangePlanView:
-    def test_anonymous(self):
-        """Tests that an anonymous user can't access the view"""
-        request = RequestFactory().get('/')
-        request.user = AnonymousUser()
-        response = views.ChangePlanListView.as_view()(request)
-        assert response.status_code == 302, 'User should be redirected'
-        assert 'login' in response.url, 'Should not be callable by anonymous'
-
-    def test_not_premium_user_access(self):
-        """Tests that a not premium user can't access"""
-        user = mixer.blend(User)
-        request = RequestFactory().get('/')
-        request.user = user
-        response = views.ChangePlanListView.as_view()(request)
-        assert response.status_code == 302, 'User should be redirected'
-        assert 'premium' in response.url, \
-            'Should not be callable by a not premium user'
-
-    @patch('accounts.models.stripe.Charge.create')
-    @patch('accounts.models.stripe.Customer.modify')
-    @patch('accounts.models.stripe.Subscription.retrieve')
-    def test_perpetual_user_cant_access(self,
-                                        subscription_retrieve,
-                                        customer_modify,
-                                        charge_create):
-        """
-        Tests that an authenticated premium user cant access the view
-        if has a perpetual plan
-        """
-        mock = MagicMock(id='123456')
-        mock.delete = MagicMock()
-        subscription_retrieve.return_value = mock
-        charge_create.return_value = mock
-
-        plan = mixer.blend('accounts.Plan', plan_type='PAGO ÚNICO')
-        user = mixer.blend(User, is_premium=True)
-
-        Subscription.objects.create_subscription(
-            user,
-            plan,
-            '456789',
-        )
-        request = RequestFactory().get('/')
-        request.user = user
-        response = views.ChangePlanListView.as_view()(request)
-        assert response.status_code == 302, 'User should be redirected'
-        assert '/' == response.url, \
-            'Should not be callable by a not perpetual premium user'
-
-    def test_premium_user_access(self):
-        """Tests that an authenticated premium user can access the view"""
-        user = mixer.blend(User, is_premium=True)
-        request = RequestFactory().get('/')
-        request.user = user
-        response = views.ChangePlanListView.as_view()(request)
-        assert response.status_code == 200, 'User should access the view'
-        assert 'asistente/change_plan.html' in \
-            response.template_name, \
-            'Change Plan template should be rendered in the view'
 
 
 class TestErrorViews(TestCase):

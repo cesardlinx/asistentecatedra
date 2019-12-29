@@ -1,35 +1,21 @@
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import migrations
-from django.template.defaultfilters import slugify
+
+User = get_user_model()
 
 
-def create_pĺans(apps, schema_editor):
-    Plan = apps.get_model('accounts', 'Plan')
-    Plan.objects.bulk_create([
-        Plan(
-            plan_type='GRATIS',
-            price=0,
-        ),
-        Plan(
-            plan_type='MENSUAL',
-            price=499,
-            stripe_plan_id=settings.STRIPE_MONTHLY_ID
-        ),
-        Plan(
-            plan_type='ANUAL',
-            price=5988,
-            stripe_plan_id=settings.STRIPE_YEARLY_ID
-        ),
-        Plan(
-            plan_type='PAGO ÚNICO',
-            price=11976,
-        ),
-    ])
-
-    plans = Plan.objects.all()
-    for plan in plans:
-        plan.slug = slugify(plan.plan_type)
-        plan.save()
+def create_superuser(apps, schema_editor):
+    email = settings.SUPERUSER_EMAIL
+    password = settings.SUPERUSER_PASSWORD
+    first_name = settings.SUPERUSER_FIRSTNAME
+    last_name = settings.SUPERUSER_LASTNAME
+    User.objects.create_superuser(
+        email,
+        password,
+        first_name=first_name,
+        last_name=last_name
+    )
 
 
 class Migration(migrations.Migration):
@@ -39,6 +25,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_pĺans,
+        migrations.RunPython(create_superuser,
                              reverse_code=migrations.RunPython.noop)
     ]

@@ -8,25 +8,11 @@ def create_questions(apps, schema_editor):
     # Preguntas
     Pregunta.objects.bulk_create([
         Pregunta(
-            question='¿Es gratis crear un usuario en Asistente de Cátedra?',
+            question='¿Es gratis usar Asistente de Cátedra?',
             answer=(
                 "Cualquier persona puede crear un usuario en Asistente de "
-                "Cátedra de manera completamente gratuita."
-            )
-        ),
-        Pregunta(
-            question='¿Qué planificaciones puedo realizar sin pagar?',
-            answer=(
-                "Asistente de Cátedra te permite la creación de planes de "
-                "clase sin ningun costo a modo de ayuda ya que este tipo de "
-                "planificación es la más requerida y usada."
-            )
-        ),
-        Pregunta(
-            question='¿Por qué habría de comparar una subscripción?',
-            answer=(
-                "Una subscripción te permite el uso completo de la aplicación "
-                "para la realización de cualquier tipo de planificación."
+                "Cátedra y comenzar a usarlo de manera completamente "
+                "segura y gratuita."
             )
         ),
         Pregunta(

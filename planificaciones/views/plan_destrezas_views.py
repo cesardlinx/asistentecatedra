@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,7 +14,6 @@ from django.views.generic.list import ListView
 from django_xhtml2pdf.views import PdfMixin
 
 from planificaciones.forms.plan_destrezas_form import PlanDestrezasForm
-from planificaciones.mixins import UserIsPremiumMixin
 from planificaciones.models.plan_destrezas import PlanDestrezas
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 """ PLANES DE DESTREZAS"""
 
 
-class PlanDestrezasListView(UserIsPremiumMixin, ListView):
+class PlanDestrezasListView(LoginRequiredMixin, ListView):
     """Vista para listado de planes de destrezas"""
     template_name = 'planificaciones/planificacion_list.html'
     ordering = '-updated_at'
@@ -47,7 +47,7 @@ class PlanDestrezasListView(UserIsPremiumMixin, ListView):
         return context
 
 
-class PlanDestrezasCreateView(UserIsPremiumMixin, CreateView):
+class PlanDestrezasCreateView(LoginRequiredMixin, CreateView):
     template_name = 'planificaciones/forms/plan_destrezas_form.html'
     form_class = PlanDestrezasForm
 
@@ -76,7 +76,7 @@ class PlanDestrezasCreateView(UserIsPremiumMixin, CreateView):
         return context
 
 
-class PlanDestrezasUpdateView(UserIsPremiumMixin, View):
+class PlanDestrezasUpdateView(LoginRequiredMixin, View):
     """Vista para la edición de planes de destrezas"""
 
     def get(self, request, *args, **kwargs):
@@ -130,7 +130,7 @@ class PlanDestrezasUpdateView(UserIsPremiumMixin, View):
                       context)
 
 
-class PlanDestrezasDeleteView(UserIsPremiumMixin, DeleteView):
+class PlanDestrezasDeleteView(LoginRequiredMixin, DeleteView):
     """Vista para borrar un plan de destrezas"""
     model = PlanDestrezas
     success_url = reverse_lazy('plan_destrezas_list')
@@ -149,7 +149,7 @@ class PlanDestrezasDeleteView(UserIsPremiumMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class PlanDestrezasDuplicateView(UserIsPremiumMixin, View):
+class PlanDestrezasDuplicateView(LoginRequiredMixin, View):
     """Vista para realizar una copia de un plan de destrezas"""
 
     def post(self, request, *args, **kwargs):
@@ -183,7 +183,7 @@ class PlanDestrezasDuplicateView(UserIsPremiumMixin, View):
         return redirect('plan_destrezas_list')
 
 
-class PlanDestrezasPdfView(UserIsPremiumMixin, PdfMixin, DetailView):
+class PlanDestrezasPdfView(LoginRequiredMixin, PdfMixin, DetailView):
     model = PlanDestrezas
     template_name = "planificaciones/pdfs/plan_destrezas_pdf.html"
     context_object_name = 'plan'

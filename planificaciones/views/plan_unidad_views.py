@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -14,7 +15,6 @@ from django_xhtml2pdf.views import PdfMixin
 from planificaciones.forms.actividad_aprendizaje_formset import \
     ActividadAprendizajeFormset
 from planificaciones.forms.plan_unidad_form import PlanUnidadForm
-from planificaciones.mixins import UserIsPremiumMixin
 from planificaciones.models.actividad_aprendizaje import ActividadAprendizaje
 from planificaciones.models.plan_unidad import PlanUnidad
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 """ PLANES DE UNIDAD"""
 
 
-class PlanUnidadListView(UserIsPremiumMixin, ListView):
+class PlanUnidadListView(LoginRequiredMixin, ListView):
     """Vista para listado de planes de unidad"""
     template_name = 'planificaciones/planificacion_list.html'
     ordering = '-updated_at'
@@ -48,7 +48,7 @@ class PlanUnidadListView(UserIsPremiumMixin, ListView):
         return context
 
 
-class PlanUnidadCreateView(UserIsPremiumMixin, View):
+class PlanUnidadCreateView(LoginRequiredMixin, View):
     """Vista para la creación de planes de unidad"""
 
     def get(self, request, *args, **kwargs):
@@ -97,7 +97,7 @@ class PlanUnidadCreateView(UserIsPremiumMixin, View):
                       context)
 
 
-class PlanUnidadUpdateView(UserIsPremiumMixin, View):
+class PlanUnidadUpdateView(LoginRequiredMixin, View):
     """Vista para la edición de planes de unidad"""
 
     def get(self, request, *args, **kwargs):
@@ -155,7 +155,7 @@ class PlanUnidadUpdateView(UserIsPremiumMixin, View):
                       context)
 
 
-class PlanUnidadDeleteView(UserIsPremiumMixin, DeleteView):
+class PlanUnidadDeleteView(LoginRequiredMixin, DeleteView):
     """Vista para borrar un plan de unidad"""
     model = PlanUnidad
     success_url = reverse_lazy('plan_unidad_list')
@@ -174,7 +174,7 @@ class PlanUnidadDeleteView(UserIsPremiumMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class PlanUnidadDuplicateView(UserIsPremiumMixin, View):
+class PlanUnidadDuplicateView(LoginRequiredMixin, View):
     """Vista para realizar una copia de un plan de unidad"""
 
     def post(self, request, *args, **kwargs):
@@ -215,7 +215,7 @@ class PlanUnidadDuplicateView(UserIsPremiumMixin, View):
         return redirect('plan_unidad_list')
 
 
-class PlanUnidadPdfView(UserIsPremiumMixin, PdfMixin, DetailView):
+class PlanUnidadPdfView(LoginRequiredMixin, PdfMixin, DetailView):
     model = PlanUnidad
     template_name = "planificaciones/pdfs/plan_unidad_pdf.html"
     context_object_name = 'plan'

@@ -47,15 +47,6 @@
 
                                 <a class="dropdown-item" href="{% url 'logout'  %}">Cerrar Sesión</a>
 
-                                {% if user.is_premium and user.active_plan.plan_type != 'PAGO ÚNICO' %}
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{% url 'change_plan' %}">Cambiar de Plan</a>
-                                {% elif user.is_premium and user.active_plan.plan_type == 'PAGO ÚNICO' %}
-                                {% else %}
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{% url 'premium' %}"><span class="fas fa-crown"></span> Obtener Premium</a>
-                                {% endif %}
-
                             </div>
                         </div>
 
@@ -81,21 +72,12 @@
                             <a class="dropdown-item" href="{% url 'plan_clase_list' %}">Planes de Clase</a>
                             <a class="dropdown-item" href="{% url 'plan_unidad_list' %}">
                                 Planificaciones de Unidad Didáctica
-                                {% if not user.is_premium %}
-                                    <span class="premium-badge">PREMIUM</span>
-                                {% endif %}
                             </a>
                             <a class="dropdown-item" href="{% url 'plan_destrezas_list' %}">
                                 Planificaciones de Destrezas
-                                {% if not user.is_premium %}
-                                    <span class="premium-badge">PREMIUM</span>
-                                {% endif %}
                             </a>
                             <a class="dropdown-item" href="{% url 'plan_anual_list' %}">
                                 Planificaciones Curriculares Anuales
-                                {% if not user.is_premium %}
-                                    <span class="premium-badge">PREMIUM</span>
-                                {% endif %}
                             </a>
                         </div>
                     </li>
@@ -111,12 +93,6 @@
                         <a href="{% url 'contacto' %}" class="navbar-link">Contáctanos</a>
                     </li>
 
-                    {% if not user.is_premium %}
-                        <li class="navbar-item stroke">
-                            <a href="{% url 'premium' %}" class="navbar-link">Premium</a>
-                        </li>
-                    {% endif %}
-
                     {% if user.is_authenticated %}
 
                         <li class="navbar-item session-link">
@@ -124,9 +100,6 @@
                         </li>
                         <li class="navbar-item session-link">
                             <a href="{% url 'logout' %}" class="navbar-link">Cerrar Sesión</a>
-                        </li>
-                        <li class="navbar-item session-link">
-                            <a href="{% url 'premium' %}" class="navbar-link"><span class="fas fa-crown"></span> Obtener Premium</a>
                         </li>
 
                     {% else %}
@@ -164,7 +137,7 @@
             <div class="footer-list-wrapper">
                 <nav>
                     <ul class="footer-list">
-                        <li class="footer-list-item"><a href="#">Contáctanos</a></li>
+                        <li class="footer-list-item"><a href="{% url 'contacto' %}">Contáctanos</a></li>
                         <li class="footer-list-item"><a href="{% url 'biblioteca' %}">Biblioteca</a></li>
                         <li class="footer-list-item"><a href="{% url 'ayuda' %}">Ayuda</a></li>
                     </ul>
@@ -181,8 +154,8 @@
             </div>
             <div class="footer-list-wrapper">
                 <h5>Síguenos!</h5>
-                <a href="#" class="social"><span class="fab fa-facebook-f"></span></a>
-                <a href="#" class="social"><span class="fab fa-twitter"></span></a>
+                <a href="https://www.facebook.com/asistentedecatedra/" class="social"><span class="fab fa-facebook-f"></span></a>
+                <a href="https://twitter.com/asistentedecate" class="social"><span class="fab fa-twitter"></span></a>
             </div>
         </div>
         <div class="container">

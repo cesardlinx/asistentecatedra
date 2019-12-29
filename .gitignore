@@ -54,7 +54,7 @@ pytest.ini
 *.log
 test_settings.py
 db.sqlite3
-media
+media/
 
 # Environments
 .env
