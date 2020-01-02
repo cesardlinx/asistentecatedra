@@ -53,7 +53,7 @@ ol li {
   margin-bottom: 1em;
 }
 
-.recursos-profesor img {
+.recursos-profesor .big-image {
   width: 100%;
   margin: 0 auto 2em;
   -webkit-box-ordinal-group: 0;
@@ -62,7 +62,7 @@ ol li {
 }
 
 @media only screen and (min-width: 992px) {
-  .recursos-profesor img {
+  .recursos-profesor .big-image {
     display: block;
     position: relative;
     top: -4em;
@@ -73,7 +73,7 @@ ol li {
 }
 
 @media only screen and (min-width: 424px) {
-  .recursos-profesor img {
+  .recursos-profesor .big-image {
     width: 392px;
   }
 }

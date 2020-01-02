@@ -39,7 +39,7 @@ ol li {
   margin-bottom: 1em;
 }
 
-.recursos-profesor img {
+.recursos-profesor .big-image {
   @include responsive(extra-large) {
     display: block;
     position: relative;
@@ -56,8 +56,3 @@ ol li {
 
 }
 
-// .recursos-profesor img {
-//   display: block;
-//   width: 90%;
-//   margin-bottom: 1em;
-// }
