@@ -57,6 +57,18 @@ class TestBibliotecaView(TestCase):
         clean_test_files()
 
 
+class TestAboutView:
+    def test_anonymous(self):
+        """Tests that an anonymous user can access the view"""
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        response = views.AboutTemplateView.as_view()(request)
+        assert response.status_code == 200, 'Should be callable by anonymous'
+        assert 'asistente/about.html' in \
+            response.template_name, \
+            'About template should be rendered in the view'
+
+
 class TestAyudaView(TestCase):
     def setUp(self):
         """Response Creation"""

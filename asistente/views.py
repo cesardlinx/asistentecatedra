@@ -20,6 +20,7 @@ User = get_user_model()
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+
 class HomeTemplateView(TemplateView):
     """Vista principal de la aplicación"""
     template_name = 'asistente/home.html'
@@ -39,6 +40,11 @@ class AyudaListView(ListView):
     template_name = 'asistente/ayuda.html'
     model = Pregunta
     context_object_name = 'preguntas'
+
+
+class AboutTemplateView(TemplateView):
+    """Vista para la seccion acerca de"""
+    template_name = 'asistente/about.html'
 
 
 class ContactView(FormView):

@@ -8,8 +8,14 @@
             <h3 class="main-title">{% block title %}ERROR 500{% endblock %}</h3>
             <section class="flat-content">
                 {% block info %}
-                    <p>Lo sentimos, al parecer ha habido un problema con su solicitud.</p>
-                    <p>Estamos trabajando para solucionar cualquier inconveniente.</p>
+                    <div class="side-container">
+                        <section>
+                            <p>Lo sentimos, al parecer ha habido un problema con su solicitud.</p>
+                            <p>Estamos trabajando para solucionar cualquier inconveniente.</p>
+                        </section>
+                        <img src="{% static 'img/broken_robot.jpg' %}" alt="error">
+                    </div>
+
                 {% endblock %}
             </section>
         </section>

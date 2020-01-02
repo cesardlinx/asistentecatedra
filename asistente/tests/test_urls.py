@@ -24,6 +24,12 @@ class TestAsistenteUrls:
         assert view.func.view_class == views.AyudaListView, \
             'Should resolve to the view AyudaListView'
 
+    def test_about(self):
+        path = reverse('about')
+        view = resolve(path)
+        assert view.func.view_class == views.AboutTemplateView, \
+            'Should resolve to the view AboutTemplateView'
+
     def test_condiciones(self):
         path = reverse('condiciones')
         view = resolve(path)

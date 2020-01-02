@@ -1,0 +1,34 @@
+{% extends 'info.html' %}
+
+{% load static %}
+
+{% block content %}
+    <section class="recursos-profesor">
+        <section class="container">
+            <h3 class="main-title">{% block title %}Acerca de este Proyecto{% endblock %}</h3>
+            <section class="flat-content">
+                {% block info %}
+                    <div class="side-container">
+                        <section>
+                            <p>
+                                Asistente de Cátedra es un proyecto creado para profesores Ecuatorianos
+                                 de EGB y BGU, para que sus planificaciones dejen de ser un problema y dediquen
+                                 su tiempo a la enseñanza de nuestros jóvenes en vez del "papeleo" tedioso de hoy en día.
+        ​                    </p>
+                            <p>
+                                Este sitio web es completamente gratuito como un incentivo y como ayuda a nuestros profesores
+                                 ecuatorianos; sin embargo para mantenerlo asi, es necesario entre todos mantenerlo de esta manera.
+                                 Con tu ayuda podemos mantener este sitio y mejorarlo. Conviértete en nuestro patron y ayuda a que
+                                 este proyecto siga creciendo.
+                            </p>
+                            <a href="https://www.patreon.com/bePatron?u=28763307" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
+                        </section>
+                        <img src="{% static 'img/professor.png' %}" alt="profesor">
+
+                    </div>
+
+                {% endblock %}
+            </section>
+        </section>
+    </section>
+{% endblock %}

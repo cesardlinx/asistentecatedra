@@ -26,3 +26,38 @@ ol li {
   margin-bottom: 1em;
 }
 
+.recursos-profesor .side-container {
+  @include responsive(extra-large) {
+    flex-direction: row;
+  }
+
+  flex-direction: column;
+  display: flex;
+}
+
+.recursos-profesor .side-container h3{
+  margin-bottom: 1em;
+}
+
+.recursos-profesor img {
+  @include responsive(extra-large) {
+    display: block;
+    position: relative;
+    top: -4em;
+    order: 2;
+  }
+
+  @include responsive(super-small) {
+    width: 392px;
+  }
+  width: 100%;
+  margin: 0 auto 2em;
+  order: -1
+
+}
+
+// .recursos-profesor img {
+//   display: block;
+//   width: 90%;
+//   margin-bottom: 1em;
+// }
