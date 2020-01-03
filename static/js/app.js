@@ -62,7 +62,7 @@ $(document).ready(function(){
         // Animations fix on resize
         var screenWidth = window.innerWidth
 
-        if (screenWidth >= 768) {
+        if (screenWidth >= 976) {
             menu_open = false;
             $('.bars').removeClass('cross');
             $('#menu-button').css('background', primaryColor);

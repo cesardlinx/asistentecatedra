@@ -818,7 +818,7 @@ header {
   z-index: 999;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   header {
     height: 6em;
   }
@@ -838,7 +838,7 @@ header {
   height: 3em;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .navbar-asistente .navbar-top {
     border-bottom: 0;
   }
@@ -908,8 +908,15 @@ header {
 
 .logo a .logo-text p {
   font-size: 1.7rem;
+  display: none;
   margin-bottom: 0;
   color: #2c3e50;
+}
+
+@media only screen and (min-width: 400px) {
+  .logo a .logo-text p {
+    display: inline-block;
+  }
 }
 
 .session-buttons {
@@ -933,7 +940,7 @@ header {
   display: none;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .session-buttons .login,
   .session-buttons .register {
     display: block;
@@ -948,7 +955,7 @@ header {
   padding: 4px;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .user-account {
     display: block;
   }
@@ -1040,7 +1047,7 @@ header {
   z-index: 999;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .menu-button {
     display: none;
   }
@@ -1096,7 +1103,7 @@ header {
   z-index: 777;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .menu {
     display: block;
     position: static;
@@ -1162,7 +1169,7 @@ header {
   height: 100vh;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .menu .navbar-items {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -1179,25 +1186,25 @@ header {
   }
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .menu .navbar-items .session-link {
     display: none;
   }
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .navbar-item {
     height: 100%;
   }
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .navbar-item:hover {
     background: #fff;
   }
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .navbar-item:hover .navbar-link {
     color: #000;
   }
@@ -1207,7 +1214,7 @@ header {
   border-bottom: 1px solid #fff;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .navbar-item:nth-child(5) a {
     border-bottom: 0;
   }
@@ -1224,7 +1231,7 @@ header {
   padding: 0 3em;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 976px) {
   .navbar-item .navbar-link {
     display: block;
     color: #fff;
