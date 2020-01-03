@@ -20,7 +20,6 @@ INSTALLED_APPS = [
     'planificaciones',
     'asistente',
     'ckeditor',
-    'ckeditor_uploader',
     'widget_tweaks',
 ]
 

@@ -38,7 +38,7 @@ CKEDITOR_CONFIGS = {
         'width': '99%',
         'extraPlugins': ','.join([
             'uploadimage',  # the upload image feature
-            'devtools',
+            # 'devtools',
             'autogrow',
         ]),
     },

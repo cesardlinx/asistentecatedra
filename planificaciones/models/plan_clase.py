@@ -2,7 +2,6 @@ from .objetivo import Objetivo
 from .objetivo_general import ObjetivoGeneral
 from .planificacion import Planificacion
 from ckeditor.fields import RichTextField
-from ckeditor_uploader.fields import RichTextUploadingField
 from django.core.validators import MaxValueValidator, MinLengthValidator, \
     MinValueValidator
 from django.db import models
@@ -45,9 +44,9 @@ class PlanClase(Planificacion):
     tecnica = models.CharField(
         max_length=100, validators=[MinLengthValidator(4)])
     bibliografia = RichTextField(config_name='basic')
-    contenido_cientifico = RichTextUploadingField()
-    material_didactico = RichTextUploadingField()
-    instrumento_evaluacion = RichTextUploadingField()
+    contenido_cientifico = RichTextField()
+    material_didactico = RichTextField()
+    instrumento_evaluacion = RichTextField()
     elaborado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='planes_clase',
