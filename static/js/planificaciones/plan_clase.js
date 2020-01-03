@@ -540,4 +540,35 @@ $(document).ready(function() {
         return parseInt(numeroProceso) + 1;
     }
 
+    CKEDITOR.config.image_previewText = ' ';
+
+    CKEDITOR.on('dialogDefinition', function (ev) {
+        // Take the dialog name and its definition from the event data.
+        var dialogName = ev.data.name;
+        var dialogDefinition = ev.data.definition;
+
+        // dialogDefinition.onShow = function () {
+        //     console.log(ev.data.name);
+        // };
+
+        // Checks if the dialog is an image dialog
+        if (dialogName == 'image') {
+            // get the info tab
+            var infoTab = dialogDefinition.getContents('info');
+
+            // removes tabs from the image dialog
+            // OJO: to know the element id, is necesary to activate
+            // the devtools plugin
+            dialogDefinition.removeContents('Upload');
+            dialogDefinition.removeContents('advanced');
+
+            // var htmlPreview = infoTab.get('htmlPreview');
+            // htmlPreview['default'] = '';
+
+            // remove content from the info tab
+            infoTab.remove('browse');
+            infoTab.remove('txtAlt');
+        }
+    });
+
 });

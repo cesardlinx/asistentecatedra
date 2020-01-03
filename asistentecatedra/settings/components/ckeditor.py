@@ -1,6 +1,8 @@
 
 # CKEditor configuration
 CKEDITOR_UPLOAD_PATH = 'uploads/'
+CKEDITOR_ALLOW_NONIMAGE_FILES = False
+CKEDITOR_DEFAULT_LANGUAGE = 'es'
 
 CKEDITOR_CONFIGS = {
     'default': {
@@ -36,7 +38,7 @@ CKEDITOR_CONFIGS = {
         'width': '99%',
         'extraPlugins': ','.join([
             'uploadimage',  # the upload image feature
-            # your extra plugins here
+            'devtools',
             'autogrow',
         ]),
     },
